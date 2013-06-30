@@ -926,3 +926,101 @@ function flexiform_flexiform_entity_getter_info() {
 
   return $getters;
 }
+
+//-----------------------------------------------------------------------------
+// Flexiform Element API
+
+/**
+ * Get information about flexiform elements.
+ */
+function flexiform_element_info($entity_type = '', $bundle = '', $name = '') {
+  $elements = &drupal_static(__FUNCTION__);
+
+  if (!isset($elements)) {
+    if ($cache = cache_get('flexiform:element_info', 'cache')) {
+      $elements = $cache->data;
+    }
+    else {
+      $elements = array();
+      $elements = module_invoke_all('flexiform_element_info');
+
+      // Make sure the entity_type, bundle and name are set.
+      foreach ($elements as $entity_type_ => $elems) {
+        foreach ($elems as $bundle_ => $els) {
+          foreach ($els as $name_ => $element) {
+            $elements[$entity_type_][$bundle_][$name_] += array(
+              'entity_type' => $entity_type_,
+              'bundle' => $bundle_,
+              'name' => $name_,
+            );
+          }
+        }
+      }
+
+      // Alter the data sets with hook_party_data_set_info_alter().
+      drupal_alter('flexiform_element_info', $elements);
+
+      cache_set('flexiform:element_info', $elements);
+    }
+  }
+
+  if (!empty($entity_type)) {
+    if (!empty($bundle)) {
+      if (!empty($name)) {
+        return $elements[$entity_type][$bundle][$name];
+      }
+      return $elements[$entity_type][$bundle];
+    }
+    return $elements[$entity_type];
+  }
+
+  return $elements;
+}
+
+/**
+ * Define elements for use in flexiforms that use the FlexiformBuilderFlexiform
+ * form builder.
+ *
+ * Elements should be defined in a multi-dimensional array keyed by entity
+ * type, bundle and name.
+ *
+ * Each element definition should be an array with at least the following keys:
+ * - label: The human readable label for the element, this can usually be
+ *     overridden once the element is in a form.
+ * - class: The Element class to use for the rendering of the element.
+ *
+ * The whole definition for an element will be passed to the element
+ * constructor so it is possible to store other settings in this array as
+ * necessary.
+ */
+function flexiform_flexiform_element_info() {
+  $elements = array();
+
+  // Get the element for all nested flexiforms.
+  $forms = db_select('flexiform', 'f')
+    ->fields('f', array('label', 'form', 'base_entity', 'base_entity_bundle'))
+    ->execute()
+    ->fetchAllAssoc('form');
+
+  foreach ($forms as $form) {
+    $elements[$form->base_entity][$form->base_entity_bundle][$form->form] = array(
+      'label' => $form->label,
+      'class' => 'FlexiformElementFlexiform',
+    );
+  }
+
+  // Get all the field elements.
+  $fields_info = field_info_instances();
+  foreach ($fields_info as $entity_type => $entity_fields) {
+    foreach ($entity_fields as $bundle => $bundle_fields) {
+      foreach ($bundle_fields as $field_name => $instance) {
+        $elements[$entity_type][$bundle][$field_name] = array(
+          'label' => $instance['label'],
+          'class' => 'FlexiformElementField',
+        );
+      }
+    }
+  }
+
+  return $elements;
+}
