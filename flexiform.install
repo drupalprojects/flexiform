@@ -290,7 +290,7 @@ function flexiform_update_7006() {
 
   foreach ($flexiforms as $flexiform) {
     $flexiform_elements = $flexiform->elements;
-    unset($flexiform->elements);
+    $flexiform->elements = array();
 
     foreach ($flexiform_elements as $entity_namespace => $elements) {
       foreach ($elements as $element_name => $settings) {
