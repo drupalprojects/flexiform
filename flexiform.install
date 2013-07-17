@@ -289,6 +289,10 @@ function flexiform_update_7006() {
   $flexiforms = entity_load('flexiform');
 
   foreach ($flexiforms as $flexiform) {
+    if (empty($flexiform->elements)) {
+      continue;
+    }
+
     $flexiform_elements = $flexiform->elements;
     $flexiform->elements = array();
 
@@ -308,5 +312,15 @@ function flexiform_update_7006() {
     }
 
     $flexiform->save();
+
+    if (module_exists('flexiform_element_group')) {
+      $groups = field_group_info_groups('flexiform', $flexiform->form, 'form', TRUE);
+      foreach( $groups as $group) {
+        foreach ($group->children as $key => $element_name) {
+          $group->children[$key] = preg_replace('/\_\_/', ':', $element_name, 2);
+        }
+        ctools_export_crud_save('field_group', $group);
+      }
+    }
   }
 }
