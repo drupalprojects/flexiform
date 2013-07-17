@@ -281,3 +281,32 @@ function flexiform_update_7005() {
     ))
     ->execute();
 }
+
+/**
+ * Convert forms to the new format.
+ */
+function flexiform_update_7006() {
+  $flexiforms = entity_load('flexiform');
+
+  foreach ($flexiforms as $flexiform) {
+    $flexiform_elements = $flexiform->elements;
+    unset($flexiform->elements);
+
+    foreach ($flexiform_elements as $entity_namespace => $elements) {
+      foreach ($elements as $element_name => $settings) {
+        $type = $settings['type'];
+        $class_name = 'FlexiformElement'.ucfirst($type);
+
+        unset($settings['type']);
+
+        $settings['element_name'] = $element_name = $type . ':' . $element_name;
+        $settings['enitity_namespace'] = $entity_namespace;
+
+        $element = new $class_name($flexiform, $settings);
+        $flexiform->addElement($element);
+      }
+    }
+
+    $flexiform->save();
+  }
+}
