@@ -109,15 +109,21 @@ class FlexiformBuilderFlexiform extends FlexiformBuilder {
 
     $form['#flexiform_entities'] = flexiform_prepare_entities($this->flexiform, $this->base_entity);
 
-    foreach($form['#flexiform_entities'] as $namespace => $entity) {
-      $elements = isset($this->flexiform->elements[$namespace]) ? $this->flexiform->elements[$namespace] : FALSE;
+    // Set up our form bits
+    if (!isset($form['#parents'])) {
+      $form['#parents'] = array();
+    }
 
-      // If there are no elements for this namespace skip it.
-      if (!$elements) {
-        continue;
-      }
+    // Iterate over all elements.
+    foreach ($this->flexiform->elements as $element_namespace => $settings) {
+      $element = FlexiformElement::getElement($this->flexiform, $element_namespace);
 
-      flexiform_embed_entity_elements($namespace, $this->flexiform, $entity, $elements, $form, $form_state);
+      // Make sure this element has the correct parents.
+      array_push($form['#parents'], $element->getEntityNamespace());
+
+      $form += $element->form($form, $form_state, $form['#flexiform_entities'][$element->getEntityNamespace()]);
+
+      array_pop($form['#parents']);
     }
 
     $this->invoke($form, $form_state);

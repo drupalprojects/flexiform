@@ -63,16 +63,22 @@ class FlexiformElement implements FlexiformElementInterface {
    *     - 'entity_namespace' - The namespace of the entity this element is
    *     acting on. This is the key of the entity in the $flexiform->entities
    *     array.
-   *     - 'entity_type' - The entity type of the entity for this element.
+   *     - 'element_name' - The name of the element we're using.
    */
-  public function __construct($flexiform, $namespace, $settings = array()) {
+  public function __construct($flexiform, $settings, $element_namespace = '') {
     $this->flexiform = $flexiform;
-    $this->element_namespace = $namespace;
-    $this->settings = $settings;
-
     $this->entity_namespace = $settings['entity_namespace'];
     $this->entity_type = $flexiform->entities[$settings['entity_namespace']]['entity_type'];
     $this->bundle = $flexiform->entities[$settings['entity_namespace']]['bundle'];
+    $this->element_name = $settings['element_name'];
+    $this->element_info = flexiform_get_element_info($this->entity_type, $this->bundle, $this->element_name);
+    $this->settings = $settings;
+
+    $this->settings += array(
+      'display_options' => array(),
+    );
+
+    $this->element_namespace = !empty($element_namespace) ? $element_namespace : $this->makeElementNamespace();
   }
 
   /**
@@ -83,10 +89,17 @@ class FlexiformElement implements FlexiformElementInterface {
   }
 
   /**
+   * Set the label for this form element.
+   */
+  public function setLabel($label) {
+    $this->settings['label'] = $label;
+  }
+
+  /**
    * Get the name for this form element.
    */
   public function name() {
-    return '';
+    return $this->element_name;
   }
 
   /**
@@ -278,9 +291,10 @@ class FlexiformElement implements FlexiformElementInterface {
    */
   public function toSettingsArray() {
     $settings = array(
-      'type' => '',
       'entity_namespace' => $this->entity_namespace,
+      'element_name' => $this->element_name,
       'weight' => $this->weight,
+      'label' => $this->label(),
       'display_options' => $this->settings['display_options'],
     );
 
@@ -288,46 +302,56 @@ class FlexiformElement implements FlexiformElementInterface {
   }
 
   /**
+   * Make namespace for the element.
+   */
+  public function makeElementNamespace() {
+    return $this->entity_namespace . ':' . $this->element_name;
+  }
+
+  /**
    * Get an element object.
    */
-  public static function getElement($flexiform, $type, $namespace, $settings = array()) {
+  public static function getElement($flexiform, $element_namespace) {
     $cached_elements = &drupal_static(__CLASS__, array());
+    if (empty($cached_elements[$flexiform->form][$element_namespace])) {
+      $settings = $flexiform->elements[$element_namespace];
+      $entity_namespace = $settings['entity_namespace'];
+      $element_name = $settings['element_name'];
+      // If we don't have a cached version then create one.
+      $entity_type = $flexiform->entities[$entity_namespace]['entity_type'];
+      $bundle = $flexiform->entities[$entity_namespace]['bundle'];
+      $element_info = flexiform_get_element_info($entity_type, $bundle, $element_name);
 
-    if (empty($cached_elements[$flexiform->form][$namespace])) {
-      $class_name = 'FlexiformElement'.ucfirst($type);
+      $class_name = $element_info['class'];
       if (!class_exists($class_name)
         || !in_array('FlexiformElementInterface', class_implements($class_name))) {
-        throw new Exception('Flexiform element type ' . $type . '  does not exist.');
+        throw new Exception('Invalid Flexiform Element class ' . $class_name . ' for element ' . $element_name);
       }
 
-      $cached_elements[$flexiform->form][$namespace] = new $class_name($flexiform, $namespace, $settings);
+      $cached_elements[$flexiform->form][$element_namespace] = new $class_name($flexiform, $settings, $element_namespace);
     }
 
-    return $cached_elements[$flexiform->form][$namespace];
+    return $cached_elements[$flexiform->form][$element_namespace];
   }
 
   /**
-   * Get the namespace for an element.
+   * Create an element object.
    */
-  public static function makeElementNamespace($type, $entity_namespace, $name) {
-    return $entity_namespace . "__" . $type . "__" . $name;
-  }
+  public static function createElement($flexiform, $settings) {
+    $entity_namespace = $settings['entity_namespace'];
+    $element_name = $settings['element_name'];
+    // If we don't have a cached version then create one.
+    $entity_type = $flexiform->entities[$entity_namespace]['entity_type'];
+    $bundle = $flexiform->entities[$entity_namespace]['bundle'];
+    $element_info = flexiform_get_element_info($entity_type, $bundle, $element_name);
 
-  /**
-   * Split a namespace into pieces.
-   */
-  public static function splitElementNamespace($namespace) {
-    $bits = explode('__', $namespace);
-    if (count($bits) != 3) {
-      drupal_set_message('Invalid Namspace Provided: ' . $namespace, 'Error');
-      return FALSE;
+    $class_name = $element_info['class'];
+    if (!class_exists($class_name)
+      || !in_array('FlexiformElementInterface', class_implements($class_name))) {
+      throw new Exception('Invalid Flexiform Element class ' . $class_name . ' for element ' . $element_name);
     }
 
-    $element['entity_namespace'] = $bits[0];
-    $element['type'] = $bits[1];
-    $element['element_name'] = $bits[2];
-
-    return $element;
+    return new $class_name($flexiform, $settings);
   }
 }
 
@@ -354,16 +378,19 @@ class FlexiformElementField extends FlexiformElement{
   /**
    * Overrides FlexiformElement::__construct().
    */
-  public function __construct($flexiform, $namespace, $settings = array()) {
-    parent::__construct($flexiform, $namespace, $settings);
-    $this->field_name = $settings['field_name'];
+  public function __construct($flexiform, $settings, $element_namespace = '') {
+    parent::__construct($flexiform, $settings, $element_namespace);
+    $this->field_name = $this->element_info['field_name'];
 
     // Build the fake instance for this form (incase the widget has changed -
     // we would normally have to be careful of default_value but that doesn't
     // figure here, so we should be fine.
     $this->instance = !empty($settings['instance']) ? $settings['instance'] : array();
     $this->field = !empty($settings['field']) ? $settings['field'] : array();
-    $this->weight = empty($settings['weight']) ? $settings['instance']['widget']['weight'] : $settings['weight'];
+
+    // Get the initial weight.
+    $instance = $this->getInstance();
+    $this->weight = !empty($settings['weight']) ? $settings['weight'] : $instance['widget']['weight'];
   }
 
   /**
@@ -378,13 +405,10 @@ class FlexiformElementField extends FlexiformElement{
   }
 
   /**
-   * Overrides FlexiformElement::name().
-   *
-   * @return string
-   *   A field name.
+   * Overrides FlexiformElement::setLabel().
    */
-  public function name() {
-    return $this->field_name;
+  public function setLabel($label) {
+    $this->instance['label'] = $label;
   }
 
   /**
@@ -722,9 +746,9 @@ class FlexiformElementFlexiform extends FlexiformElement {
   /**
    * Overrides FlexiformElement::__construct().
    */
-  public function __construct($flexiform, $namespace, $settings = array()) {
-    parent::__construct($flexiform, $namespace, $settings);
-    $this->form = $settings['form'];
+  public function __construct($flexiform, $settings, $element_namespace = '') {
+    parent::__construct($flexiform, $settings, $element_namespace);
+    $this->form = $this->element_info['form'];
     $this->label = $settings['label'];
     $this->weight = $settings['weight'];
   }
@@ -734,13 +758,6 @@ class FlexiformElementFlexiform extends FlexiformElement {
    */
   public function label() {
     return $this->settings['label'];
-  }
-
-  /**
-   * Overrires FlexiformElement::label().
-   */
-  public function name() {
-    return $this->form;
   }
 
   /**
@@ -761,7 +778,7 @@ class FlexiformElementFlexiform extends FlexiformElement {
    * Build the configure form for the element.
    */
   public function configureForm($form, &$form_state, $flexiform) {
-    $link = l(t('Edit @flexiform', array('@flexiform' => $this->label())), 'admin/structure/flexiform/manage/' . $this->name());
+    $link = l(t('Edit @flexiform', array('@flexiform' => $this->label())), 'admin/structure/flexiform/manage/' . $this->form);
     $form['description']['#markup'] = t('There are no settings for @flexiform as it is a nested form. You can edit the flexiform by clicking on the link below, however these changes will effect the form everywhere it is used.<br />!link', array('@flexiform' => $this->label(), '!link' => $link));
     return $form;
   }
@@ -781,7 +798,7 @@ class FlexiformElementFlexiform extends FlexiformElement {
     $form[$this->element_namespace]['#flexiform_element'] = $this;
     $form[$this->element_namespace]['#type'] = 'fieldset';
     $form[$this->element_namespace]['#title'] = $this->label();
-    $form[$this->element_namespace] += $builder->form($sub_form, $form_state, $entity); //flexiform($sub_form, $form_state, $this->getFlexiform(), $entity, FALSE);
+    $form[$this->element_namespace] += $builder->form($sub_form, $form_state, $entity);
 
     return $form;
   }

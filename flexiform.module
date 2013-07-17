@@ -565,7 +565,7 @@ function flexiform_submission_page_view($flexiform_submission, $view_mode = 'ful
  * Split a namespace into entity and field name
  */
 function flexiform_formfield_load($string) {
-  return FlexiformElement::splitElementNamespace($string);
+  return $string;
 }
 
 /**
@@ -933,7 +933,7 @@ function flexiform_flexiform_entity_getter_info() {
 /**
  * Get information about flexiform elements.
  */
-function flexiform_element_info($entity_type = '', $bundle = '', $name = '') {
+function flexiform_get_element_info($entity_type = '', $bundle = '', $name = '') {
   $elements = &drupal_static(__FUNCTION__);
 
   if (!isset($elements)) {
@@ -952,6 +952,7 @@ function flexiform_element_info($entity_type = '', $bundle = '', $name = '') {
               'entity_type' => $entity_type_,
               'bundle' => $bundle_,
               'name' => $name_,
+              'group' => 'Other',
             );
           }
         }
@@ -1003,9 +1004,12 @@ function flexiform_flexiform_element_info() {
     ->fetchAllAssoc('form');
 
   foreach ($forms as $form) {
-    $elements[$form->base_entity][$form->base_entity_bundle][$form->form] = array(
+    $elements[$form->base_entity][$form->base_entity_bundle]['flexiform:' . $form->form] = array(
       'label' => $form->label,
       'class' => 'FlexiformElementFlexiform',
+      'type' => 'form',
+      'group' => 'Flexiform',
+      'form' => $form->form,
     );
   }
 
@@ -1014,9 +1018,12 @@ function flexiform_flexiform_element_info() {
   foreach ($fields_info as $entity_type => $entity_fields) {
     foreach ($entity_fields as $bundle => $bundle_fields) {
       foreach ($bundle_fields as $field_name => $instance) {
-        $elements[$entity_type][$bundle][$field_name] = array(
+        $elements[$entity_type][$bundle]['field:' . $field_name] = array(
           'label' => $instance['label'],
           'class' => 'FlexiformElementField',
+          'type' => 'field',
+          'group' => 'Field',
+          'field_name' => $field_name,
         );
       }
     }
