@@ -14,6 +14,7 @@ class Flexiform extends Entity {
   public $label;
   public $elements = array();
   public $entities = array();
+  public $displays = array();
 
   public function __construct($values = array()) {
     parent::__construct($values, 'flexiform');
@@ -28,6 +29,40 @@ class Flexiform extends Entity {
     }
 
     return new $class_name($this, $base_entity);
+  }
+
+  public function getDisplay($display) {
+    if (empty($this->displays[$display])) {
+      return FALSE;
+    }
+
+    $display_info = flexiform_display_info($display);
+    if (empty($display_info)) {
+      drupal_set_message(t('Display plugin @plugin not found.', array('@plugin' => $display)), 'error');
+      return new FlexiformDisplayNull($this, $this->displays[$display]);
+    }
+
+    $class_name = $display_info['class'];
+    if (!class_exists($class_name)) {
+      throw new Exception('Display class does not exist.');
+    }
+
+    return new $class_name($this, $this->displays[$display]);
+  }
+
+  public function createDisplay($display) {
+    $display_info = flexiform_display_info($display);
+    if (empty($display_info)) {
+      drupal_set_message(t('Display plugin @plugin not found.', array('@plugin' => $display)), 'error');
+      return new FlexiformDisplayNull($this, $this->displays[$display]);
+    }
+
+    $class_name = $display_info['class'];
+    if (!class_exists($class_name)) {
+      throw new Exception('Display class does not exist.');
+    }
+
+    return new $class_name($this);
   }
 
   public function addElement($element) {

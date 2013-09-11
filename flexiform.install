@@ -89,17 +89,12 @@ function flexiform_schema() {
         'serialize' => TRUE,
         'description' => 'A serialized array of elements related to this flexiform.',
       ),
-      'path' => array(
-        'type' => 'varchar',
-        'length' => 255,
+      'displays' => array(
+        'type' => 'text',
         'not null' => FALSE,
-        'description' => 'The path to a new submission of this form.',
-      ),
-      'edit_path' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => FALSE,
-        'description' => 'The path to an edit version of this form.',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'A serialized array of displays of this flexiform.',
       ),
     ) + entity_exportable_schema_fields(),
     'primary key' => array('id'),
@@ -400,4 +395,47 @@ function flexiform_update_7008() {
 
     field_update_field($field);
   }
+}
+
+/**
+ * Add displays field to the flexiform table.
+ */
+function flexiform_update_7009() {
+  db_add_field('flexiform', 'displays', array(
+    'type' => 'text',
+    'not null' => FALSE,
+    'size' => 'big',
+    'serialize' => TRUE,
+    'description' => 'A serialized array of displays of this flexiform.',
+  ));
+
+  $rows = db_select('flexiform', 'f')
+    ->fields('f', array('form', 'path', 'edit_path'))
+    ->execute()
+    ->fetchAllAssoc('form');
+
+  foreach (entity_load('flexiform') as $form) {
+    $row = $rows[$form->form];
+
+    if (!empty($row->path)) {
+      $form->displays['flexiform_create_entity_page'] = array(
+        'enabled' => TRUE,
+        'title' => $form->label,
+        'path' => $row->path,
+      );
+    }
+
+    if (!empty($row->edit_path)) {
+      $form->displays['flexiform_edit_entity_page'] = array(
+        'enabled' => TRUE,
+        'title' => $form->label,
+        'path' => $row->edit_path,
+      );
+    }
+
+    $form->save();
+  }
+
+  db_drop_field('flexiform', 'path');
+  db_drop_field('flexiform', 'edit_path');
 }

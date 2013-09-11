@@ -11,6 +11,12 @@ files[] = flexiform.admin.inc
 files[] = flexiform.entity.inc
 files[] = includes/flexiform.flexiform.inc
 
+; Displays
+files[] = includes/flexiform.display.inc
+files[] = includes/display/null.display.inc
+files[] = includes/display/add_page.display.inc
+files[] = includes/display/edit_page.display.inc
+
 ; Builders
 files[] = includes/flexiform.builder.inc
 files[] = includes/builder/flexiform.builder.inc

@@ -24,46 +24,14 @@ function flexiform_hook_info() {
 function flexiform_menu() {
   $items = array();
 
-  // Get Flexiform Pages
-  $query = db_select('flexiform', 'f');
-  $query->isNotNull('path');
-  $query->condition('path', '', '<>');
-  $query->fields('f', array('form', 'path'));
-  $forms = $query->execute()->fetchAllAssoc('form');
-
-  foreach ($forms as $form => $row) {
-    $items[$row->path] = array(
-      'title callback' => 'flexiform_page_title',
-      'title arguments' => array($form),
-      'page callback' => 'flexiform_page_wrapper',
-      'page arguments' => array($form),
-      'access callback' => TRUE,
-      'file' => 'flexiform.pages.inc',
-    );
-  }
-
-  // Get Flexiform Edit Pages
-  $query = db_select('flexiform', 'f');
-  $query->isNotNull('edit_path');
-  $query->condition('edit_path', '', '<>');
-  $query->fields('f', array('form', 'edit_path'));
-  $forms = $query->execute()->fetchAllAssoc('form');
-
-  foreach ($forms as $form => $row) {
-    $path_bits = explode('/', $row->edit_path);
-    $wildcard_key = array_search('%', $path_bits);
-    if ($wildcard_key === FALSE) {
-      continue;
+  // @todo: Consider altering storage for displays so that this can be more performant.
+  $forms = entity_load('flexiform');
+  foreach ($forms as $form) {
+    foreach (array('flexiform_create_entity_page', 'flexiform_edit_entity_page') as $display) {
+      if (($display = $form->getDisplay($display)) && $display->isEnabled()) {
+        $items += $display->hook_menu();
+      }
     }
-
-    $items[$row->edit_path] = array(
-      'title callback' => 'flexiform_page_title',
-      'title arguments' => array($form, $wildcard_key),
-      'page callback' => 'flexiform_page_wrapper',
-      'page arguments' => array($form, $wildcard_key),
-      'access callback' => TRUE,
-      'file' => 'flexiform.pages.inc',
-    );
   }
 
   return $items;
@@ -640,4 +608,96 @@ function flexiform_flexiform_element_info() {
   }
 
   return $elements;
+}
+
+//-----------------------------------------------------------------------------
+// Flexiform Display API
+
+/**
+ * Get information about flexiform displays.
+ */
+function flexiform_display_info($display = FALSE) {
+  $displays = &drupal_static(__FUNCTION__, array());
+
+  if (empty($displays)) {
+    if ($cache = cache_get('flexiform:display_info', 'cache')) {
+      $displays = $cache->data;
+    }
+    else {
+      $displays = array();
+      foreach (module_implements('flexiform_display_info') as $module) {
+        // Due to http://drupal.org/node/890660 we can't use module_invoke_all()
+        // because we need to know the provenance of each set.
+        $displays_module = module_invoke($module, 'flexiform_display_info');
+        foreach ($displays_module as $display_name => $display_info) {
+          $display_info += array(
+            'class' => $display_name,
+            'label' => $display_name,
+            'module' => $module,
+            'entity_types' => array(),
+          );
+          $displays[$display_name] = $display_info;
+        }
+      }
+
+      // Alter the data sets with hook_party_data_set_info_alter().
+      drupal_alter('flexiform_display_info', $displays);
+
+      cache_set('flexiform:display_info', $displays);
+    }
+  }
+
+  if (!empty($display)) {
+    return empty($displays[$display]) ? FALSE : $displays[$display];
+  }
+
+  return $displays;
+}
+
+/**
+ * Get display plugins for a particular entity type.
+ */
+function flexiform_entity_type_get_displays($entity_type) {
+  // If this isn't an entity type return false
+  if (!entity_get_info($entity_type)) {
+    return FALSE;
+  }
+
+  $displays = flexiform_display_info();
+  $applicable_displays = array();
+  foreach ($displays as $display => $info) {
+    if (empty($info['entity_types'])
+      || in_array($entity_type, $info['entity_types'])) {
+      $applicable_displays[$display] = $info;
+    }
+  }
+  return $applicable_displays;
+}
+
+/**
+ * Implements hook_flexiform_builder_info().
+ */
+function flexiform_flexiform_display_info() {
+  $displays = array();
+
+  $displays['flexiform_create_entity_page'] = array(
+    'class' => 'FlexiformDisplayCreatePage',
+    'label' => t('Add page'),
+    'description' => t('A page to add a new submission of the form. Will create a new base entity.'),
+  );
+
+  $displays['flexiform_edit_entity_page'] = array(
+    'class' => 'FlexiformDisplayEditPage',
+    'label' => t('Edit page'),
+    'description' => t('A page to an edit form. Will load an existing base entity.'),
+  );
+
+  return $displays;
+}
+
+/**
+ * Display a flexiform.
+ */
+function flexiform_display($flexiform, $display, $context = array()) {
+  return $flexiform->getDisplay($display)->build($context);
 }

@@ -350,19 +350,29 @@ function flexiform_form($form, &$form_state, $flexiform, $op = 'edit') {
     $form['form_group']['#value'] = $group;
   }
 
-  $form['path'] = array(
-    '#title' => t('Path to Form'),
-    '#type' => 'textfield',
-    '#default_value' => isset($flexiform->path) ? $flexiform->path : NULL,
-    '#description' => t('The path to a new submission of this form. If blank the form will not be exposed at a path.'),
+  // Displays Section of the form.
+  $form['displays'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Displays'),
+    '#description' => t('Configure places this form appears on your site.'),
+    '#tree' => TRUE,
   );
 
-  $form['edit_path'] = array(
-    '#title' => t('Path to Edit Form'),
-    '#type' => 'textfield',
-    '#default_value' => isset($flexiform->edit_path) ? $flexiform->edit_path : NULL,
-    '#description' => t('The path to an edit version of this form. Must include a single \'%\' where the id of the base entity will go.'),
-  );
+  foreach (flexiform_display_info() as $display => $info) {
+    $controller = $flexiform->getDisplay($display);
+    if (!$controller) {
+      $controller = $flexiform->createDisplay($display);
+    }
+
+    $displayForm = array(
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#title' => $info['label'],
+      '#collapsed' => !$controller->isEnabled(),
+      '#description' => $info['description'],
+    );
+    $form['displays'][$display] = $controller->configForm($displayForm, $form_state);
+  }
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
