@@ -35,13 +35,19 @@ function flexiform_webform_form($form, &$form_state, $webform, $op = 'edit') {
     '#disabled' => empty($webform->is_new),
   );
 
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
   return $form;
 }
 
 /**
  * Form API submit callback for the type form.
  */
-function flexiform_form_submit(&$form, &$form_state) {
+function flexiform_webform_form_submit(&$form, &$form_state) {
   $webform = entity_ui_form_submit_build_entity($form, $form_state);
   $webform->save();
   $form_state['redirect'] = 'admin/structure/flexiform_webforms';
@@ -50,6 +56,6 @@ function flexiform_form_submit(&$form, &$form_state) {
 /**
  * Form API submit callback for the delete button.
  */
-function flexiform_form_submit_delete(&$form, &$form_state) {
+function flexiform_webform_form_submit_delete(&$form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/flexiform_webforms/manage/' . $form_state['webform']->webform . '/delete';
 }

@@ -25,7 +25,7 @@ function flexiform_webform_entity_info() {
       'label' => 'label',
     ),
     'access callback' => 'flexiform_access',
-    'module' => 'flexiform',
+    'module' => 'flexiform_webform',
     // Enable the entity API's admin UI.
     'admin ui' => array(
       'path' => 'admin/structure/flexiform_webforms',
@@ -55,7 +55,7 @@ function flexiform_webform_entity_info() {
     'label callback' => 'entity_class_label',
     'uri callback' => 'entity_class_uri',
     'access callback' => 'flexiform_webform_submission_access',
-    'module' => 'flexiform',
+    'module' => 'flexiform_webform',
     'admin ui' => array(
       'path' => 'admin/content/flexiform_webform_submissions',
       'file' => 'flexiform_submission.admin.inc',
