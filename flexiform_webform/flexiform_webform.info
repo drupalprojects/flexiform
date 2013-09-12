@@ -7,6 +7,7 @@ dependencies[] = flexiform
 dependencies[] = entity
 
 files[] = flexiform_webform.entity.inc
+files[] = flexiform_webform.admin.inc
 files[] = flexiform_webform_submission.entity.inc
 files[] = flexiform_webform_submission.admin.inc
 files[] = views/flexiform_webform_submission_handler_link_field.inc

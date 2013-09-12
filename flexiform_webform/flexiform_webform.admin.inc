@@ -5,6 +5,25 @@
  */
 
 /**
+ * UI Class
+ */
+class FlexiformWebformUIController extends EntityDefaultUIController {
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hook_menu() {
+    $items = parent::hook_menu();
+
+    // Change the way they clone things.
+    $items['admin/structure/flexiform_webforms/manage/%entity_object/clone']['page callback'] = 'flexiform_webform_ui_get_clone_form';
+
+    return $items;
+  }
+
+}
+
+/**
  * Generates the model type editing form.
  */
 function flexiform_webform_form($form, &$form_state, $webform, $op = 'edit') {
@@ -12,6 +31,8 @@ function flexiform_webform_form($form, &$form_state, $webform, $op = 'edit') {
     $webform->label .= ' (cloned)';
     $webform->webform = '';
   }
+
+  $form['#op'] = $op;
 
   $form['label'] = array(
     '#title' => t('Label'),
@@ -35,6 +56,20 @@ function flexiform_webform_form($form, &$form_state, $webform, $op = 'edit') {
     '#disabled' => empty($webform->is_new),
   );
 
+
+  $form['cloned_from'] = array(
+    '#type' => 'value',
+    '#value' => !empty($webform->cloned_from) ? $webform->cloned_from : NULL,
+  );
+
+  $form['clone_fields'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Copy Field Definitions'),
+    '#description' => t('This will copy the field instance settings from the original webform.'),
+    '#default_value' => FALSE,
+    '#access' => ($op == 'clone'),
+  );
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -50,6 +85,14 @@ function flexiform_webform_form($form, &$form_state, $webform, $op = 'edit') {
 function flexiform_webform_form_submit(&$form, &$form_state) {
   $webform = entity_ui_form_submit_build_entity($form, $form_state);
   $webform->save();
+
+  if (!empty($form_state['values']['clone_fields'])) {
+    $original = $form_state['values']['cloned_from'];
+    foreach (field_info_instances('flexiform_webform_submission', $original) as $instance) {
+      $instance['bundle'] = $webform->webform;
+      field_create_instance($instance);
+    }
+  }
   $form_state['redirect'] = 'admin/structure/flexiform_webforms';
 }
 
