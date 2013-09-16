@@ -90,7 +90,9 @@ function flexiform_webform_form_submit(&$form, &$form_state) {
     $original = $form_state['values']['cloned_from'];
     foreach (field_info_instances('flexiform_webform_submission', $original) as $instance) {
       $instance['bundle'] = $webform->webform;
-      field_create_instance($instance);
+      if (!field_info_instance('flexiform_webform_submission', $instance['field_name'], $webform->webform)) {
+        field_create_instance($instance);
+      }
     }
   }
   $form_state['redirect'] = 'admin/structure/flexiform_webforms';
