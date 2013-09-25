@@ -72,6 +72,7 @@ class FlexiformElement implements FlexiformElementInterface {
     $this->element_name = $settings['element_name'];
     $this->element_info = flexiform_get_element_info($this->entity_type, $this->bundle, $this->element_name);
     $this->settings = $settings;
+    $this->weight = !empty($settings['weight']) ? $settings['weight'] : 0;
 
     $this->settings += array(
       'display_options' => array(),
