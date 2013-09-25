@@ -16,6 +16,7 @@ files[] = includes/flexiform.display.inc
 files[] = includes/display/null.display.inc
 files[] = includes/display/add_page.display.inc
 files[] = includes/display/edit_page.display.inc
+files[] = includes/display/edit_pane.display.inc
 
 ; Builders
 files[] = includes/flexiform.builder.inc

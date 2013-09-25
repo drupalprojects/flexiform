@@ -79,6 +79,10 @@ function flexiform_ctools_plugin_directory($owner, $plugin_type) {
   if ($owner == 'panelizer' && $plugin_type == 'entity') {
     return "plugins/$plugin_type";
   }
+
+  if ($owner == 'ctools' && $plugin_type == 'content_types') {
+    return "plugins/$plugin_type";
+  }
 }
 
 /**
@@ -691,6 +695,14 @@ function flexiform_flexiform_display_info() {
     'label' => t('Edit page'),
     'description' => t('A page to an edit form. Will load an existing base entity.'),
   );
+
+  if (module_exists('ctools')) {
+    $displays['flexiform_edit_entity_pane'] = array(
+      'class' => 'FlexiformDisplayEditPane',
+      'label' => t('Edit Pane (Ctools Content)'),
+      'description' => t('Expose the form in a Ctools Content Plugin.'),
+    );
+  }
 
   return $displays;
 }
