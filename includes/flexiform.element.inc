@@ -295,6 +295,16 @@ class FlexiformElement implements FlexiformElementInterface {
   }
 
   /**
+   * Validate the form element.
+   */
+  public function formValidate($form, &$form_state, $entity) { }
+
+  /**
+   * Submit the form element.
+   */
+  public function formSubmit($form, &$form_state, $entity) { }
+
+  /**
    * Extract the submitted values for this form element.
    */
   public function formExtractValues($form, &$form_state, $entity) {
@@ -308,7 +318,6 @@ class FlexiformElement implements FlexiformElementInterface {
     $values = $this->formExtractValues($form, $form_state, $entity);
     return empty($values);
   }
-
 
   /**
    * Convert this object into a settings array.
