@@ -12,8 +12,8 @@ function flexiform_entity_getter_party_data_set($flexiform, $base_entity, $entit
 
   // Get the party entity.
   $party = $entities[$settings['parameters']['party']];
-  $controller = party_get_crm_controller($party, $config['data_set_name']);
-  return $controller->getEntity(0, TRUE);
+  $data_set_name = $config['data_set_name'];
+  return $party->getDataSetController($data_set_name)->getEntity(0, TRUE);
 }
 
 /**
@@ -24,9 +24,9 @@ function flexiform_entity_setter_party_data_set($flexiform, $base_entity, $entit
 
   // Get the party entity. We like to party. We like to, we like to party.
   $party = $entities[$settings['parameters']['party']];
-  $controller = party_get_crm_controller($party, $config['data_set_name']);
-  $controller->attachEntity($entity);
-  $controller->save(TRUE);
+  $party->getDataSetController($config['data_set_name'])
+    ->attachEntity($entity)
+    ->save(TRUE);
 }
 
 /**
