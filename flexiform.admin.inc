@@ -500,7 +500,7 @@ function flexiform_manage_form_fields_form($form, &$form_state, $flexiform) {
       t('Entity'),
       t('Name'),
       t('Widget'),
-      array('data' => t('Operations'), 'colspan' => 2),
+      t('Operations'),
     ),
     '#parent_options' => array(),
     '#regions' => array(
@@ -573,17 +573,12 @@ function flexiform_manage_form_fields_form($form, &$form_state, $flexiform) {
         '#markup' => $element->name(),
       ),
       'widget_type' => $widget,
-      'configure' => array(
-        '#type' => 'link',
-        '#title' => t('configure'),
-        '#href' => $element_path,
-        '#options' => array('attributes' => array('title' => t('Configure settings for this form'))),
-      ),
-      'remove' => array(
-        '#type' => 'link',
-        '#title' => t('remove'),
-        '#href' => $element_path . '/remove',
-        '#options' => array('attributes' => array('title' => t('Remove this element.'))),
+      'operations' => array(
+        '#theme' => 'item_list',
+        '#items' => array(
+          'configure' => l(t('configure'), $element_path, array('attributes' => array('title' => t('Configure settings for this form')))),
+          'remove' => l(t('remove'), $element_path . '/remove', array('attributes' => array('title' => t('Remove this element.')))),
+        ),
       ),
     );
   }
@@ -669,11 +664,13 @@ function flexiform_manage_form_fields_form($form, &$form_state, $flexiform) {
         '#title_display' => 'invisible',
         '#options' => $element_options,
         '#empty_option' => t('- Select an Element -'),
-        '#description' => t('Pick a Element'),
+        '#description' => t('Pick an Element'),
         '#attributes' => array('class' => array('entity-select')),
         '#prefix' => '<div id="flexiform-element-selector"><div class="add-new-placeholder">&nbsp;</div>',
         '#suffix' => '</div>',
       ),
+      'widget' => array(),
+      'operations' => array(),
     );
   }
 
