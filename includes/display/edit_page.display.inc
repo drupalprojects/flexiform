@@ -18,7 +18,7 @@ class FlexiformDisplayEditPage extends FlexiformDisplayBase {
     $path_bits = explode('/', $this->configuration['path']);
     $wildcard_key = array_search('%', $path_bits);
     if ($wildcard_key === FALSE) {
-      continue;
+      return;
     }
 
     $items[$this->configuration['path']] = array(
