@@ -16,6 +16,8 @@ class FlexiformElementCustomHtml extends FlexiformRepeatableElement {
     $value = $form['#flexiform']->elements[$this->getElementNamespace()]['custom_html']['value'];
     $format = $form['#flexiform']->elements[$this->getElementNamespace()]['custom_html']['format'];
 
+    // Perform some keyword substitution.
+    $value = $this->replaceCtoolsSubstitutions($value, $form['#flexiform_entities']);
 
     $form[$this->element_namespace] = array(
       '#markup' => check_markup($value, $format),
@@ -37,6 +39,15 @@ class FlexiformElementCustomHtml extends FlexiformRepeatableElement {
       '#format' => !empty($this->settings['custom_html']['format']) ? $this->settings['custom_html']['format'] : NULL,
       '#default_value' => !empty($this->settings['custom_html']['value']) ? $this->settings['custom_html']['value'] : '',
     );
+
+    $form['contexts'] = array(
+      '#title' => t('Substitutions'),
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+
+    $form['contexts']['contexts'] = $this->getCtoolsSubstitutionsList();
 
     $form = parent::configureForm($form, $form_state, $flexiform);
 
@@ -70,5 +81,90 @@ class FlexiformElementCustomHtml extends FlexiformRepeatableElement {
     $settings['custom_html'] = $this->settings['custom_html'];
 
     return $settings;
+  }
+
+  /**
+   * Get an array of ctools context for the flexiform.
+   *
+   * @param array $entities
+   *   An array of entities keyed by namespace. If NULL, placeholder contexts
+   *   will be used.
+   *
+   * @return ctools_context[]
+   *   An array of ctools contexts.
+   */
+  public function getCtoolsContexts($entities = array()) {
+    global $user;
+
+    $contexts = array(
+      'current-user' => ctools_context_create('entity:user', $user),
+    );
+    $contexts['current-user']->keyword = 'current-user';
+    $contexts['current-user']->identifier = t('Logged-in user');
+    foreach ($this->flexiform->entities as $namespace => $info) {
+      $type = 'entity:' . $info['entity_type'];
+      if (isset($entities[$namespace])) {
+        $contexts[$namespace] = ctools_context_create($type, $entities[$namespace]);
+      }
+      else {
+        $contexts[$namespace] = ctools_context_create_empty($type);
+      }
+      $contexts[$namespace]->keyword = $namespace;
+      $contexts[$namespace]->identifier = $info['label'];
+    }
+
+    return $contexts;
+  }
+
+  /**
+   * Replace ctools substitutions with their values.
+   *
+   * @param string $string
+   *   The string we want to replace in.
+   * @param array $entities
+   *   An array of entities keyed by namespace. If NULL, placeholder contexts
+   *   will be used.
+   * @param array $keywords
+   *   Optionally provide additional keywords to replace.
+   *
+   * @return string
+   *   $string with it's substitutions replaced.
+   */
+  public function replaceCtoolsSubstitutions($string, $entities, $keywords = array()) {
+    $contexts = $this->getCtoolsContexts($entities);
+    return ctools_context_keyword_substitute($string, $keywords, $contexts);
+  }
+
+  /**
+   * Build a list of possible ctools substitutions.
+   *
+   * @param array $keywords
+   *   Optionally provide additional keywords to show.
+   *
+   * @return array
+   *   A render array of substitutions.
+   */
+  public function getCtoolsSubstitutionsList($keywords = array()) {
+    $content = array(
+      '#theme' => 'table',
+      '#header' => array(t('Keyword'), t('Value')),
+      '#rows' => array(),
+    );
+
+    foreach ($this->getCtoolsContexts() as $context) {
+      foreach (ctools_context_get_converters('%' . check_plain($context->keyword) . ':', $context) as $keyword => $title) {
+        $content['#rows'][] = array(
+          check_plain($keyword),
+          t('@identifier: @title', array('@title' => $title, '@identifier' => $context->identifier)),
+        );
+      }
+    }
+
+    if (count($content['#rows'])) {
+      return $content;
+    }
+    else {
+      return array();
+    }
   }
 }
