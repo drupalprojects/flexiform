@@ -34,7 +34,7 @@ files[] = includes/element/node_status.element.inc
 files[] = includes/element/node_sticky.element.inc
 files[] = includes/element/custom_html.element.inc
 
-files[] = plugins/entity/PanelizerEntityFlexiformSubmission.class.inc
+; Plugins and Views
 files[] = views/flexiform.views.inc
 files[] = views/flexiform_submission_handler_link_field.inc
 files[] = views/flexiform_submission_handler_delete_link_field.inc

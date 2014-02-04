@@ -1,11 +1,11 @@
 <?php
 /**
  * @file
- * Definition of the commerce_order plugin.
+ * Definition of the flexiform webform submission plugin.
  */
 
 $plugin = array(
-  'handler' => 'PanelizerEntityFlexiformSubmission',
+  'handler' => 'PanelizerEntityFlexiformWebformSubmission',
   'uses page manager' => FALSE,
   'hooks' => array(
     'menu' => TRUE,

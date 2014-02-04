@@ -14,3 +14,4 @@ files[] = views/flexiform_webform_submission_handler_link_field.inc
 files[] = views/flexiform_webform_submission_handler_delete_link_field.inc
 files[] = views/flexiform_webform_submission_handler_flexiform_submission_operations_field.inc
 files[] = views/flexiform_webform_submission_handler_edit_link_field.inc
+files[] = plugins/entity/panelizerEntityFlexiformWebformSubmission.class.inc
