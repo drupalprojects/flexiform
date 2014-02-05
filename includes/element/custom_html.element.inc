@@ -96,6 +96,7 @@ class FlexiformElementCustomHtml extends FlexiformRepeatableElement {
   public function getCtoolsContexts($entities = array()) {
     global $user;
 
+    ctools_include('context');
     $contexts = array(
       'current-user' => ctools_context_create('entity:user', $user),
     );
