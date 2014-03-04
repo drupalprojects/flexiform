@@ -108,4 +108,31 @@ class FlexiformController extends EntityAPIControllerExportable {
     return $flexiform;
   }
 
+  /**
+   * Overrides EntityAPIController::invoke().
+   */
+  public function invoke($hook, $entity) {
+    parent::invoke($hook, $entity);
+
+    if ($hook == 'insert' || $hook == 'update') {
+      // Get hold of the display info.
+      $display_info = flexiform_display_info();
+
+      // Check for any displays implementing hook_menu.
+      foreach ($entity->displays as $id => $display) {
+        if (method_exists($display_info[$id]['class'], 'hook_menu')) {
+          if ($hook == 'update') {
+            // If the config has changed continue.
+            if (isset($entity->original->displays[$id]) && $display == $entity->original->displays[$id]) {
+              continue;
+            }
+          }
+
+          // Mark the menu to be rebuilt.
+          variable_set('menu_rebuild_needed', TRUE);
+          break;
+        }
+      }
+    }
+  }
 }
