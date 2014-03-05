@@ -13,10 +13,12 @@ class FlexiformDisplayEditPage extends FlexiformDisplayPageBase {
    * Define the menu links
    */
   public function hook_menu() {
+    // If there is no wild-card key in this path we cannot use it for an edit
+    // page.
     $path_bits = explode('/', $this->configuration['path']);
     $wildcard_key = array_search('%', $path_bits);
     if ($wildcard_key === FALSE) {
-      return;
+      return array();
     }
 
     $items = parent::hook_menu();
