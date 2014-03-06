@@ -120,6 +120,34 @@ class FlexiformElementField extends FlexiformElement{
   }
 
   /**
+   * Get the Difference of two settings arrays.
+   *
+   * @see http://uk1.php.net/manual/en/function.array-diff-assoc.php#111675
+   *
+   * @todo: Build in special casing for default values.
+   */
+  public function diffArrays($array, $original_array) {
+    $difference = array();
+    foreach ($array as $key => $value) {
+      if (is_array($value)) {
+        if (!isset($original_array[$key]) || !is_array($original_array[$key])) {
+          $difference[$key] = $value;
+        }
+        else {
+          $new_diff = $this->diffArrays($value, $original_array[$key]);
+          if (!empty($new_diff)) {
+            $difference[$key] = $new_diff;
+          }
+        }
+      }
+      elseif (!array_key_exists($key,$original_array) || $original_array[$key] !== $value) {
+        $difference[$key] = $value;
+      }
+    }
+    return $difference;
+  }
+
+  /**
    * Get the field array.
    *
    * At this point we merge the field settings for the form into the normal
@@ -211,7 +239,7 @@ class FlexiformElementField extends FlexiformElement{
     $element_field = $this->getField();
     $field = array_merge($element_field, $field);
     $original_field = field_info_field($instance['field_name']);
-    $this->field = array_diff_assoc($field, $original_field);
+    $this->field = $this->diffArrays($field, $original_field);
 
     // Work out element instance settings. This gets a little complicated as
     // we want to make sure the default value settings work.
@@ -235,8 +263,7 @@ class FlexiformElementField extends FlexiformElement{
 
     // Cast Required to a boolean so it doesn't get erroneously stored.
     $instance['required'] = (bool) $instance['required'];
-
-    $this->instance = array_diff_assoc($instance, $original_instance);
+    $this->instance = $this->diffArrays($instance, $original_instance);
 
     parent::configureFormSubmit($form, $form_state, $flexiform);
   }
