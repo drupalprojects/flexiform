@@ -20,6 +20,16 @@ class FlexiformUIController extends EntityDefaultUIController {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function overviewForm($form, &$form_state, $conditions = array()) {
+    // Overridden to allow the passing of conditions through.
+    $form['table'] = $this->overviewTable($conditions);
+    $form['pager'] = array('#theme' => 'pager');
+    return $form;
+  }
+
+  /**
    * Overrides overviewTableHeaders();
    */
   protected function overviewTableHeaders($conditions, $rows, $additional_header = array()) {
@@ -93,6 +103,16 @@ class FlexiformUIController extends EntityDefaultUIController {
     $row[] = l(t('export'), $this->path . '/manage/' . $id . '/export');
 
     return $row;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hook_forms() {
+    $forms = parent::hook_forms();
+    $forms['flexiform_overview_form']['callback'] = 'flexiform_overview_form';
+
+    return $forms;
   }
 
   /**
@@ -188,8 +208,101 @@ class FlexiformUIController extends EntityDefaultUIController {
       );
     }
 
+    // Generate paths for all other entity types with field UI.
+    // @see field_ui_menu
+    $entity_info = entity_get_info();
+    foreach ($entity_info as $entity_type => $info) {
+      // Only do this if the bundle is set.
+      if (empty($info['bundles'])) {
+        continue;
+      }
+
+      foreach ($info['bundles'] as $bundle_name => $bundle_info) {
+        // Only act if there is an admin page set.
+        if (empty($bundle_info['admin'])) {
+          continue;
+        }
+        // Get the path for this bundle.
+        $path = $bundle_info['admin']['path'];
+        // The bundle arg could be either a position in the path or an actual
+        // bundle.
+        if (isset($bundle_info['admin']['bundle argument'])) {
+          $bundle_arg = $bundle_info['admin']['bundle argument'];
+        }
+        else {
+          $bundle_arg = $bundle_name;
+        }
+        // Extract access information, providing defaults.
+        $access = array_intersect_key($bundle_info['admin'], drupal_map_assoc(array('access callback', 'access arguments')));
+        $access += array(
+          'access callback' => 'user_access',
+          'access arguments' => array('administer site configuration'),
+        );
+
+        $items["$path/forms"] = array(
+          'title' => t('Manage Forms'),
+          'type' => MENU_LOCAL_TASK,
+          'page callback' => 'drupal_get_form',
+          'page arguments' => array('flexiform_overview_form', 'flexiform', $entity_type, $bundle_arg),
+          'description' => 'Manage ' . $info['label'] . ' Forms',
+          'weight' => 3,
+          'file' => 'includes/entity.ui.inc',
+        )+$access;
+
+        $items["$path/forms/add"] = array(
+          'title' => t('Add Form'),
+          'type' => MENU_LOCAL_ACTION,
+          'page callback' => 'flexiform_add_for_entity',
+          'page arguments' => array($entity_type, $bundle_arg),
+          'description' => t('Add Form'),
+          'file' => 'flexiform.admin.inc',
+          'file path' => drupal_get_path('module', 'flexiform'),
+        )+$access;
+      }
+    }
+
     return $items;
   }
+}
+
+/**
+ * Form builder function for the flexiform overview form.
+ */
+function flexiform_overview_form($form, &$form_state, $entity_type = 'flexiform', $base_entity = '', $base_entity_bundle = '') {
+  // Build a conditions array.
+  $conditions = array();
+  if (!empty($base_entity)) {
+    $conditions['base_entity'] = $base_entity;
+  }
+  if (!empty($base_entity) && !empty($base_entity_bundle)) {
+    $base_entity_bundle = field_extract_bundle($base_entity, $base_entity_bundle);
+    $conditions['base_entity_bundle'] = $base_entity_bundle;
+  }
+
+  return entity_ui_controller($entity_type)->overviewForm($form, $form_state, $conditions);
+}
+
+/**
+ * Form wrapper to add a flexiform for a given entity type and bundle.
+ */
+function flexiform_add_for_entity($entity_type, $bundle) {
+  $bundle = field_extract_bundle($entity_type, $bundle);
+
+  $values = array(
+    'base_entity' => $entity_type,
+    'base_entity_bundle' => $bundle,
+  );
+  $flexiform = entity_create('flexiform', $values);
+
+  $info = entity_get_info($entity_type);
+  if (!empty($info['bundles'][$bundle]['admin']['real path'])) {
+    $form_state['redirect'] = $info['bundles'][$bundle]['admin']['real path'] . '/forms';
+  }
+
+  // Fix the entity and bundle.
+  $form_state['fix_entity_bundle'] = TRUE;
+
+  return entity_ui_get_form('flexiform', $flexiform, 'add', $form_state);
 }
 
 /**
@@ -242,7 +355,7 @@ function flexiform_form($form, &$form_state, $flexiform, $op = 'edit') {
       'wrapper' => 'flexiform-base-entity-bundle-selector',
       'callback' => 'flexiform_form_base_entity_bundle_selector',
     ),
-    '#disabled' => empty($flexiform->is_new),
+    '#disabled' => empty($flexiform->is_new) || !empty($form_state['fix_entity_bundle']),
   );
 
   if (isset($form_state['values']['base_entity'])) {
@@ -284,7 +397,7 @@ function flexiform_form($form, &$form_state, $flexiform, $op = 'edit') {
       'wrapper' => 'flexiform-builder-selector',
       'callback' => 'flexiform_form_builder_selector',
     ),
-    '#disabled' => empty($flexiform->is_new),
+    '#disabled' => empty($flexiform->is_new) || !empty($form_state['fix_entity_bundle']),
   );
 
   if (isset($form_state['values']['base_entity_bundle'])) {
@@ -410,6 +523,8 @@ function flexiform_form($form, &$form_state, $flexiform, $op = 'edit') {
     $form['rules']['inactive']['#empty'] = t('There are no inactive rules.');
   }
 
+
+
   return $form;
 }
 
@@ -452,7 +567,9 @@ function flexiform_form_submit(&$form, &$form_state) {
   }
 
   $flexiform->save();
-  $form_state['redirect'] = 'admin/structure/flexiforms';
+  if (empty($form_state['redirect'])) {
+    $form_state['redirect'] = 'admin/structure/flexiforms';
+  }
 }
 
 /**

@@ -62,6 +62,22 @@ function flexiform_menu_alter(&$items) {
       }
     }
   }
+
+  // Alter comment bits.
+  // Adjust the Field UI tabs on admin/structure/types/manage/[node-type].
+  // See comment_entity_info().
+  if (!empty($items['admin/structure/types/manage/%comment_node_type/comment/fields']['title'])) {
+    $items['admin/structure/types/manage/%comment_node_type/comment/fields']['title'] = 'Comment fields';
+    $items['admin/structure/types/manage/%comment_node_type/comment/fields']['weight'] = 4;
+  }
+  if (!empty($items['admin/structure/types/manage/%comment_node_type/comment/display']['title'])) {
+    $items['admin/structure/types/manage/%comment_node_type/comment/display']['title'] = 'Comment display';
+    $items['admin/structure/types/manage/%comment_node_type/comment/display']['weight'] = 5;
+  }
+  if (!empty($items['admin/structure/types/manage/%comment_node_type/comment/forms']['title'])) {
+    $items['admin/structure/types/manage/%comment_node_type/comment/forms']['title'] = 'Comment forms';
+    $items['admin/structure/types/manage/%comment_node_type/comment/forms']['weight'] = 6;
+  }
 }
 
 /**
