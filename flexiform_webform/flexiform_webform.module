@@ -62,6 +62,16 @@ function flexiform_webform_entity_info() {
       'controller class' => 'FlexiformWebformSubmissionUIController',
       'menu wildcard' => '%flexiform_webform_submission',
     ),
+    'view modes' => array(
+      'full' => array(
+        'label' => 'Full Display',
+        'custom settings' => FALSE,
+      ),
+      'summary' => array(
+        'label' => 'Summary',
+        'custom settings' => TRUE,
+      ),
+    ),
   );
 
   return $info;
