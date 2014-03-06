@@ -212,7 +212,21 @@ class FlexiformElementField extends FlexiformElement{
     );
     $form['instance']['contexts']['contexts'] = $this->getCtoolsSubstitutionsList();
 
+    // Rename the boxes and discourage use of field settings.
+    $form['instance']['#title'] = t('Form Settings');
+    $form['instance']['#description'] = t('These settings will override default Field API settings for this field instance. Overrides will only apply to this flexiform.');
+    $form['field']['#title'] = t('Field Settings');
+    $form['field']['#description'] = t('These settings will override default Field API settings for this field. Overrides will only apply to this flexiform. <strong>Handle with care: Altering these settings can cause unexpected results.</strong>');
+    $form['field']['#collapsible'] = TRUE;
+    $form['field']['#collapsed'] = TRUE;
+
+    // Delete the 'Save Settings' button added by FieldUI.
+    unset($form['actions']);
+
     $form = parent::configureForm($form, $form_state, $flexiform);
+
+    // Unset the label field added by  FlexiformElementBase.
+    unset($form['label']);
 
     return $form;
   }
