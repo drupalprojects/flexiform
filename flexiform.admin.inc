@@ -1185,13 +1185,10 @@ function flexiform_manage_form_entities_form_submit($form, &$form_state) {
  */
 function flexiform_field_max_weight($flexiform) {
   $max_weight = 0;
-  foreach($flexiform->elements as $entity_namespace => $elements) {
-    foreach($elements as $element_namespace => $settings) {
-      //@todo: Use an element class to get this right.
-      $weight = !empty($settings['weight']) ? $settings['weight'] : 0;
-      if ($weight > $max_weight) {
-        $max_weight = $weight;
-      }
+  foreach($flexiform->elements as $element_namespace => $settings) {
+    $weight = !empty($settings['weight']) ? $settings['weight'] : 0;
+    if ($weight > $max_weight) {
+      $max_weight = $weight;
     }
   }
 
