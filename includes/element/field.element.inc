@@ -165,6 +165,24 @@ class FlexiformElementField extends FlexiformElement{
     $form['instance']['default_value_widget']['#states'] = array(
       'visible' => array(':input[name="instance[use_default_value_function]"]' => array('checked' => FALSE)),
     );
+    $form['instance']['use_default_value_tokens'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use Tokens in Default Value'),
+      '#default_value' => !empty($instance['use_default_value_tokens']),
+      '#states' => array(
+        'visible' => array(':input[name="instance[use_default_value_function]"]' => array('checked' => FALSE)),
+      ),
+    );
+    $form['instance']['contexts'] = array(
+      '#title' => t('Substitutions'),
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#status' => array(
+        'visible' => array(':input[name="instance[use_default_value_tokens]"]' => array('checked' => TRUE)),
+      ),
+    );
+    $form['instance']['contexts']['contexts'] = $this->getCtoolsSubstitutionsList();
 
     $form = parent::configureForm($form, $form_state, $flexiform);
 
@@ -236,6 +254,19 @@ class FlexiformElementField extends FlexiformElement{
     }
 
     $instance = $this->getInstance();
+
+    // Deal with default value tokens.
+    if (!empty($instance['use_default_value_tokens'])) {
+      $defaults = &$instance['default_value'];
+      foreach ($defaults as $delta => &$item) {
+        foreach ($item as &$value) {
+          if (is_string($value)) {
+            $value = $this->replaceCtoolsSubstitutions($value, $form['#flexiform_entities']);
+          }
+        }
+      }
+    }
+
     $form_fields = field_default_form($this->entity_type, $entity, $this->getField(), $instance, $language, $items, $form, $form_state);
     foreach ($form_fields as $form_key => $form_field) {
       // Make sure the parents stuff is always correct.

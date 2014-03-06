@@ -65,6 +65,13 @@ class FlexiformDisplayBase implements FlexiformDisplayInterface {
     }
 
     $base_entity = entity_create($this->flexiform->base_entity, $values);
+
+    // Make sure the entity label is always set to play nicely with ctools.
+    if (!empty($info['entity keys']['label'])
+      && !isset($base_entity->{$info['entity keys']['label']})) {
+      $base_entity->{$info['entity keys']['label']} = '';
+    }
+
     return $base_entity;
   }
 

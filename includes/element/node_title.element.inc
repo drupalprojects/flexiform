@@ -16,12 +16,21 @@ class FlexiformElementNodeTitle extends FlexiformElement {
     $parents = $form['#parents'];
     $parents[] = 'title';
 
+    // Work out the default value.
+    $default = '';
+    if (!empty($this->settings['default_value']['default_value'])) {
+      $default = $this->settings['default_value']['default_value'];
+    }
+    if (!empty($this->settings['default_value']['use_tokens'])) {
+      $default = $this->replaceCtoolsSubstitutions($default, $form['#flexiform_entities']);
+    }
+
     $form[$this->element_namespace] = array(
       '#type' => 'textfield',
       '#parents' => $parents,
       '#title' => $this->label(),
       '#required' => TRUE,
-      '#default_value' => !empty($entity->title) ? $entity->title : '',
+      '#default_value' => !empty($entity->title) ? $entity->title : $default,
       '#maxlength' => 255,
     );
 
@@ -54,5 +63,62 @@ class FlexiformElementNodeTitle extends FlexiformElement {
 
     $title = drupal_array_get_nested_value($form_state['values'], $parents);
     return $title;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function configureForm($form, &$form_state, $flexiform) {
+    $form = parent::configureForm($form, $form_state, $flexiform);
+
+    $form['default_value'] = array(
+      '#tree' => TRUE,
+      '#type' => 'fieldset',
+      '#title' => t('Default Value'),
+      '#weight' => -5,
+    );
+
+    $form['default_value']['default_value'] = array(
+      '#type' => 'textfield',
+      '#title' => $this->label() ? $this->label() : t('Default'),
+      '#default_value' => !empty($this->settings['default_value']['default_value']) ? $this->settings['default_value']['default_value'] : '',
+      '#maxlength' => 255,
+    );
+
+    $form['default_value']['use_tokens'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use Tokens in Default Value'),
+      '#default_value' => !empty($this->settings['default_value']['use_tokens']),
+    );
+
+    $form['default_value']['contexts'] = array(
+      '#title' => t('Substitutions'),
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+
+    $form['default_value']['contexts']['contexts'] = $this->getCtoolsSubstitutionsList();
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function configureFormSubmit($form, &$form_state, $flexiform) {
+    $this->settings['default_value']['default_value'] = $form_state['values']['default_value']['default_value'];
+    $this->settings['default_value']['use_tokens'] = $form_state['values']['default_value']['use_tokens'];
+
+    parent::configureFormSubmit($form, $form_state, $flexiform);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function toSettingsArray() {
+    $settings = parent::toSettingsArray();
+    $settings['default_value'] = $this->settings['default_value'];
+    return $settings;
   }
 }
