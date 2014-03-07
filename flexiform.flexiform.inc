@@ -114,6 +114,50 @@ function flexiform_flexiform_entity_getter_info() {
     );
   }
 
+  // Build entity reference getters.
+  if (module_exists('entityreference')) {
+    $fields = db_select('field_config', 'fc')
+      ->condition('type', 'entityreference')
+      ->fields('fc', array('field_name'))
+      ->execute()
+      ->fetchCol();
+
+    foreach ($fields as $field_name) {
+      // Get all the info we need.
+      $field = field_info_field($field_name);
+      $target_entity_type = $field['settings']['target_type'];
+      $target_entity_info = entity_get_info($target_entity_type);
+
+      // Build a getter for each entity_type this field is present on.
+      foreach ($field['bundles'] as $base_entity_type => $bundles) {
+        $base_entity_info = entity_get_info($base_entity_type);
+
+        // Prepare replacements for the label.
+        $label_replacements = array(
+          '@target' => $target_entity_info['label'],
+          '@base' => $base_entity_info['label'],
+          '@field' => $field_name,
+        );
+
+        // Build getter info.
+        $getters["entityreference__{$field_name}__{$base_entity_type}"] = array(
+          'label' => t('@target from @base via @field', $label_replacements),
+          'description' => t('Load and entity via an entityreference field'),
+          'field_name' => $field_name,
+          'getter callback' => 'flexiform_entity_getter_entityreference',
+          'setter callback' => 'flexiform_entity_setter_entityreference',
+          'params' => array(
+            'base' => array(
+              'entity_type' => $base_entity_type,
+            ),
+          ),
+          'entity_types' => array($target_entity_type),
+          'file' => 'entityreference.flexiform.inc',
+        );
+      }
+    }
+  }
+
   return $getters;
 }
 
