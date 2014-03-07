@@ -320,3 +320,28 @@ function hook_flexiform_entity_getter_info() {
 function hook_flexiform_entity_getter_info_alter(&$entity_getter_info) {
 
 }
+
+/**
+ * Prepare the base entity of a flexiform.
+ *
+ * @param $base_entity
+ *   The base entity of the form, provided by the FlexiformDisplay.
+ * @param Flexiform $flexiform
+ *   The flexiform that is about to be built.
+ * @param FlexiformDisplayBase $display
+ *   The flexiform display handler that has provided the base entity.
+ *
+ * @see FlexiformDisplayBase::build()
+ */
+function hook_flexiform_prepare_base_entity($base_entity, Flexiform $flexiform, FlexiformDisplayBase $display) {
+  global $user;
+
+  // Default an entity reference field to the current user id.
+  // This allows the form to use the entityreference getter to load this
+  // user into the form.
+  if ($flexiform->form == 'node_create_form') {
+    $base_entity->field_author[LANGUAGE_NONE][0] = array(
+      'target_id' => $user->uid,
+    );
+  }
+}
