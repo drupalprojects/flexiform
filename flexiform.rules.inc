@@ -14,6 +14,33 @@ function flexiform_rules_event_info() {
   );
 
   $events = array();
+  // Add an event for all flexiforms.
+  $event = $defaults + array(
+    'label' => t('On submitting any flexiform'),
+    'variables' => array(
+      'base_entity' => array(
+        'type' => 'entity',
+        'label' => t('Base Entity'),
+      ),
+    ),
+  );
+  $events['flexiform_any_submit'] = $event;
+
+  // Add an event for each group.
+  foreach (flexiform_get_groups() as $group => $info) {
+    $event = $defaults + array(
+      'label' => t('On submitting any flexiform in the @group group', array('@group' => $info['label'])),
+      'variables' => array(
+        'base_entity' => array(
+          'type' => 'entity',
+          'label' => t('Base Entity'),
+        ),
+      ),
+    );
+    $events['flexiform_group_submit_' . $group] = $event;
+  }
+
+  // Add an event for each flexiform.
   foreach(entity_load('flexiform') as $flexiform) {
     $event = $defaults + array(
       'label' => t('On submitting @flexiform', array('@flexiform' => $flexiform->label)),

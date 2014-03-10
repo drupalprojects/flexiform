@@ -93,7 +93,15 @@ class FlexiformBuilderFlexiform extends FlexiformBuilder {
     }
 
     if (module_exists('rules')) {
+      $base_entity_wrapper = entity_metadata_wrapper($flexiform->base_entity, $form['#flexiform_base_entity']);
+      $args = array(
+        'base_entity' => $base_entity_wrapper,
+      );
+
+      // Fire the most specific rules first and track back to the less specific.
       rules_invoke_event_by_args('flexiform_submit_'.$this->flexiform->form, $form['#flexiform_entities']);
+      rules_invoke_event_by_args('flexiform_group_submit_'.$this->flexiform->form_group, $args);
+      rules_invoke_event_by_args('flexiform_any_submit', $args);
     }
   }
 }
