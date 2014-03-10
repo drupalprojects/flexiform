@@ -200,8 +200,8 @@ class FlexiformUIController extends EntityDefaultUIController {
     $items["{$this->path}/manage/{$wildcard}/form-entities/%/remove"] = array(
       'title' => 'Remove',
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('flexiform_entity_remove_form', 4, 7),
-      'type' => MENU_LOCAL_TASK,
+      'page arguments' => array('flexiform_entity_remove_form', 4, 6),
+      'type' => MENU_CALLBACK,
       'weight' => 3,
       'file' => 'flexiform.admin.inc',
       'file path' => drupal_get_path('module', 'flexiform'),
