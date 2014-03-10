@@ -109,6 +109,14 @@ class FlexiformController extends EntityAPIControllerExportable {
   }
 
   /**
+   * Overrides EntityAPIController::save().
+   */
+  public function save($flexiform, DatabaseTransaction $transaction = NULL) {
+    $return = parent::save($flexiform);
+    $this->storeTags($flexiform);
+  }
+
+  /**
    * Overrides EntityAPIController::invoke().
    */
   public function invoke($hook, $entity) {
@@ -132,6 +140,41 @@ class FlexiformController extends EntityAPIControllerExportable {
           variable_set('menu_rebuild_needed', TRUE);
           break;
         }
+      }
+    }
+  }
+
+  /**
+   * Overrides EntityAPIController::attachLoad().
+   */
+  public function attachLoad(&$queried_entities, $revision_id = FALSE) {
+    $ids = array_keys($queried_entities);
+    $tags = array();
+    $result = db_select('flexiform_tags')
+      ->fields('flexiform_tags', array('id', 'tag'))
+      ->condition('id', $ids, 'IN')
+      ->execute();
+    foreach ($result as $row) {
+      $tags[$row->id][] = $row->tag;
+    }
+
+    foreach ($queried_entities as $entity_id => &$entity) {
+      $entity->tags = !empty($tags[$entity_id]) ? $tags[$entity_id] : array();
+    }
+  }
+
+  /**
+   * Store the tags associated with a given flexiform.
+   */
+  protected function storeTags($flexiform) {
+    db_delete('flexiform_tags')
+      ->condition('id', $flexiform->id)
+      ->execute();
+    if (!empty($flexiform->tags)) {
+      foreach ($flexiform->tags as $tag) {
+        db_insert('flexiform_tags')
+          ->fields(array('id', 'tag'), array($flexiform->id, $tag))
+          ->execute();
       }
     }
   }

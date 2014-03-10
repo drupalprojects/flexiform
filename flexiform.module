@@ -134,6 +134,16 @@ function flexiform_entity_info() {
 }
 
 /**
+ * Implements hook_views_api().
+ */
+function flexiform_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'flexiform') . '/includes/views',
+  );
+}
+
+/**
  * Impements hook_ctools_plugin_directory().
  */
 function flexiform_ctools_plugin_directory($owner, $plugin_type) {

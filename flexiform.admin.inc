@@ -125,6 +125,17 @@ class FlexiformUIController extends EntityDefaultUIController {
 
     $wildcard = '%flexiform';
 
+    // Tags autocomplete pages.
+    $items["{$this->path}/autocomplete_tags"] = array(
+      'title' => 'Flexiform tags autocomplete',
+      'page callback' => 'flexiform_autocomplete_tags',
+      'page arguments' => array(4),
+      'type' => MENU_CALLBACK,
+      'file' => 'flexiform.admin.inc',
+      'file path' => drupal_get_path('module', 'flexiform'),
+      'access arguments' => array('administer flexiforms'),
+    );
+
     $items["{$this->path}/manage/{$wildcard}/form-fields"] = array(
       'title' => 'Manage form fields',
       'page callback' => 'drupal_get_form',
@@ -463,6 +474,15 @@ function flexiform_form($form, &$form_state, $flexiform, $op = 'edit') {
     $form['form_group']['#value'] = $group;
   }
 
+  // Add tags element
+  $form['tags'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Tags'),
+    '#default_value' => isset($flexiform->tags) ? drupal_implode_tags($flexiform->tags) : '',
+    '#autocomplete_path' => 'admin/structure/flexiforms/autocomplete_tags',
+    '#description' => t('Tags associated with this flexible form. Separate multiple tags with commas.'),
+  );
+
   // Displays Section of the form.
   $form['displays'] = array(
     '#type' => 'fieldset',
@@ -547,6 +567,9 @@ function flexiform_form_builder_selector($form, $form_state) {
  */
 function flexiform_form_submit(&$form, &$form_state) {
   $flexiform = entity_ui_form_submit_build_entity($form, $form_state);
+
+  // Sort out tags.
+  $flexiform->tags = drupal_explode_tags($form_state['values']['tags']);
 
   $base_entity_info = entity_get_info($flexiform->base_entity);
   if (empty($flexiform->entities)) {
@@ -1713,4 +1736,44 @@ function _flexiform_entity_form_reduce_order($array, $a) {
     $array = array_merge($array, array_reduce($a['children'], '_flexiform_field_form_reduce_order'));
   }
   return $array;
+}
+
+/**
+ * Auto-complete callback for flexiform tags.
+ */
+function flexiform_autocomplete_tags($tags_typed = '') {
+  // The user enters a comma-separated list of tags. We only autocomplete the
+  // last tag.
+  $tags_typed = drupal_explode_tags($tags_typed);
+  $tag_last = drupal_strtolower(array_pop($tags_typed));
+
+  $tag_matches = array();
+  if ($tag_last != '') {
+    $query = db_select('flexiform_tags', 'ft');
+    // Do not select already entered terms.
+    if (!empty($tags_typed)) {
+      $query->condition('ft.tag', $tags_typed, 'NOT IN');
+    }
+    // Select rows that match by tag name.
+    $tags_return = $query
+      ->distinct()
+      ->fields('ft', array('tag'))
+      ->condition('ft.tag', '%' . db_like($tag_last) . '%', 'LIKE')
+      ->groupBy('ft.tag')
+      ->range(0, 10)
+      ->execute()
+      ->fetchCol('ft.tag');
+
+    $prefix = count($tags_typed) ? drupal_implode_tags($tags_typed) . ', ' : '';
+
+    foreach ($tags_return as $name) {
+      $n = $name;
+      // Tag names containing commas or quotes must be wrapped in quotes.
+      if (strpos($name, ',') !== FALSE || strpos($name, '"') !== FALSE) {
+        $n = '"' . str_replace('"', '""', $name) . '"';
+      }
+      $tag_matches[$prefix . $n] = check_plain($name);
+    }
+  }
+  drupal_json_output($tag_matches);
 }

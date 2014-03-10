@@ -103,6 +103,28 @@ function flexiform_schema() {
     ),
   );
 
+  $schema['flexiform_tags'] = array(
+    'fields' => array(
+      'id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The primary identifier of the flexiform.',
+      ),
+      'tag' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'description' => 'The tag string associated with this flexiform',
+      ),
+    ),
+    'primary key' => array('id', 'tag'),
+    'foreign keys' => array(
+      'table' => 'flexiform',
+      'columns' => array('id' => 'id'),
+    ),
+  );
+
   return $schema;
 }
 
@@ -438,4 +460,32 @@ function flexiform_update_7009() {
 
   db_drop_field('flexiform', 'path');
   db_drop_field('flexiform', 'edit_path');
+}
+
+/**
+ * Add flexiform tags table.
+ */
+function flexiform_update_7010() {
+  $schema = array(
+    'fields' => array(
+      'id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The primary identifier of the flexiform.',
+      ),
+      'tag' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'description' => 'The tag string associated with this flexiform',
+      ),
+    ),
+    'primary key' => array('id', 'tag'),
+    'foreign keys' => array(
+      'table' => 'flexiform',
+      'columns' => array('id' => 'id'),
+    ),
+  );
+  db_create_table('flexiform_tags', $schema);
 }
