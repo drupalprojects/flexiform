@@ -142,7 +142,7 @@ function flexiform_flexiform_entity_getter_info() {
         // Build getter info.
         $getters["entityreference__{$field_name}__{$base_entity_type}"] = array(
           'label' => t('@target from @base via @field', $label_replacements),
-          'description' => t('Load and entity via an entityreference field'),
+          'description' => t('Load an entity via an entityreference field'),
           'field_name' => $field_name,
           'getter callback' => 'flexiform_entity_getter_entityreference',
           'setter callback' => 'flexiform_entity_setter_entityreference',
@@ -158,6 +158,44 @@ function flexiform_flexiform_entity_getter_info() {
     }
   }
 
+  // Build field collection getters.
+  if (module_exists('field_collection')) {
+    $fields = db_select('field_config', 'fc')
+      ->condition('type', 'field_collection')
+      ->fields('fc', array('field_name'))
+      ->execute()
+      ->fetchCol();
+
+    foreach ($fields as $field_name) {
+      $field = field_info_field($field_name);
+
+      // Build a getter for each entity_type this field is present on.
+      foreach ($field['bundles'] as $base_entity_type => $bundles) {
+        $base_entity_info = entity_get_info($base_entity_type);
+
+        // Prepare replacements for the label.
+        $label_replacements = array(
+          '@base' => $base_entity_info['label'],
+          '@field' => $field_name,
+        );
+
+        $getters["field_collection__{$field_name}__{$base_entity_type}"] = array(
+          'label' => t('Field Collection Item: @field from @base', $label_replacements),
+          'description' => t('Load the field collection item'),
+          'field_name' => $field_name,
+          'getter callback' => 'flexiform_entity_getter_field_collection',
+          'setter callback' => 'flexiform_entity_setter_field_collection',
+          'params' => array(
+            'base' => array(
+              'entity_type' => $base_entity_type,
+            ),
+          ),
+          'entity_types' => array('field_collection_item'),
+          'file' => 'field_collection.flexiform.inc',
+        );
+      }
+    }
+  }
   return $getters;
 }
 
