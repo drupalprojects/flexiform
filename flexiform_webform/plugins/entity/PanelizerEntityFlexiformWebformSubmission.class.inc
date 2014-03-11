@@ -4,6 +4,9 @@
  * Class for the Panelizer commerce_order entity plugin.
  */
 
+// Make sure the default file is loaded.
+module_load_include('php', 'panelizer', 'plugins/entity/PanelizerEntityDefault.class');
+
 /**
  * Panelizer Entity commerce_order plugin class.
  *
