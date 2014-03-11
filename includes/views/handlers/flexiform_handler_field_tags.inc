@@ -6,7 +6,6 @@
  * as fields
  */
 
-
 class flexiform_handler_field_tags extends views_handler_field {
 
   function construct() {

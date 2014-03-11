@@ -8,6 +8,19 @@
  * Implements hook_views_data_alter().
  */
 function flexiform_views_data_alter(&$data) {
+
+  // Add an add URL field.
+  $data['flexiform']['add_page_url'] = array(
+    'title' => t('Add Page URI'),
+    'help' => t('Path to the Add Page.'),
+    'field' => array(
+      'real field' => 'id',
+      'handler' => 'flexiform_handler_field_add_page_url',
+      'click sortable' => FALSE,
+    ),
+  );
+
+  // Add Tags Field
   $data['flexiform']['tags'] = array(
     'title' => t('Tags'),
     'help' => t('Flexible form tags.'),

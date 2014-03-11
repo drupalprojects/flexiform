@@ -37,6 +37,7 @@ files[] = includes/element/node_sticky.element.inc
 files[] = includes/element/custom_html.element.inc
 
 ; Plugins and Views
+files[] = includes/views/handlers/flexiform_handler_field_add_page_url.inc
 files[] = includes/views/handlers/flexiform_handler_field_tags.inc
 files[] = includes/views/handlers/flexiform_handler_filter_tags.inc
 
