@@ -36,6 +36,12 @@ abstract class FlexiformDisplayPageBase extends FlexiformDisplayBase {
       // @TODO: Deal properly with default local tasks.
     }
 
+    // Add the access settings.
+    if (!empty($this->configuration['access']['permission'])) {
+      $items[$this->configuration['path']]['access callback'] = 'user_access';
+      $items[$this->configuration['path']]['access arguments'] = array($this->configuration['access']['permission']);
+    }
+
     return $items;
   }
 
@@ -76,7 +82,51 @@ abstract class FlexiformDisplayPageBase extends FlexiformDisplayBase {
       ),
     );
 
+    $form['access'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Access'),
+      '#tree' => TRUE,
+      '#description' => t('Alter settings for who can access this page.'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+
+    $form['access']['permission'] = array(
+      '#type' => 'select',
+      '#title' => t('Required Permission'),
+      '#description' => t('Only users with the following permission will be able to access this form.'),
+      '#options' => $this->getPermissionOptions(),
+      '#empty_option' => t(' - None - '),
+      '#default_value' => isset($this->configuration['access']['permission']) ? $this->configuration['access']['permission'] : '',
+    );
+
     return $form;
+  }
+
+  /**
+   * Get Permission Options.
+   */
+  protected function getPermissionOptions() {
+    $options = &drupal_static('FlexiformDisplayPagePermissionOptions', array());
+
+    if (!empty($options)) {
+      return $options;
+    }
+
+    $module_info = system_get_info('module');
+    $modules = array();
+    foreach (module_implements('permission') as $module) {
+      $modules[$module] = $module_info[$module]['name'];
+      $permissions[$module] = module_invoke($module, 'permission');
+    }
+
+    foreach($permissions as $module => $perms) {
+      foreach ($perms as $perm => $info) {
+        $options[$modules[$module]][$perm] = strip_tags($info['title']);
+      }
+    }
+
+    return $options;
   }
 
   /**
