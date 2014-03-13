@@ -178,4 +178,24 @@ class FlexiformController extends EntityAPIControllerExportable {
       }
     }
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
+    $query = parent::buildQuery($ids, $conditions, $revision_id);
+    $query_conditions = &$query->conditions();
+    foreach ($query_conditions as &$condition) {
+      // One entry in $query_conditions is a string with key '#conjunction'.
+      // @see QueryConditionInterface::conditions().
+      if (is_array($condition)) {
+        // Support using 'tags' => array('tag1', 'tag2') as condition.
+        if ($condition['field'] == 'base.tags') {
+          $query->join('flexiform_tags', 'ft', 'base.id = ft.id');
+          $condition['field'] = 'ft.tag';
+        }
+      }
+    }
+    return $query;
+  }
 }

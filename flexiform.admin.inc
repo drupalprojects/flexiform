@@ -23,10 +23,61 @@ class FlexiformUIController extends EntityDefaultUIController {
    * {@inheritdoc}
    */
   public function overviewForm($form, &$form_state, $conditions = array()) {
+    $collapsed = TRUE;
+
+    $tags = array();
+    if (!empty($_GET['tags'])) {
+      $tags = $conditions['tags'] = drupal_explode_tags($_GET['tags']);
+      $collapsed = FALSE;
+    }
+
+    $form['filter'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Filter'),
+      '#collapsible' => TRUE,
+      '#collapsed' => $collapsed,
+    );
+    $form['filter']['#id'] = 'flexiform-filter-form';
+    $form['filter']['tags'] = array(
+      '#title' => t('Filter by tag'),
+      '#type' => 'textfield',
+      '#default_value' => drupal_implode_tags($tags),
+      '#autocomplete_path' => 'admin/structure/flexiforms/autocomplete_tags',
+    );
+    $form['filter']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Filter'),
+      '#name' => '', // prevent from showing up in $_GET.
+    );
+
     // Overridden to allow the passing of conditions through.
     $form['table'] = $this->overviewTable($conditions);
     $form['pager'] = array('#theme' => 'pager');
+
+    $form['#method'] = 'get';
+    $form['#submit'][] = 'flexiform_form_submit_rebuild';
     return $form;
+  }
+
+  /**
+   * Overrides overviewTable();
+   */
+  public function overviewTable($conditions = array()) {
+    $entities = entity_load($this->entityType, FALSE, $conditions);
+    ksort($entities);
+
+    $rows = array();
+    foreach ($entities as $entity) {
+      $rows[] = $this->overviewTableRow($conditions, entity_id($this->entityType, $entity), $entity);
+    }
+
+    $render = array(
+      '#theme' => 'table',
+      '#header' => $this->overviewTableHeaders($conditions, $rows),
+      '#rows' => $rows,
+      '#empty' => t('None.'),
+    );
+    return $render;
   }
 
   /**
@@ -48,10 +99,14 @@ class FlexiformUIController extends EntityDefaultUIController {
     // Take the first column as usual.
     $row[] = array(
       'data' => array(
-        '#theme' => 'entity_ui_overview_item',
+        '#theme' => 'flexiform_ui_overview_item',
         '#label' => entity_label($this->entityType, $entity),
+        '#tags' => drupal_implode_tags($entity->tags),
         '#name' => !empty($this->entityInfo['exportable']) ? entity_id($this->entityType, $entity) : FALSE,
-        '#url' => FALSE,
+        '#url' => array(
+          'path' => $this->path . '/manage/' . $id,
+          'options' => array(),
+        ),
         '#entity_type' => $this->entityType,
       ),
     );
@@ -1776,4 +1831,25 @@ function flexiform_autocomplete_tags($tags_typed = '') {
     }
   }
   drupal_json_output($tag_matches);
+}
+
+/**
+ * Render an item on the flexiform overview page.
+ */
+function theme_flexiform_ui_overview_item($variables) {
+  $output = $variables['url'] ? l($variables['label'], $variables['url']['path'], $variables['url']['options']) : check_plain($variables['label']);
+  if ($variables['name']) {
+    $output .= ' <small> (' . t('Machine name') . ': ' . check_plain($variables['name']) . ')</small>';
+  }
+  if ($variables['tags']) {
+    $output .= '<br /><small>' . t('Tags') . ': ' . check_plain($variables['tags']) . '</small>';
+  }
+  return $output;
+}
+
+/**
+ * Trigger a rebuild of the form.
+ */
+function flexiform_form_submit_rebuild($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
 }
