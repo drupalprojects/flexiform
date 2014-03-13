@@ -21,6 +21,37 @@ class FlexiformWebformUIController extends EntityDefaultUIController {
     return $items;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function operationCount() {
+    $count = parent::operationCount() + 1;
+
+    if (module_exists('panelizer')) {
+      $count++;
+    }
+
+    return $count;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function overviewTableRow($conditions, $id, $entity, $additional_cols = array()) {
+    $row = parent::overviewTableRow($conditions, $id, $entity, $additional_cols);
+    // We want to put 2 operations in the table before clone, export and revert.
+    $lastOperations = array_splice($row, -3, 3);
+
+    // Add the manage forms element.
+    $row[] = l(t('manage forms'), $this->path . '/manage/' . $id . '/forms');
+
+    if (module_exists('panelizer')) {
+      $row[] = l(t('panelizer'), 'admin/config/content/panelizer/flexiform_webform_submission/' . $id . '.default/content');
+    }
+
+    $row = array_merge($row, $lastOperations);
+    return $row;
+  }
 }
 
 /**
