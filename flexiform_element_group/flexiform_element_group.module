@@ -54,4 +54,11 @@ function flexiform_element_group_flexiform_build_alter(&$form, &$form_state, $fl
   $form['#bundle'] = $flexiform->form;
 
   field_group_attach_groups($form, 'form', $form_state);
+
+  // Field Group >= 7.x-1.2 moved most of its rendering work to a pre render
+  // function so we add this to the form. To maintain compatibility with older
+  // versions of field group we only add it if the function exists.
+  if (function_exists('field_group_form_pre_render')) {
+    $form['#pre_render'][] = 'field_group_form_pre_render';
+  }
 }
