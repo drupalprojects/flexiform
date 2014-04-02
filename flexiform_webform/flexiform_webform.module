@@ -100,7 +100,23 @@ function flexiform_webform_entity_info_alter(&$entity_info) {
 }
 
 /**
- * Impements hook_ctools_plugin_directory().
+ * Implements hook_module_implements_alter().
+ */
+function flexiform_webform_module_implements_alter(&$implementations, $hook) {
+  $hooks = array(
+    'webform_submission_load',
+    'webform_submission_access',
+    'webform_submission_delete',
+  );
+
+  if (in_array($hook, $hooks)) {
+    unset($implementations['flexiform']);
+    unset($implementations['flexiform_webform']);
+  }
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
  */
 function flexiform_webform_ctools_plugin_directory($owner, $plugin_type) {
   if ($owner == 'panelizer' && $plugin_type == 'entity') {
