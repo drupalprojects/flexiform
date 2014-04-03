@@ -101,6 +101,29 @@ function flexiform_webform_form($form, &$form_state, $webform, $op = 'edit') {
     '#access' => ($op == 'clone'),
   );
 
+  $flexiforms = array();
+  if ($op == 'clone') {
+    $query = db_select('flexiform', 'f');
+    $query->fields('f', array('form', 'label'));
+    $query->condition('base_entity', 'flexiform_webform_submission');
+    $query->condition('base_entity_bundle', $webform->cloned_from);
+    $flexiforms = $query->execute()->fetchAllKeyed();
+  }
+
+  $form['clone_flexiforms'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Clone Flexible Forms'),
+    '#description' => t('Tick which flexible forms to clone with this flexiform webform. The machine name of this flexiform webform will replace or be appended to the machine names and paths associated with these flexible forms.'),
+    '#default_value' => array(),
+    '#options' => $flexiforms,
+    '#access' => ($op =='clone'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="clone_fields"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -117,6 +140,9 @@ function flexiform_webform_form_submit(&$form, &$form_state) {
   $webform = entity_ui_form_submit_build_entity($form, $form_state);
   $webform->save();
 
+  $form_state['redirect'] = 'admin/structure/flexiform_webforms';
+
+  // Copy fields.
   if (!empty($form_state['values']['clone_fields'])) {
     $original = $form_state['values']['cloned_from'];
     foreach (field_info_instances('flexiform_webform_submission', $original) as $instance) {
@@ -126,7 +152,78 @@ function flexiform_webform_form_submit(&$form, &$form_state) {
       }
     }
   }
-  $form_state['redirect'] = 'admin/structure/flexiform_webforms';
+  else {
+    return;
+  }
+
+  // Copy Flexiforms
+  $forms = array_filter($form_state['values']['clone_flexiforms']);
+  $cloned = array();
+  $original = $form_state['values']['cloned_from'];
+  foreach (entity_load('flexiform', $forms) as $oldform) {
+    $newForm = clone $oldform;
+
+    // Clear id
+    unset($newForm->id);
+
+    // Work out new machine name.
+    $new_form = str_replace($original, $webform->webform, $oldform->form, $count);
+    $newForm->form = (!empty($count)) ? $new_form : $newForm->form . '_' . $webform->webform;
+
+    // Stop from getting too long
+    if (strlen($newForm->form) > 252) {
+      $newForm->form = substr($newForm->form, 0, 252);
+    }
+
+    // Reduce duplicate.
+    $query = db_select('flexiform')->condition('form', $newForm->form)->countQuery();
+    if ($query->execute()->fetchField() > 0) {
+      $i = 1;
+      $new_form = $newForm->form . '_' . $i;
+
+      $query = db_select('flexiform')->condition('form', $new_form)->countQuery();
+      while ($query->execute()->fetchField() > 0) {
+        $new_form = $newForm->form . "_{$i}";
+        $query = db_select('flexiform')->condition('form', $new_form)->countQuery();
+        $i++;
+      }
+
+      $newForm->form = $new_form;
+    }
+
+    // Change base_entity_bundle
+    $newForm->base_entity_bundle = $webform->webform;
+    $newForm->entities['base_entity']['bundle'] = $webform->webform;
+
+    // Work out menu paths:
+    $displays = array(
+      'flexiform_create_entity_page',
+      'flexiform_edit_entity_page'
+    );
+
+    foreach ($displays as $display) {
+      if ($newForm->displays[$display]['enabled']) {
+        $path = &$newForm->displays[$display]['path'];
+        $new_path = str_replace($original, $webform->webform, $path, $count);
+        $path = (!empty($count)) ? $new_path : $path . '/' . $webform->webform;
+      }
+    }
+
+    $newForm->save();
+
+    $cloned[] = l($newForm->label, "admin/structure/flexiforms/manage/{$newForm->form}", array('attributes' => array('target' => '_blank')));
+  }
+
+  if (!empty($cloned)) {
+    $message = t('The following flexiforms have been cloned:', array('%field' => $instance['label']));
+    $list = array(
+      '#theme' => 'item_list',
+      '#items' => $cloned,
+    );
+    $message .= drupal_render($list);
+    drupal_set_message($message);
+  }
+
 }
 
 /**
