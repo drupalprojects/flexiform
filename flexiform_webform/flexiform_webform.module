@@ -289,13 +289,19 @@ function flexiform_webform_field_create_instance($instance) {
 
   $forms = db_select('flexiform', 'f')
     ->fields('f', array('form', 'id'))
-    ->condition('base_entity', 'flexiform_webform')
+    ->condition('base_entity', 'flexiform_webform_submission')
     ->condition('base_entity_bundle', $instance['bundle'])
     ->execute()
     ->fetchAllAssoc('id');
 
+  $added_to = array();
   foreach ($forms as $form) {
-    $flexiform = entity_load_single($form);
+    $flexiform = entity_load_single('flexiform', $form->form);
+
+    // Only add to forms that use the flexiform form builder.
+    if ($flexiform->builder != 'FlexiformBuilderFlexiform') {
+      continue;
+    }
 
     $settings = array(
       'element_name' => 'field:' . $instance['field_name'],
@@ -305,6 +311,17 @@ function flexiform_webform_field_create_instance($instance) {
     $flexiform->addElement($element);
 
     $flexiform->save();
+    $added_to[] = l($flexiform->label, "admin/structure/flexiforms/manage/{$flexiform->form}/form-fields", array('attributes' => array('target' => '_blank')));
+  }
+
+  if (!empty($added_to)) {
+    $message = t('The field %field has been added to the following flexiforms:', array('%field' => $instance['label']));
+    $list = array(
+      '#theme' => 'item_list',
+      '#items' => $added_to,
+    );
+    $message .= drupal_render($list);
+    drupal_set_message($message);
   }
 }
 

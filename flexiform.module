@@ -340,6 +340,14 @@ function flexiform_page_title($flexiform, $display = 'flexiform_create_entity_pa
   return $flexiform->getDisplay($display)->title($context);
 }
 
+/**
+ * Implements hook_field_create_instance().
+ */
+function flexiform_field_create_instance() {
+  // Clear the element cache.
+  flexiform_get_element_info('','','', TRUE);
+}
+
 //-----------------------------------------------------------------------------
 // Flexiform Builder API
 
@@ -474,11 +482,11 @@ function flexiform_entity_type_get_getters($entity_type) {
 /**
  * Get information about flexiform elements.
  */
-function flexiform_get_element_info($entity_type = '', $bundle = '', $name = '') {
+function flexiform_get_element_info($entity_type = '', $bundle = '', $name = '', $reset = FALSE) {
   $elements = &drupal_static(__FUNCTION__);
 
-  if (!isset($elements)) {
-    if ($cache = cache_get('flexiform:element_info', 'cache')) {
+  if (!isset($elements) || $reset) {
+    if (($cache = cache_get('flexiform:element_info', 'cache')) && !$reset) {
       $elements = $cache->data;
     }
     else {
