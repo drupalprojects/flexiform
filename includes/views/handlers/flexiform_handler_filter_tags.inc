@@ -36,7 +36,7 @@ class flexiform_handler_filter_tags extends views_handler_filter_many_to_one {
       }
 
       $form['value'] = array(
-        '#title' => $this->options['limit'] ? t('Select terms from vocabulary @voc', array('@voc' => $vocabulary->name)) : t('Select terms'),
+        '#title' => t('Select tags'),
         '#type' => 'textfield',
         '#default_value' => $default,
         '#autocomplete_path' => 'admin/structure/flexiforms/autocomplete_tags',
