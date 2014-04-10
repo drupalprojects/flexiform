@@ -14,4 +14,5 @@ function flexiform_webform_entity_property_info_alter(&$property_info) {
 
   $properties['created']['type'] = 'date';
   $properties['changed']['type'] = 'date';
+  $properties['webform']['required'] = TRUE;
 }
