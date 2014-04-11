@@ -39,7 +39,7 @@ class FlexiformElementField extends FlexiformElement{
 
     // Get the initial weight.
     $instance = $this->getInstance();
-    $this->weight = !empty($settings['weight']) ? $settings['weight'] : $instance['widget']['weight'];
+    $this->weight = isset($settings['weight']) ? $settings['weight'] : $instance['widget']['weight'];
   }
 
   /**
@@ -117,6 +117,15 @@ class FlexiformElementField extends FlexiformElement{
     }
 
     return $this->full_instance;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setWeight($weight) {
+    parent::setWeight($weight);
+
+    $this->instance['widget']['weight'] = $weight;
   }
 
   /**
