@@ -40,6 +40,7 @@ function flexiform_webform_entity_info() {
     // Entity API
     'entity class' => 'FlexiformWebformSubmission',
     'controller class' => 'EntityApiController',
+    'fc handler class' => 'FlexiformFCHandler',
     'base table' => 'flexiform_webform_submission',
     'fieldable' => TRUE,
     'entity keys' => array(

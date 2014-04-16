@@ -87,7 +87,7 @@ function flexiform_webform_form($form, &$form_state, $webform, $op = 'edit') {
     '#disabled' => empty($webform->is_new),
   );
 
-
+  // Extended Cloning Options
   $form['cloned_from'] = array(
     '#type' => 'value',
     '#value' => !empty($webform->cloned_from) ? $webform->cloned_from : NULL,
@@ -124,6 +124,37 @@ function flexiform_webform_form($form, &$form_state, $webform, $op = 'edit') {
     ),
   );
 
+  $info = entity_get_info('flexiform_webform_submission');
+  if (module_exists('fc') && $info['fc handler class'] == 'FlexiformFCHandler') {
+    $form['fc'] = array(
+      '#type' => 'fieldset',
+      '#tree' => TRUE,
+      '#title' => t('Field Complete Settings'),
+      '#description' => t('These options allow you to choose which flexible form (if any) to use to calculate the completeness of the submission. A submission will be considered complete based on the fields and settings in that flexiform.'),
+    );
+
+    $usable_forms = array(
+      '__none' => t('Use Field Complete Default Handler'),
+    );
+    if ($webform->webform) {
+      $usable_forms += db_select('flexiform', 'f')
+        ->fields('f', array('form', 'label'))
+        ->condition('base_entity', 'flexiform_webform_submission')
+        ->condition('base_entity_bundle', $webform->webform)
+        ->condition('builder', 'FlexiformBuilderFlexiform')
+        ->execute()
+        ->fetchAllKeyed();
+    }
+
+    $form['fc']['form'] = array(
+      '#type' => 'select',
+      '#options' => $usable_forms,
+      '#default_value' => !empty($webform->data['fc']['form']) ? $webform->data['fc']['form'] : '__none',
+      '#title' => t('Flexible Form'),
+      '#description' => t('Which form to use to calculate the completeness of a flexiform webform submission.'),
+    );
+  }
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -138,6 +169,9 @@ function flexiform_webform_form($form, &$form_state, $webform, $op = 'edit') {
  */
 function flexiform_webform_form_submit(&$form, &$form_state) {
   $webform = entity_ui_form_submit_build_entity($form, $form_state);
+  if (module_exists('fc')) {
+    $webform->data['fc'] = $form_state['values']['fc'];
+  }
   $webform->save();
 
   $form_state['redirect'] = 'admin/structure/flexiform_webforms';
@@ -223,7 +257,6 @@ function flexiform_webform_form_submit(&$form, &$form_state) {
     $message .= drupal_render($list);
     drupal_set_message($message);
   }
-
 }
 
 /**

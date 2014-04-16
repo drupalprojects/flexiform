@@ -10,6 +10,7 @@ files[] = flexiform_webform.entity.inc
 files[] = flexiform_webform.admin.inc
 files[] = flexiform_webform_submission.entity.inc
 files[] = flexiform_webform_submission.admin.inc
+files[] = flexiform_webform.fc.inc
 files[] = views/flexiform_webform_submission_handler_link_field.inc
 files[] = views/flexiform_webform_submission_handler_delete_link_field.inc
 files[] = views/flexiform_webform_submission_handler_flexiform_submission_operations_field.inc
