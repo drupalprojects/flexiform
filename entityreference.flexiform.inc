@@ -39,6 +39,11 @@ function flexiform_entity_getter_entityreference($flexiform, $base_entity, $enti
  * Setter callback for party from user.
  */
 function flexiform_entity_setter_entityreference($flexiform, $base_entity, $entity, $entity_type, $entities, $namespace, $config) {
+  // If the entity is still false do not save it!
+  if ($entity === FALSE) {
+    return;
+  }
+
   // Save the entity.
   entity_save($entity_type, $entity);
   list($id,,) = entity_extract_ids($entity_type, $entity);
