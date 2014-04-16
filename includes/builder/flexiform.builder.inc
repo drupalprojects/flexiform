@@ -26,11 +26,14 @@ class FlexiformBuilderFlexiform extends FlexiformBuilder {
     foreach ($this->flexiform->elements as $element_namespace => $settings) {
       $element = FlexiformElement::getElement($this->flexiform, $element_namespace);
 
+      // Don't show form elements for entities that don't exist.
+      if (empty($form['#flexiform_entities'][$element->getEntityNamespace()])) {
+        continue;
+      }
+
       // Make sure this element has the correct parents.
       array_push($form['#parents'], $element->getEntityNamespace());
-
       $form += $element->form($form, $form_state, $form['#flexiform_entities'][$element->getEntityNamespace()]);
-
       array_pop($form['#parents']);
     }
 
