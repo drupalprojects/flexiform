@@ -10,12 +10,40 @@
 class FlexiformBuilderFlexiform extends FlexiformBuilder {
 
   /**
+   * Prepare the entities needed for the form, either by creating or loading.
+   *
+   * @return
+   *  An array of entities keyed by namespace
+   */
+  public function prepareEntities() {
+    $entities = array();
+
+    foreach($this->flexiform->entities as $namespace => $info) {
+      if (isset($info['getter'])) {
+        $getter = flexiform_entity_getter_info($info['getter']);
+
+        if (isset($getter['file']) && file_exists(drupal_get_path('module', $getter['module']) . '/' . $getter['file'])) {
+          include_once drupal_get_path('module', $getter['module']) . '/' . $getter['file'];
+        }
+
+        $callback = $getter['getter callback'];
+        if (function_exists($callback)) {
+          // Todo: Sort out params
+          $entities[$namespace] = $callback($this->flexiform, $this->base_entity, $entities, $namespace, $getter);
+        }
+      }
+    }
+
+    return $entities;
+  }
+
+  /**
    * Build the form for this flexiform.
    */
   public function form($form, &$form_state) {
     $form = parent::form($form, $form_state);
 
-    $form['#flexiform_entities'] = flexiform_prepare_entities($this->flexiform, $this->base_entity);
+    $form['#flexiform_entities'] = $this->prepareEntities();
 
     // Set up our form bits
     if (!isset($form['#parents'])) {

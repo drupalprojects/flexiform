@@ -169,25 +169,7 @@ function flexiform_embed_entity_elements($entity_namespace, $flexiform, $entity,
  *  An array of entities keyed by namespace
  */
 function flexiform_prepare_entities($flexiform, $base_entity) {
-  $entities = array();
-
-  foreach($flexiform->entities as $namespace => $info) {
-    if (isset($info['getter'])) {
-      $getter = flexiform_entity_getter_info($info['getter']);
-
-      if (isset($getter['file']) && file_exists(drupal_get_path('module', $getter['module']) . '/' . $getter['file'])) {
-        include_once drupal_get_path('module', $getter['module']) . '/' . $getter['file'];
-      }
-
-      $callback = $getter['getter callback'];
-      if (function_exists($callback)) {
-        // Todo: Sort out params
-        $entities[$namespace] = $callback($flexiform, $base_entity, $entities, $namespace, $getter);
-      }
-    }
-  }
-
-  return $entities;
+  $flexiform->getBuilder($base_entity)->prepareEntities();
 }
 
 /**

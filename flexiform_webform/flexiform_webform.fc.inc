@@ -35,7 +35,7 @@ class FlexiformFCHandler extends fcComplete {
     }
 
     // Get the Entities.
-    $entities = flexiform_prepare_entities($flexiform, $this->entity);
+    $entities = $flexiform->getBuilder($this->entity)->prepareEntities();
 
     $this->completeness = array();
     foreach ($flexiform->elements as $element_namespace => $element_settings) {
