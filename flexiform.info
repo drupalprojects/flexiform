@@ -17,6 +17,7 @@ files[] = includes/display/null.display.inc
 files[] = includes/display/page.display.inc
 files[] = includes/display/add_page.display.inc
 files[] = includes/display/edit_page.display.inc
+files[] = includes/display/add_pane.display.inc
 files[] = includes/display/edit_pane.display.inc
 files[] = includes/display/user_category.display.inc
 

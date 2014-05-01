@@ -218,6 +218,12 @@ function flexiform_flexiform_display_info() {
   );
 
   if (module_exists('ctools')) {
+    $displays['flexiform_add_entity_pane'] = array(
+      'class' => 'FlexiformDisplayAddPane',
+      'label' => t('Add Pane (Ctools Content)'),
+      'description' => t('Expose the form in a Ctools Content Plugin.'),
+    );
+
     $displays['flexiform_edit_entity_pane'] = array(
       'class' => 'FlexiformDisplayEditPane',
       'label' => t('Edit Pane (Ctools Content)'),
