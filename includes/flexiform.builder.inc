@@ -94,4 +94,11 @@ class FlexiformBuilder implements FlexiformBuilderInterface {
 
     drupal_alter($hooks, $form, $form_state, $this->flexiform);
   }
+
+  /**
+   * Get the Flexiform.
+   */
+  public function getFlexiform() {
+    return $this->flexiform;
+  }
 }

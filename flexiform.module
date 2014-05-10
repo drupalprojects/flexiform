@@ -434,11 +434,16 @@ function flexiform_entity_getter_info($getter = NULL) {
         foreach ($getters_module as $getter_name => $getter_info) {
           $getter_info += array(
             'params' => array(),
-            'getter callback' => 'flexiform_entity_getter_' . $getter_name,
-            'setter callback' => 'flexiform_entity_setter_' . $getter_name,
-            'file' => $module . '.flexiform.inc',
             'module' => $module,
           );
+          if (!isset($getter_info['class'])) {
+            $getter_info['class'] = 'FlexiformFormEntityLegacy';
+            $getter_info += array(
+              'getter callback' => 'flexiform_entity_getter_' . $getter_name,
+              'setter callback' => 'flexiform_entity_setter_' . $getter_name,
+              'file' => $module . '.flexiform.inc',
+            );
+          }
           $getters[$getter_name] = $getter_info;
         }
       }

@@ -252,12 +252,29 @@ class FlexiformUIController extends EntityDefaultUIController {
       'access arguments' => array('administer flexiforms'),
     );
 
+    $items["{$this->path}/manage/{$wildcard}/form-entities/%"] = array(
+      'title' => 'Configure',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('flexiform_entity_configure_form', 4, 6),
+      'type' => MENU_CALLBACK,
+      'weight' => 3,
+      'file' => 'flexiform.admin.inc',
+      'file path' => drupal_get_path('module', 'flexiform'),
+      'access arguments' => array('administer flexiforms'),
+    );
+
+    $items["{$this->path}/manage/{$wildcard}/form-entities/%/configure"] = array(
+      'title' => 'Configure',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => 3,
+    );
+
     $items["{$this->path}/manage/{$wildcard}/form-entities/%/remove"] = array(
       'title' => 'Remove',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('flexiform_entity_remove_form', 4, 6),
-      'type' => MENU_CALLBACK,
-      'weight' => 3,
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 4,
       'file' => 'flexiform.admin.inc',
       'file path' => drupal_get_path('module', 'flexiform'),
       'access arguments' => array('administer flexiforms'),
@@ -1852,4 +1869,31 @@ function theme_flexiform_ui_overview_item($variables) {
  */
 function flexiform_form_submit_rebuild($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Form to Configure a Flexiform Entity.
+ */
+function flexiform_entity_configure_form($form, &$form_state, $flexiform, $entity_namespace) {
+  $form['#flexiform'] = $flexiform;
+  $handler = $flexiform->getBuilder()->getEntityManager()
+    ->getEntityHandler($entity_namespace);
+  $form['#form_entity'] = $handler;
+  $form += $handler->configForm($form, $form_state);
+
+  return $form;
+}
+
+/**
+ * Validation Handler.
+ */
+function flexiform_entity_configure_form_validate($form, &$form_state) {
+  $form['#form_entity']->configFormValidate($form, $form_state);
+}
+
+/**
+ * Submit handler.
+ */
+function flexiform_entity_configure_form_submit($form, &$form_state) {
+  $form['#form_entity']->configFormSubmit($form, $form_state);
 }

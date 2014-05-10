@@ -54,7 +54,7 @@ function flexiform_flexiform_entity_getter_info() {
     'label' => 'Base Entity',
     'description' => 'The Base Entity for this Flexiform',
     'entity_types' => array_keys(entity_get_info()),
-    'file' => 'includes/flexiform.flexiform.inc',
+    'class' => 'FlexiformFormEntityBase',
   );
 
   // User Getters
@@ -62,7 +62,7 @@ function flexiform_flexiform_entity_getter_info() {
     'label' => 'Current User',
     'description' => 'Load the current user into the Form',
     'entity_types' => array('user'),
-    'file' => 'user.flexiform.inc',
+    'class' => 'FlexiformFormEntityCurrentUser',
   );
 
   // Profile2 Getters
@@ -88,15 +88,13 @@ function flexiform_flexiform_entity_getter_info() {
         'label' => t('@label data set', array('@label' => $info['label'])),
         'description' => t('Load a data set from a party.'),
         'data_set_name' => $data_set_name,
-        'getter callback' => 'flexiform_entity_getter_party_data_set',
-        'setter callback' => 'flexiform_entity_setter_party_data_set',
         'params' => array(
           'party' => array(
             'entity_type' => 'party',
           ),
         ),
         'entity_types' => array($info['entity type']),
-        'file' => 'party.flexiform.inc',
+        'class' => 'FlexiformFormEntityPartyDataSet',
       );
     }
 
@@ -110,7 +108,7 @@ function flexiform_flexiform_entity_getter_info() {
         ),
       ),
       'entity_types' => array('party'),
-      'file' => 'party.flexiform.inc',
+      'class' => 'FlexiformFormEntityPartyFromUser',
     );
   }
 
@@ -144,15 +142,13 @@ function flexiform_flexiform_entity_getter_info() {
           'label' => t('@target from @base via @field', $label_replacements),
           'description' => t('Load an entity via an entityreference field'),
           'field_name' => $field_name,
-          'getter callback' => 'flexiform_entity_getter_entityreference',
-          'setter callback' => 'flexiform_entity_setter_entityreference',
           'params' => array(
             'base' => array(
               'entity_type' => $base_entity_type,
             ),
           ),
           'entity_types' => array($target_entity_type),
-          'file' => 'entityreference.flexiform.inc',
+          'class' => 'FlexiformFormEntityEntityReference',
         );
       }
     }
@@ -183,15 +179,13 @@ function flexiform_flexiform_entity_getter_info() {
           'label' => t('Field Collection Item: @field from @base', $label_replacements),
           'description' => t('Load the field collection item'),
           'field_name' => $field_name,
-          'getter callback' => 'flexiform_entity_getter_field_collection',
-          'setter callback' => 'flexiform_entity_setter_field_collection',
           'params' => array(
             'base' => array(
               'entity_type' => $base_entity_type,
             ),
           ),
           'entity_types' => array('field_collection_item'),
-          'file' => 'field_collection.flexiform.inc',
+          'class' => 'FlexiformFormEntityFieldCollection',
         );
       }
     }
