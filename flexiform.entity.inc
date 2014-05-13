@@ -20,7 +20,7 @@ class Flexiform extends Entity {
     parent::__construct($values, 'flexiform');
   }
 
-  public function getBuilder($base_entity) {
+  public function getBuilder($base_entity = NULL) {
     $builder = flexiform_builder_info($this->builder);
     $class_name = $builder['class'];
 

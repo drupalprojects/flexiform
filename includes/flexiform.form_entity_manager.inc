@@ -309,6 +309,16 @@ class FlexiformFormEntityManagerDefault implements FlexiformFormEntityManagerInt
   }
 
   /**
+   * Save Entity Settings.
+   */
+  public function saveEntitySettings($namespace, $settings) {
+    $this->entitySettings[$namespace] = $settings;
+    $flexiform = $this->getBuilder()->getFlexiform();
+    $flexiform->entities = $this->entitySettings;
+    $flexiform->save();
+  }
+
+  /**
    * Get the builder.
    */
   public function getBuilder() {

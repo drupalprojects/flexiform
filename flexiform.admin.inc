@@ -1896,4 +1896,7 @@ function flexiform_entity_configure_form_validate($form, &$form_state) {
  */
 function flexiform_entity_configure_form_submit($form, &$form_state) {
   $form['#form_entity']->configFormSubmit($form, $form_state);
+
+  drupal_set_message(t('The configuration has been updated.'));
+  $form_state['redirect'] = "admin/structure/flexiforms/manage/{$form['#flexiform']->form}/form-entities";
 }
