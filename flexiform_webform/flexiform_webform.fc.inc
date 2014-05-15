@@ -48,7 +48,18 @@ class FlexiformFCHandler extends fcComplete {
       $field = $element->getField();
       $instance = $element->getInstance();
       $settings = !empty($instance['settings']['fc']) ? $instance['settings']['fc'] : array();
-      if (empty($settings['fc_include'])) {
+
+      // Work out if this field needs to be included.
+      $include = FALSE;
+      if (!empty($settings['fc_include']) && $settings['fc_include'] == 'always') {
+        $include = TRUE;
+      }
+      else if (!empty($settings['fc_include']) && $settings['fc_include'] == 'entity_exists'
+        && !empty($entities[$settings['fc_include__entity_exists']]) {
+        $include = TRUE;
+      }
+
+      if (!$include) {
         continue;
       }
 

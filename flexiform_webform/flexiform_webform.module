@@ -391,10 +391,14 @@ function flexiform_webform_form_flexiform_field_configure_form_alter(&$form, &$f
   );
 
   $form['fc']['fc_include'] = array(
-    '#type' => 'checkbox',
+    '#type' => 'select',
     '#title' => t('Include in field completeness'),
-    '#description' => t('If checked, this field instance will be included in the completeness calculation for its parent entity.'),
-    '#default_value' => !empty($settings['fc_include']),
+    '#options' => array(
+      'always' => t('Always'),
+      'entity_exists' => t('If an Entity Exists'),
+      'never' => t('Never'),
+    ),
+    '#default_value' => !empty($settings['fc_include']) ? $settings['fc_include'] : 'never',
     '#states' => array(
       // Don't show if required is ticked.
       'invisible' => array(
@@ -409,6 +413,24 @@ function flexiform_webform_form_flexiform_field_configure_form_alter(&$form, &$f
       // Only show if required is ticked.
       'visible' => array(
         ':input[name="instance[required]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
+  // Entity Options
+  $options = array();
+  foreach ($flexiform->entities as $namespace => $entInfo) {
+    $options[$namespace] = $entInfo['label'];
+  }
+  $form['fc']['fc_include__entity_exists'] = array(
+    '#type' => 'select',
+    '#title' => t('Entity'),
+    '#description' => t('The entity that must exist for this element to be included in field complete.'),
+    '#options' => $options,
+    '#default_value' => !empty($settings['fc_include__entity_exists']) ? $settings['fc_include__entity_exists'] : NULL,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="fc[fc_include]"]' => array('value' => 'entity_exists'),
       ),
     ),
   );
@@ -472,4 +494,5 @@ function flexiform_webform_form_flexiform_field_configure_form_fc_submit($form, 
   $flexiform = $form['#flexiform'];
   $element = $form['#flexiform_element'];
   $flexiform->elements[$element->getElementNamespace()]['instance']['settings']['fc'] = $form_state['values']['fc'];
+  $flexiform->save();
 }
