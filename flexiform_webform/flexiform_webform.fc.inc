@@ -48,7 +48,7 @@ class FlexiformFCHandler extends fcComplete {
       $field = $element->getField();
       $instance = $element->getInstance();
       $settings = !empty($instance['settings']['fc']) ? $instance['settings']['fc'] : array();
-      if (!empty($settings['disable'])) {
+      if (empty($settings['fc_include'])) {
         continue;
       }
 

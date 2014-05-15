@@ -174,6 +174,9 @@ class FlexiformElement implements FlexiformElementInterface {
       '#tree' => TRUE,
       '#type' => 'fieldset',
       '#title' => t('Display Options'),
+      '#weight' => 50,
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
     );
 
     $form['display_options']['css_classes'] = array(
@@ -198,6 +201,7 @@ class FlexiformElement implements FlexiformElementInterface {
     $form['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Save'),
+      '#weight' => 100,
     );
     return $form;
   }
