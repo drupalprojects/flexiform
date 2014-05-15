@@ -1026,10 +1026,41 @@ function flexiform_field_remove_form_submit($form, &$form_state) {
 /**
  * Choose a widget type
  */
-function flexiform_field_widget_type_form($form, &$form_state, $flexiform, $element) {
-  $form['temp']['#markup'] = 'Temporary';
+function flexiform_field_widget_type_form($form, &$form_state, $flexiform, $element_namespace) {
+  $element = FlexiformElement::getElement($flexiform, $element_namespace);
+
+  form_load_include($form_state, 'inc', 'field_ui', 'field_ui.admin');
+  $form = field_ui_widget_type_form($form, $form_state, $element->getInstance());
+
+  $form['#flexiform_element'] = $element;
+  $form['#flexiform'] = $flexiform;
+
+  $form['#submit'] = array('flexiform_field_widget_type_form_submit');
 
   return $form;
+}
+
+/**
+ * Submit callback for the widget type form.
+ */
+function flexiform_field_widget_type_form_submit($form, &$form_state) {
+  $form_values = $form_state['values'];
+  $flexiform = $form['#flexiform'];
+  $element = $form['#flexiform_element'];
+
+  // Set the right module information.
+  $widget_type = field_info_widget_types($form_values['widget_type']);
+  $widget_module = $widget_type['module'];
+
+  $instance = &$flexiform->elements[$element->getElementNamespace()]['instance'];
+  $instance['widget']['type'] = $form_values['widget_type'];
+  $instance['widget']['module'] = $widget_module;
+  $flexiform->save();
+
+  // Set a message.
+  drupal_set_message(t('The configuration has been saved.'));
+
+  $form_state['redirect'] = 'admin/structure/flexiforms/manage/' . $flexiform->form . '/form-fields';
 }
 
 /**
