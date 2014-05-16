@@ -311,11 +311,44 @@ class FlexiformFormEntityManagerDefault implements FlexiformFormEntityManagerInt
   /**
    * Save Entity Settings.
    */
-  public function saveEntitySettings($namespace, $settings) {
-    $this->entitySettings[$namespace] = $settings;
+  public function saveEntitySettings() {
     $flexiform = $this->getBuilder()->getFlexiform();
     $flexiform->entities = $this->entitySettings;
     $flexiform->save();
+  }
+
+  /**
+   * Remove and entity from this form.
+   */
+  public function removeEntitySettings($namespace) {
+    unset($this->entitySettings[$namespace]);
+    $this->saveEntitySettings();
+  }
+
+  /**
+   * Update entity settings.
+   */
+  public function updateEntitySettings($namespace, $settings) {
+    $this->entitySettings[$namespace] = $settings;
+    $this->saveEntitySettings();
+  }
+
+  /**
+   * Find out if any entities depend on this entity.
+   */
+  public function checkForDependants($namespace) {
+    $dependants = array();
+    foreach ($this->entitySettings as $curNamespace => $settings) {
+      if (!empty($settings['parameters'])) {
+        foreach ($settings['parameters'] as $param => $paramNamespace) {
+          if ($namespace === $paramNamespace) {
+            $dependants[$curNamespace] = $settings['label'];
+          }
+        }
+      }
+    }
+
+    return $dependants;
   }
 
   /**

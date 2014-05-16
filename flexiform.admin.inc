@@ -1941,6 +1941,56 @@ function flexiform_entity_configure_form_submit($form, &$form_state) {
 }
 
 /**
+ * Form callback for removing entities.
+ */
+function flexiform_entity_remove_form($form, &$form_state, $flexiform, $entity_namespace) {
+  $form['#flexiform'] = $flexiform;
+  $form['#entity_namespace'] = $entity_namespace;
+  $manager = $flexiform->getBuilder()->getEntityManager();
+  $dependants = $manager->checkForDependants($entity_namespace);
+  $settings = $manager->getEntitySettings($entity_namespace);
+  if ($entity_namespace == 'base_entity') {
+    $form['message']['#markup'] = t('Cannot remove the base entity of a form.');
+  }
+  else if (!empty($dependants)) {
+    $dependantList = array(
+      '#theme' => 'item_list',
+      '#items' => $dependants,
+    );
+    $args = array(
+      '%this' => $settings['label'],
+      '!dependants' => drupal_render($dependantList),
+    );
+    $form['message']['#markup'] = t('Cannot remove %this as the following entities depend on it. Remove these entities first. !dependants', $args);
+  }
+  else {
+    $form['message']['#markup'] = t('Are you sure you want to remove %this from the form?', array('%this' => $settings['label']));
+
+    $form['actions'] = array(
+      '#type' => 'actions',
+    );
+
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Remove'),
+    );
+  }
+
+  return $form;
+}
+
+/**
+ * Form submit for removing entities.
+ */
+function flexiform_entity_remove_form_submit($form, &$form_state) {
+  $flexiform = $form['#flexiform'];
+  $entity_namespace = $form['#entity_namespace'];
+  $flexiform->getBuilder()->getEntityManager()->removeEntitySettings($entity_namespace);
+
+  $form_state['redirect'] = "admin/structure/flexiforms/manage/{$flexiform->form}/form-entities";
+}
+
+/**
  * Clone form page callback.
  */
 function flexiform_ui_get_clone_form($entity_type, $entity, $op = 'clone', $form_state = array()) {

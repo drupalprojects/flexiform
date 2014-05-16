@@ -114,6 +114,6 @@ class FlexiformFormEntityBase implements FlexiformFormEntityInterface {
    */
   public function configFormSubmit($form, &$form_state) {
     $this->settings += $form_state['values']['settings'];
-    $this->manager->saveEntitySettings($this->entity_namespace, $this->settings);
+    $this->manager->updateEntitySettings($this->entity_namespace, $this->settings);
   }
 }
