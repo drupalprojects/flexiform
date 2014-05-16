@@ -62,3 +62,58 @@ function flexiform_element_group_flexiform_build_alter(&$form, &$form_state, $fl
     $form['#pre_render'][] = 'field_group_form_pre_render';
   }
 }
+
+/**
+ * Implements hook_form_flexiform_form_alter().
+ */
+function flexiform_element_group_form_flexiform_form_alter(&$form, &$form_state) {
+  if ($form_state['op'] !== 'clone') {
+    return;
+  }
+
+  $flexiform = $form['#flexiform'];
+  if ($flexiform->builder != 'FlexiformBuilderFlexiform') {
+    return;
+  }
+
+  $form['#submit'][] = 'flexiform_element_group_flexiform_form_clone_groups_submit';
+}
+
+/**
+ * Form submission handler to clone all the form groups.
+ */
+function flexiform_element_group_flexiform_form_clone_groups_submit($form, &$form_state) {
+  $original = $form['#cloned_from'];
+  $flexiform = $form['#flexiform'];
+
+  flexiform_element_group_clone_groups($original, $flexiform->form);
+}
+
+/**
+ * Clone the groups between two flexiforms.
+ *
+ * @param string $original
+ *   The machine name of the original flexiform.
+ * @param string $new
+ *   The machine name of the new flexiform.
+ */
+function flexiform_element_group_clone_groups($original, $new) {
+  $groups = field_group_info_groups('flexiform', $original, 'form');
+
+  // Prepare storage with ctools.
+  ctools_include('export');
+
+  foreach ($groups as $group) {
+    $new_group = clone $group;
+    unset($new_group->id);
+    unset($new_group->table);
+    unset($new_group->export_type);
+    unset($new_group->type);
+    $new_group->bundle = $new;
+    $new_group->identifier = "{$new_group->group_name}|flexiform|{$new}|form";
+
+    // Save and enable it in ctools
+    ctools_export_crud_save('field_group', $new_group);
+    ctools_export_crud_enable('field_group', $new_group->identifier);
+  }
+}

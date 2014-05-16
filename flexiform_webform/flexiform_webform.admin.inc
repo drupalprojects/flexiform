@@ -245,6 +245,10 @@ function flexiform_webform_form_submit(&$form, &$form_state) {
 
     $newForm->save();
 
+    if (module_exists('flexiform_element_group')) {
+      flexiform_element_group_clone_groups($oldform->form, $newForm->form);
+    }
+
     $cloned[] = l($newForm->label, "admin/structure/flexiforms/manage/{$newForm->form}", array('attributes' => array('target' => '_blank')));
   }
 
