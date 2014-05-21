@@ -396,6 +396,7 @@ function flexiform_webform_form_flexiform_field_configure_form_alter(&$form, &$f
     '#options' => array(
       'always' => t('Always'),
       'entity_exists' => t('If an Entity Exists'),
+      'element_complete' => t('If another element is complete'),
       'never' => t('Never'),
     ),
     '#default_value' => !empty($settings['fc_include']) ? $settings['fc_include'] : 'never',
@@ -431,6 +432,48 @@ function flexiform_webform_form_flexiform_field_configure_form_alter(&$form, &$f
     '#states' => array(
       'visible' => array(
         ':input[name="fc[fc_include]"]' => array('value' => 'entity_exists'),
+      ),
+    ),
+  );
+
+  // Element options.
+  $elOptions = array();
+  foreach ($flexiform->elements as $namespace => $elInfo) {
+    if (empty($elInfo['field_name'])) {
+      continue;
+    }
+
+    if ($namespace == $element->getElementNamespace()) {
+      continue;
+    }
+
+    $elOptions[$namespace] = $elInfo['label'];
+  }
+  $form['fc']['fc_include__element_complete'] = array(
+    '#type' => 'select',
+    '#title' => t('Element'),
+    '#description' => t('The element to check for completeness.'),
+    '#options' => $elOptions,
+    '#default_value' => !empty($settings['fc_include__element_complete']) ? $settings['fc_include__element_complete'] : NULL,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="fc[fc_include]"]' => array('value' => 'element_complete'),
+      ),
+    ),
+  );
+
+  $form['fc']['fc_include__element_complete_if_ignored'] = array(
+    '#type' => 'select',
+    '#title' => t('If the required element is not included:'),
+    '#description' => t('Sometimes the element that is depended on may be ignored by the completeness checker and so the completeness of that element will not be calculated. In this scenario should this element be included or excluded.'),
+    '#options' => array(
+      'include' => t('Include'),
+      'exclude' => t('Exclude'),
+    ),
+    '#default_value' => !empty($settings['fc_include__element_complete_if_ignored']) ? $settings['fc_include__element_complete_if_ignored'] : NULL,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="fc[fc_include]"]' => array('value' => 'element_complete'),
       ),
     ),
   );
