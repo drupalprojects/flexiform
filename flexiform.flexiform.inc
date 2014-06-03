@@ -297,6 +297,13 @@ function flexiform_flexiform_element_info() {
       );
     }
 
+    $elements['node'][$bundle]['node:author'] = array(
+      'label' => t('Authored by'),
+      'class' => 'FlexiformElementNodeAuthor',
+      'type' => 'author',
+      'group' => 'Node',
+    );
+
     $elements['node'][$bundle]['node:status'] = array(
       'label' => t('Published'),
       'class' => 'FlexiformElementNodeStatus',

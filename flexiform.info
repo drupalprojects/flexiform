@@ -36,6 +36,7 @@ files[] = includes/element/node_promote.element.inc
 files[] = includes/element/node_status.element.inc
 files[] = includes/element/node_sticky.element.inc
 files[] = includes/element/custom_html.element.inc
+files[] = includes/element/node_author.element.inc
 
 ; Form Entities
 files[] = includes/flexiform.form_entity.inc
