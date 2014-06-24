@@ -36,6 +36,7 @@ class FlexiformFCHandler extends fcComplete {
     // Currently only support field api elements.
     if (!($element instanceof FlexiformElementField)) {
       $this->ignored[$element_namespace] = TRUE;
+      return TRUE;
     }
 
     $field = $element->getField();
