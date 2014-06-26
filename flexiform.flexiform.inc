@@ -57,6 +57,14 @@ function flexiform_flexiform_entity_getter_info() {
     'class' => 'FlexiformFormEntityBase',
   );
 
+  // Load entity getter.
+  $getters['load_entity'] = array(
+    'label' => 'Load Entity from ID',
+    'description' => 'Load the entity based on id.',
+    'entity_types' => array_keys(entity_get_info()),
+    'class' => 'FlexiformFormEntityLoad',
+  );
+
   // User Getters
   $getters['user_current_user'] = array(
     'label' => 'Current User',

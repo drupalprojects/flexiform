@@ -37,13 +37,7 @@ class FlexiformFormEntityEntityReference extends FlexiformFormEntityBase {
       return FALSE;
     }
 
-    // Check the entity is the right bundle.
-    list(,,$bundle) = entity_extract_ids($settings['entity_type'], $target_entity);
-    if ($bundle != $settings['bundle']) {
-      return FALSE;
-    }
-
-    return $target_entity;
+    return $this->checkBundle($target_entity) ? $target_entity : FALSE;
   }
 
   /**

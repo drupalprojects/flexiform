@@ -80,6 +80,26 @@ class FlexiformFormEntityBase implements FlexiformFormEntityInterface {
   }
 
   /**
+   * Check bundle.
+   *
+   * @param $entity
+   *   The entity to check.
+   *
+   * @return boolean
+   *   True if the entity is the right bundle for this form entity. False
+   *   otherwise.
+   */
+  public function checkBundle($entity) {
+    list(,,$bundle) = entity_extract_ids($this->entity_type, $entity);
+    if ($bundle == $this->settings['bundle']) {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
+
+  /**
    * {@inheritdoc}
    */
   public function getEntity() {
@@ -113,7 +133,7 @@ class FlexiformFormEntityBase implements FlexiformFormEntityInterface {
    * {@inheritdoc}
    */
   public function configFormSubmit($form, &$form_state) {
-    $this->settings += $form_state['values']['settings'];
+    $this->settings = $form_state['values']['settings'] + $this->settings;
     $this->manager->updateEntitySettings($this->entity_namespace, $this->settings);
   }
 }
