@@ -226,10 +226,11 @@ class FlexiformUIController extends EntityDefaultUIController {
       'title' => 'Widget type',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('flexiform_field_widget_type_form', 4, 6),
+      'access callback' => 'flexiform_field_widget_type_form_access',
+      'access arguments' => array(4, 6),
       'file' => 'flexiform.admin.inc',
       'file path' => drupal_get_path('module', 'flexiform'),
       'type' => MENU_LOCAL_TASK,
-      'access arguments' => array('administer flexiforms'),
     );
 
     $items["{$this->path}/manage/{$wildcard}/form-fields/%flexiform_formfield/remove"] = array(
@@ -1032,18 +1033,28 @@ function flexiform_field_remove_form_submit($form, &$form_state) {
 }
 
 /**
+ * Access callback for widget type form.
+ */
+function flexiform_field_widget_type_form_access($flexiform, $element_namespace) {
+  $element = FlexiformElement::getElement($flexiform, $element_namespace);
+  return ($element instanceof FlexiformElementFieldAPIInterface)
+    && user_access('administer flexiforms');
+}
+
+/**
  * Choose a widget type
  */
 function flexiform_field_widget_type_form($form, &$form_state, $flexiform, $element_namespace) {
   $element = FlexiformElement::getElement($flexiform, $element_namespace);
+  if ($element instanceof FlexiformElementFieldAPIInterface) {
+    form_load_include($form_state, 'inc', 'field_ui', 'field_ui.admin');
+    $form = field_ui_widget_type_form($form, $form_state, $element->getInstance());
 
-  form_load_include($form_state, 'inc', 'field_ui', 'field_ui.admin');
-  $form = field_ui_widget_type_form($form, $form_state, $element->getInstance());
+    $form['#flexiform_element'] = $element;
+    $form['#flexiform'] = $flexiform;
 
-  $form['#flexiform_element'] = $element;
-  $form['#flexiform'] = $flexiform;
-
-  $form['#submit'] = array('flexiform_field_widget_type_form_submit');
+    $form['#submit'] = array('flexiform_field_widget_type_form_submit');
+  }
 
   return $form;
 }

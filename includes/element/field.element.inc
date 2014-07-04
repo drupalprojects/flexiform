@@ -7,7 +7,7 @@
 /**
  * Class for Field API elemtents.
  */
-class FlexiformElementField extends FlexiformElement{
+class FlexiformElementField extends FlexiformElement implements FlexiformElementFieldAPIInterface {
 
   /**
    * The field name of the field.
