@@ -160,6 +160,15 @@ class FlexiformElement implements FlexiformElementInterface {
   }
 
   /**
+   * Get the settings.
+   *
+   * @return array
+   */
+  public function getSettings() {
+    return $this->settings;
+  }
+
+  /**
    * Build the configure form for the element.
    */
   public function configureForm($form, &$form_state, $flexiform) {
