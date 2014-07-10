@@ -46,8 +46,9 @@ function flexiform_conditional_fields_flexiform_element_configure_form($form, &$
       }
     }
 
-    foreach ($dependees as $dependee => $options) {
-      $form['table'][$dependee] = array();
+    foreach ($dependees as $dependency_key => $options) {
+      list($dependee) = explode('|', $dependency_key);
+      $form['table'][$dependency_key] = array();
       $dependee_count = count($dependees);
       $dependee_element = FlexiformElement::getElement($flexiform, $dependee);
 
@@ -77,26 +78,26 @@ function flexiform_conditional_fields_flexiform_element_configure_form($form, &$
       $row['edit'] = array(
         '#type' => 'link',
         '#title' => t('edit'),
-        '#href' => 'admin/structure/flexiforms/manage/'.$flexiform->form.'/form-fields/'.$element_namespace.'/conditional-fields/'.$dependee.'/edit',
+        '#href' => 'admin/structure/flexiforms/manage/'.$flexiform->form.'/form-fields/'.$element_namespace.'/conditional-fields/'.$dependency_key.'/edit',
         '#options' => array('query' => $destination, 'attributes' => array('title' => t('Edit dependency settings.'))),
         '#query' => drupal_get_destination(),
       );
       $row['delete'] = array(
         '#type' => 'link',
         '#title' => t('delete'),
-        '#href' => 'admin/structure/flexiforms/manage/'.$flexiform->form.'/form-fields/'.$element_namespace.'/conditional-fields/'.$dependee.'/delete',
+        '#href' => 'admin/structure/flexiforms/manage/'.$flexiform->form.'/form-fields/'.$element_namespace.'/conditional-fields/'.$dependency_key.'/delete',
         '#options' => array('query' => $destination, 'attributes' => array('title' => t('Delete dependency.'))),
       );
 
       if (!empty($row['group'])) {
-        $form['table'][$dependee] = array(
+        $form['table'][$dependency_key] = array(
           'dependee' => &$row['dependee'],
           'group' => &$row['group'],
           'description' => &$row['description'],
           'edit' => &$row['edit'],
           'delete' => &$row['delete'],
         );
-        $form['table']['#rows'][$dependee] = array(
+        $form['table']['#rows'][$dependency_key] = array(
           'dependee' => array('data' => &$row['dependee']),
           'group' => array('data' => &$row['group']),
           'description' => array('data' => &$row['description'], 'colspan' => $row['description']['#colspan']),
@@ -105,13 +106,13 @@ function flexiform_conditional_fields_flexiform_element_configure_form($form, &$
         );
       }
       else {
-        $form['table'][$dependee] = array(
+        $form['table'][$dependency_key] = array(
           'dependee' => &$row['dependee'],
           'description' => &$row['description'],
           'edit' => &$row['edit'],
           'delete' => &$row['delete'],
         );
-        $form['table']['#rows'][$dependee] = array(
+        $form['table']['#rows'][$dependency_key] = array(
           'dependee' => array('data' => &$row['dependee']),
           'description' => array('data' => &$row['description'], 'colspan' => $row['description']['#colspan']),
           'edit' => array('data' => &$row['edit']),
@@ -203,33 +204,42 @@ function flexiform_conditional_fields_flexiform_element_configure_form_submit($f
   );
   $options += conditional_fields_dependency_default_options();
 
-  $flexiform->elements[$element_namespace]['conditional_fields'][$values['dependee']] = $options;
+  $dependency_key = $values['dependee'];
+  $i = 1;
+  while (!empty($flexiform->elements[$element_namespace]['conditional_fields'][$dependency_key])) {
+    $dependency_key = $values['dependee'] . '|' . $i;
+    $i++;
+  }
+
+  $flexiform->elements[$element_namespace]['conditional_fields'][$dependency_key] = $options;
   $flexiform->save();
 }
 
 /**
  * Page Callback for handling conditional fields operations.
  */
-function flexiform_conditional_fields_operation($flexiform, $dependent, $dependee, $op = FALSE) {
+function flexiform_conditional_fields_operation($flexiform, $dependent, $dependency_key, $op = FALSE) {
   $form = ($op == 'edit') ? 'flexiform_conditional_fields_configure_form' : (($op == 'delete') ? 'flexiform_conditional_fields_delete_form' : FALSE);
 
   if (!$form) {
     return drupal_not_found();
   }
 
-  return drupal_get_form($form, $flexiform, $dependent, $dependee);
+  return drupal_get_form($form, $flexiform, $dependent, $dependency_key);
 }
 
 /**
  * Form to edit conditional fields.
  */
-function flexiform_conditional_fields_configure_form($form, &$form_state, $flexiform, $element_namespace, $dependee) {
+function flexiform_conditional_fields_configure_form($form, &$form_state, $flexiform, $element_namespace, $dependency_key) {
+  list($dependee) = explode('|', $dependency_key);
   $form['#flexiform'] = $flexiform;
   $form['#flexiform_element'] = FlexiformElement::getElement($flexiform, $element_namespace);
   $form['#flexiform_dependee'] = FlexiformElement::getElement($flexiform, $dependee);
+  $form['#dependency_key'] = $dependency_key;
 
   $settings = $form['#flexiform_element']->getSettings();
-  $options = $settings['conditional_fields'][$dependee];
+  $options = $settings['conditional_fields'][$dependency_key];
 
   $form['#attached']['css'][] = drupal_get_path('module', 'conditional_fields') . '/conditional_fields.css';
 
@@ -546,6 +556,7 @@ function flexiform_conditional_fields_configure_form($form, &$form_state, $flexi
 function flexiform_conditional_fields_configure_form_submit($form, &$form_state) {
   $dependent = $form['#flexiform_element']->getElementNamespace();
   $dependee = $form['#flexiform_dependee']->getElementNamespace();
+  $dependency_key = $form['#dependency_key'];
 
   if ($form['#flexiform_dependee'] instanceof FlexiformElementFieldAPIInterface) {
     $dependee_field = $form['#flexiform_dependee']->getField();
@@ -600,7 +611,7 @@ function flexiform_conditional_fields_configure_form_submit($form, &$form_state)
 
   $options += conditional_fields_dependency_default_options();
 
-  $form['#flexiform']->elements[$dependent]['conditional_fields'][$dependee] = $options;
+  $form['#flexiform']->elements[$dependent]['conditional_fields'][$dependency_key] = $options;
   $form['#flexiform']->save();
   drupal_set_message(t('Saved dependency configuration.'));
 }
@@ -608,12 +619,14 @@ function flexiform_conditional_fields_configure_form_submit($form, &$form_state)
 /**
  * Form to delete conditional fields.
  */
-function flexiform_conditional_fields_delete_form($form, &$form_state, $flexiform, $element_namespace, $dependee) {
+function flexiform_conditional_fields_delete_form($form, &$form_state, $flexiform, $element_namespace, $dependency_key) {
   $destination = drupal_get_destination();
+  list($dependee) = explode('|', $dependency_key);
 
   $form['#flexiform'] = $flexiform;
   $form['#flexiform_element'] = FlexiformElement::getElement($flexiform, $element_namespace);
   $form['#flexiform_dependee'] = FlexiformElement::getElement($flexiform, $dependee);
+  $form['#dependency_key'] = $dependency_key;
   return confirm_form(
     $form,
     t('Are you sure you want to delete this dependency?'),
@@ -629,7 +642,7 @@ function flexiform_conditional_fields_delete_form($form, &$form_state, $flexifor
  */
 function flexiform_conditional_fields_delete_form_submit($form, &$form_state) {
   $dependent = $form['#flexiform_element']->getElementNamespace();
-  $dependee = $form['#flexiform_dependee']->getElementNamespace();
-  unset($form['#flexiform']->elements[$dependent]['conditional_fields'][$dependee]);
+  $dependency_key = $form['#dependency_key'];
+  unset($form['#flexiform']->elements[$dependent]['conditional_fields'][$dependency_key]);
   $form['#flexiform']->save();
 }

@@ -165,11 +165,14 @@ function flexiform_conditional_fields_load_depencies($flexiform) {
   $dependencies[$flexiform->form] = array();
   $id = 0;
   foreach ($flexiform->elements as $element_namespace => $settings) {
+
     if (empty($settings['conditional_fields'])) {
       continue;
     }
 
-    foreach ($settings['conditional_fields'] as $dependee => $options) {
+    foreach ($settings['conditional_fields'] as $dependency_key => $options) {
+      list($dependee) = explode('|', $dependency_key);
+
       $dependencies[$flexiform->form]['dependents'][$element_namespace][$id] = array(
         'dependee' => $dependee,
         'options' => $options,
