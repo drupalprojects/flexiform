@@ -65,6 +65,14 @@ function flexiform_flexiform_entity_getter_info() {
     'class' => 'FlexiformFormEntityLoad',
   );
 
+  // New entity getter.
+  $getters['new_entity'] = array(
+    'label' => 'Create a New Entity',
+    'description' => 'Create a new entity.',
+    'entity_types' => array_keys(entity_get_info()),
+    'class' => 'FlexiformFormEntityNew',
+  );
+
   // User Getters
   $getters['user_current_user'] = array(
     'label' => 'Current User',
