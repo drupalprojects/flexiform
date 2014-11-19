@@ -99,6 +99,13 @@ class FlexiformFormEntityManagerDefault implements FlexiformFormEntityManagerInt
   protected $base_entity_key = '';
 
   /**
+   * An array of booleans keyed by namespace of entities to skip on save.
+   *
+   * @var bool[]
+   */
+  protected $skip_save = array();
+
+  /**
    * Build and instance of this entity manager.
    *
    * @param array $settings
@@ -298,14 +305,34 @@ class FlexiformFormEntityManagerDefault implements FlexiformFormEntityManagerInt
   }
 
   /**
+   * Mark an entity to be skipped or not on save.
+   *
+   * @param string $namespace
+   *   The namespace of the entity to skip.
+   * @param bool $skip
+   *   Whether to skip this entity on save.
+   */
+  public function skipOnSave(string $namespace, bool $skip) {
+    $this->skip_save[$namespace] = $skip;
+  }
+
+  /**
    * Save Entities.
    */
   public function saveEntities() {
     foreach ($this->entitySettings as $namespace => $info) {
+      // Allow forms to skip saving particular entities.
+      if (!empty($this->skip_save[$namespace])) {
+        continue;
+      }
+
       if ($handler = $this->getEntityHandler($namespace)) {
         $handler->saveEntity($this->getEntity($namespace));
       }
     }
+
+    // Reset the skip entities.
+    $this->skip_save = array();
   }
 
   /**
