@@ -39,12 +39,34 @@ interface FlexiformDisplayInterface {
    * Get the config form.
    */
   public function configForm($form, &$form_state);
+
+  /**
+   * Retrieve the flexiform for this display.
+   *
+   * @return Flexiform
+   */
+  public function getFlexiform();
+
 }
 
 /**
  * Base class for all flexiform displays.
  */
 class FlexiformDisplayBase implements FlexiformDisplayInterface {
+
+  /**
+   * The Flexiform the display is for.
+   *
+   * @var Flexiform
+   */
+  private $flexiform;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFlexiform() {
+    return $this->flexiform;
+  }
 
   public function __construct(Flexiform $flexiform, array $configuration = array()) {
     $this->flexiform = $flexiform;

@@ -56,7 +56,7 @@ class FlexiformDisplayEditPage extends FlexiformDisplayPageBase {
    * {@inheritdoc}
    */
   public function getBaseEntity($context = array()) {
-    $base_entity = entity_load_single($this->flexiform->base_entity, $context['base_entity_id']);
+    $base_entity = entity_load_single($this->getFlexiform()->base_entity, $context['base_entity_id']);
 
     //@todo: Check the entity is the right bundle.
     return $base_entity;
