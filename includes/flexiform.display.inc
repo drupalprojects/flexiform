@@ -47,6 +47,19 @@ interface FlexiformDisplayInterface {
    */
   public function getFlexiform();
 
+  /**
+   * Get the path, if applicable, for the display.
+   *
+   * @param $base_entity_id
+   *   The identifier for the base entity.
+   * @param ...
+   *  Any additional arguments.
+   *
+   * @return string|NULL
+   *   The path to the flexiform or NULL if there is none.
+   */
+  public function getPath($base_entity_id = NULL);
+
 }
 
 /**
@@ -143,6 +156,13 @@ class FlexiformDisplayBase implements FlexiformDisplayInterface {
     );
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPath($base_entity_id = NULL) {
+    return NULL;
   }
 
 }

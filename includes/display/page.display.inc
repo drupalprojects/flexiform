@@ -58,6 +58,30 @@ abstract class FlexiformDisplayPageBase extends FlexiformDisplayBase {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getPath($base_entity_id = NULL) {
+    // Get hold of all the info.
+    $items = $this->hook_menu();
+    $path = explode('/', reset(array_keys($items)));
+    $item = reset($items);
+    $args = func_get_args();
+
+    // Deal with placeholders.
+    foreach ($item['page arguments'] as $pos => $arg) {
+      if (is_int($arg)) {
+        $path[$arg] = array_shift($args);
+      }
+    }
+
+    // Append the rest of the arguments.
+    $path = array_merge($path, $args);
+
+    // Re-combine and return.
+    return implode('/', $path);
+  }
+
+  /**
    * Get the configuration form.
    */
   public function configForm($form, &$form_state) {
