@@ -31,9 +31,20 @@ class Flexiform extends Entity {
     return new $class_name($this, $base_entity);
   }
 
+  /**
+   * Get hold of a particular display.
+   *
+   * @param string $display
+   *   The display we want to get.
+   *
+   * @return FlexiformDisplayInterface
+   *   The flexiform display class if it exists, FlexiformDisplayNull if not.
+   * 
+   * @throws Exception
+   */
   public function getDisplay($display) {
     if (empty($this->displays[$display])) {
-      return FALSE;
+      return new FlexiformDisplayNull($this);
     }
 
     $display_info = flexiform_display_info($display);
