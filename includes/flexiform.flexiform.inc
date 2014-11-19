@@ -68,14 +68,8 @@ function flexiform_wrapper($flexiform, $base_entity) {
  *   Constructed form array.
  */
 function flexiform($form, &$form_state, $flexiform, $base_entity) {
-  global $user;
-
-  // Consider moving all of these functions into .module easier accessibility.
-  $form_state['build_info']['files']["flexiform:includes/flexiform.flexiform.inc"] = array(
-    'type' => 'inc',
-    'module' => 'flexiform',
-    'name' => 'includes/flexiform.flexiform',
-  );
+  // @TODO: Consider moving all of these functions into .module easier accessibility.
+  form_load_include($form_state, 'inc', 'flexiform', 'includes/flexiform.flexiform');
 
   $form['#flexiform_builder'] = $builder = $flexiform->getBuilder($base_entity);
   $form = $builder->form($form, $form_state);
