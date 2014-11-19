@@ -144,7 +144,7 @@ function flexiform_multistep_step_next(&$form_state) {
 
   // If not saving everything, remove items we don't want.
   foreach (array_diff($entities, $save_entities) as $namespace) {
-    $entity_manager->skipSave($namespace, TRUE);
+    $entity_manager->skipOnSave($namespace, TRUE);
   }
 
   $builder->formSubmit($form, $form_state);

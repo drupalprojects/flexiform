@@ -312,7 +312,7 @@ class FlexiformFormEntityManagerDefault implements FlexiformFormEntityManagerInt
    * @param bool $skip
    *   Whether to skip this entity on save.
    */
-  public function skipOnSave(string $namespace, bool $skip) {
+  public function skipOnSave($namespace, $skip) {
     $this->skip_save[$namespace] = $skip;
   }
 
