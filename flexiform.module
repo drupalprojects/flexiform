@@ -90,7 +90,7 @@ function flexiform_user_categories() {
 
   $forms = entity_load('flexiform');
   foreach ($forms as $form) {
-    if (($display = $form->getDisplay('flexiform_user_category')) && $display->isEnabled()) {
+    if (($display = $form->getDisplay('FlexiformDisplayUserCategory')) && $display->isEnabled()) {
       $categories = array_merge($categories, $display->hook_user_categories());
     }
   }
@@ -325,7 +325,7 @@ function flexiform_get_groups() {
 /**
  * Title Callback for Flexiform Submission Pages.
  */
-function flexiform_page_title($flexiform, $display = 'flexiform_create_entity_page', $base_entity_id = FALSE) {
+function flexiform_page_title($flexiform, $display, $base_entity_id = NULL) {
   if (!is_object($flexiform)) {
     $flexiform = flexiform_load($flexiform);
   }

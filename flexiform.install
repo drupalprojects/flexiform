@@ -489,3 +489,47 @@ function flexiform_update_7010() {
   );
   db_create_table('flexiform_tags', $schema);
 }
+
+/**
+ * Switch to keying displays by class name.
+ */
+function flexiform_update_7011(&$sandbox) {
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'flexiform');
+
+  if (!isset($sandbox['progress'])) {
+    $sandbox['progress'] = 0;
+    $sandbox['last_id'] = 0;
+    $count = clone $query;
+    $count->count();
+    $sandbox['max'] = $count->execute();
+  }
+
+  $map = array(
+    'flexiform_create_entity_page' => 'FlexiformDisplayCreatePage',
+    'flexiform_edit_entity_page' => 'FlexiformDisplayEditPage',
+    'flexiform_add_entity_pane' => 'FlexiformDisplayAddPane',
+    'flexiform_edit_entity_pane' => 'FlexiformDisplayEditPane',
+    'flexiform_user_category' => 'FlexiformDisplayUserCategory',
+  );
+
+  $query->entityCondition('entity_id', $sandbox['last_id'], '>');
+  $query->range(0, 20);
+
+  $results = $query->execute();
+  if (!empty($results['flexiform'])) {
+    foreach (entity_load('flexiform', array_keys($results['flexiform'])) as $flexiform) {
+      $displays = array();
+      foreach ($flexiform->displays as $old_key => $settings) {
+        $displays[$map[$old_key]] = $settings;
+      }
+      $flexiform->displays = $displays;
+      $flexiform->save();
+
+      $sandbox['progress']++;
+      $sandbox['last_id'] = $flexiform->id;
+    }
+  }
+
+  $sandbox['#finished'] = !empty($sandbox['max']) ? $sandbox['progress'] / $sandbox['max'] : 1;
+}

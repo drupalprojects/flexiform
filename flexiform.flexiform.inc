@@ -210,40 +210,35 @@ function flexiform_flexiform_entity_getter_info() {
 }
 
 /**
- * Implements hook_flexiform_builder_info().
+ * Implements hook_flexiform_display_info().
  */
 function flexiform_flexiform_display_info() {
   $displays = array();
 
-  $displays['flexiform_create_entity_page'] = array(
-    'class' => 'FlexiformDisplayCreatePage',
+  $displays['FlexiformDisplayCreatePage'] = array(
     'label' => t('Add page'),
     'description' => t('A page to add a new submission of the form. Will create a new base entity.'),
   );
 
-  $displays['flexiform_edit_entity_page'] = array(
-    'class' => 'FlexiformDisplayEditPage',
+  $displays['FlexiformDisplayEditPage'] = array(
     'label' => t('Edit page'),
     'description' => t('A page to an edit form. Will load an existing base entity.'),
   );
 
   if (module_exists('ctools')) {
-    $displays['flexiform_add_entity_pane'] = array(
-      'class' => 'FlexiformDisplayAddPane',
+    $displays['FlexiformDisplayAddPane'] = array(
       'label' => t('Add Pane (Ctools Content)'),
       'description' => t('Expose the form in a Ctools Content Plugin.'),
     );
 
-    $displays['flexiform_edit_entity_pane'] = array(
-      'class' => 'FlexiformDisplayEditPane',
+    $displays['FlexiformDisplayEditPane'] = array(
       'label' => t('Edit Pane (Ctools Content)'),
       'description' => t('Expose the form in a Ctools Content Plugin.'),
     );
   }
 
   if (module_exists('user')) {
-    $displays['flexiform_user_category'] = array(
-      'class' => 'FlexiformDisplayUserCategory',
+    $displays['FlexiformDisplayUserCategory'] = array(
       'label' => t('User category'),
       'description' => t('Expose this form as a tab under user edit.'),
     );

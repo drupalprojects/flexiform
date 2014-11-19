@@ -17,9 +17,9 @@ abstract class FlexiformDisplayPageBase extends FlexiformDisplayBase {
 
     $items[$this->configuration['path']] = array(
       'title callback' => 'flexiform_page_title',
-      'title arguments' => array($this->flexiform->form),
+      'title arguments' => $this->getMenuArguments(),
       'page callback' => 'flexiform_page_wrapper',
-      'page arguments' => array($this->flexiform->form),
+      'page arguments' => $this->getMenuArguments(),
       'access callback' => TRUE,
       'file' => 'flexiform.pages.inc',
     );
@@ -43,6 +43,18 @@ abstract class FlexiformDisplayPageBase extends FlexiformDisplayBase {
     }
 
     return $items;
+  }
+
+  /**
+   * Get the page/title arguments for hook_menu.
+   *
+   * @see FlexiformDisplayPageBase::hook_menu()
+   */
+  protected function getMenuArguments() {
+    return array(
+      $this->getFlexiform()->form,
+      get_class($this),
+    );
   }
 
   /**

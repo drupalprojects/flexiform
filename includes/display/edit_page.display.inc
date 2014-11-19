@@ -10,27 +10,46 @@
 class FlexiformDisplayEditPage extends FlexiformDisplayPageBase {
 
   /**
-   * Define the menu links
+   * The position of the base entity id.
+   *
+   * @var int
+   */
+  private $base_id_position;
+
+  /**
+   * Retrieve the position of the base id in the menu path.
+   *
+   * @return int|FALSE
+   */
+  protected function getBaseIdPosition() {
+    // Assume the first wildcard is the base id position.
+    if (!isset($this->base_id_position)) {
+      $path_bits = explode('/', $this->configuration['path']);
+      $this->base_id_position = array_search('%', $path_bits);
+    }
+
+    return $this->base_id_position;
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function hook_menu() {
-    // If there is no wild-card key in this path we cannot use it for an edit
-    // page.
-    $path_bits = explode('/', $this->configuration['path']);
-    $wildcard_key = array_search('%', $path_bits);
-    if ($wildcard_key === FALSE) {
+    // If there is no base id in this path we cannot use it for an edit page.
+    if (!$this->getBaseIdPosition()) {
       return array();
     }
 
-    $items = parent::hook_menu();
+    return parent::hook_menu();
+  }
 
-    foreach ($items as &$item) {
-      $item['title arguments'][] = 'flexiform_edit_entity_page';
-      $item['title arguments'][] = $wildcard_key;
-      $item['page arguments'][] = 'flexiform_edit_entity_page';
-      $item['page arguments'][] = $wildcard_key;
-    }
-
-    return $items;
+  /**
+   * {@inheritdoc}
+   */
+  protected function getMenuArguments() {
+    $args = parent::getMenuArguments();
+    $args[] = $this->getBaseIdPosition();
+    return $args;
   }
 
   /**

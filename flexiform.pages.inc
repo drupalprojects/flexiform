@@ -7,7 +7,7 @@
 /**
  * Page callback for flexiform submission pages.
  */
-function flexiform_page_wrapper($flexiform, $display = 'flexiform_create_entity_page', $base_entity_id = FALSE) {
+function flexiform_page_wrapper($flexiform, $display, $base_entity_id = NULL) {
   if (!is_object($flexiform)) {
     $flexiform = flexiform_load($flexiform);
   }
