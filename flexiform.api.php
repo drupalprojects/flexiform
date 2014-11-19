@@ -345,3 +345,20 @@ function hook_flexiform_prepare_base_entity($base_entity, Flexiform $flexiform, 
     );
   }
 }
+
+/**
+ * Alter the form wrapper for a Flexiform.
+ *
+ * @param callable $wrapper
+ *   The form wrapper callback.
+ * @param FlexiformDisplayInterface $display
+ *   The display being built.
+ * @param array $context
+ *   The context in which the form is being built.
+ */
+function hook_flexiform_wrapper_alter($wrapper, FlexiformDisplayInterface $display, $context) {
+  // Swap the wrapper to our custom one for a particular flexiform.
+  if ($display->getFlexiform()->form == 'my_form') {
+    $wrapper = 'my_wrapper';
+  }
+}

@@ -89,7 +89,12 @@ class FlexiformDisplayBase implements FlexiformDisplayInterface {
     module_load_include('inc', 'flexiform', 'includes/flexiform.flexiform');
     $base_entity = $this->getBaseEntity($context);
     module_invoke_all('flexiform_prepare_base_entity', $base_entity, $this->flexiform, $this);
-    return flexiform_wrapper($this->flexiform, $base_entity);
+
+    // Allow other modules to change the form wrapper.
+    $wrapper = 'flexiform_wrapper';
+    drupal_alter('flexiform_wrapper', $wrapper, $this, $context);
+
+    return call_user_func($wrapper, $this->flexiform, $base_entity);
   }
 
   /**
