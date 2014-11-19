@@ -18,6 +18,7 @@ function flexiform_page_wrapper($flexiform, $display, $base_entity_id = NULL) {
 
   $context = array(
     'base_entity_id' => $base_entity_id,
+    'args' => array_slice(func_get_args(), 3),
   );
   return $flexiform->getDisplay($display)->build($context);
 }

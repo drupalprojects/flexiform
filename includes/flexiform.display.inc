@@ -129,7 +129,10 @@ class FlexiformDisplayBase implements FlexiformDisplayInterface {
     $wrapper = 'flexiform_wrapper';
     drupal_alter('flexiform_wrapper', $wrapper, $this, $context);
 
-    return call_user_func($wrapper, $this->flexiform, $base_entity);
+    $args = $context['args'];
+    array_unshift($args, $base_entity);
+    array_unshift($args, $this->flexiform);
+    return call_user_func_array($wrapper, $args);
   }
 
   /**
