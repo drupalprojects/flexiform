@@ -41,11 +41,6 @@ function flexiform_element_group_manage_form_fields_form_alter(&$form, &$form_st
   form_load_include($form_state, 'inc', 'field_group', 'field_group.field_ui');
   form_load_include($form_state, 'inc', 'field_ui', 'field_ui.admin');
 
-  // Only start altering the form if we need to.
-  if (empty($form['#elements'])) {
-    return;
-  }
-
   $params = flexiform_element_group_manage_form_fields_form_params($form);
 
   // This key is used to store the current updated field.
