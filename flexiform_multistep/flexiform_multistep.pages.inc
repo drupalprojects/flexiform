@@ -20,6 +20,7 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = N
   ctools_include('wizard');
 
   $menu_item = menu_get_item();
+  $settings = flexiform_multistep_settings_get($flexiform->form);
 
   $form_info = array(
     'id' => 'flexiform_multistep_' . $flexiform->form,

@@ -68,6 +68,6 @@ function flexiform_multistep_settings_get($form) {
  */
 function flexiform_multistep_settings_set($form, $form_settings) {
   $settings = variable_get('flexiform_multistep', array());
-  $settings[$form] = $settings;
+  $settings[$form] = $form_settings;
   variable_set('flexiform_multistep', $settings);
 }

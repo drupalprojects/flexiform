@@ -21,6 +21,12 @@ function _flexiform_multistep_form_flexiform_manage_form_fields_form_alter(&$for
     '#parents' => array('flexiform_multistep'),
   );
 
+  $form['additional_settings']['flexiform_multistep']['enabled'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable server side multi-page for this form.'),
+    '#default_value' => !empty($settings['enabled']),
+  );
+
   ctools_include('wizard');
   $ctools_wizard_defaults = array('id' => NULL, 'forms' => array());
   ctools_wizard_defaults($ctools_wizard_defaults);
@@ -138,6 +144,11 @@ function _flexiform_multistep_form_flexiform_manage_form_fields_form_alter(&$for
     '#title' => t('Save entities on the submission of each page'),
     '#description' => t('If checked, all entities used on the page will be saved when the page is submitted rather than all entities being saved at the end. This can be overridden per page.'),
     '#default_value' => !empty($settings['save_entities']),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="flexiform_multistep[enabled]"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 }
 
@@ -150,7 +161,7 @@ function flexiform_multistep_manage_form_fields_submit(&$form, &$form_state) {
   $settings = $form_state['values']['flexiform_multistep'];
 
   // Clear out empties.
-  $settings = array_filter($settings['form_info']);
+  $settings['form_info'] = array_filter($settings['form_info']);
 
   flexiform_multistep_settings_set($form['#flexiform']->form, $settings);
 }
