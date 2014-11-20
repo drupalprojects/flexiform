@@ -572,7 +572,7 @@ function flexiform_form($form, &$form_state, $flexiform, $op = 'edit') {
 
   foreach (flexiform_display_info() as $display => $info) {
     $controller = $flexiform->getDisplay($display);
-    if (!$controller) {
+    if (get_class($controller) == 'FlexiformDisplayNull') {
       $controller = $flexiform->createDisplay($display);
     }
 
