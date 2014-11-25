@@ -150,6 +150,26 @@ function _flexiform_multistep_form_flexiform_manage_form_fields_form_alter(&$for
       ),
     ),
   );
+
+
+  $tokens = array(
+    '#theme' => 'item_list',
+    '#items' => array(),
+  );
+  foreach ($form['#flexiform']->entities as $namespace => $info) {
+    $tokens['#items'][] = format_string('%namespace: @label', array(
+      '%namespace' => '%' . $namespace,
+      '@label' => $info['label'],
+    ));
+  }
+  $form['additional_settings']['flexiform_multistep']['redirect'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Redirect on completion'),
+    '#description' => t('Provide an internal path to redirect to on completion of the form. The following tokens are available: !tokens', array(
+      '!tokens' => drupal_render($tokens),
+    )),
+    '#default_value' => isset($settings['redirect']) ? $settings['redirect'] : NULL,
+  );
 }
 
 /**

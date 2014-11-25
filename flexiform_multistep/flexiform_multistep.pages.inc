@@ -108,7 +108,11 @@ function flexiform_multistep_step_form($form, &$form_state, $flexiform, $base_en
  */
 function flexiform_multistep_step_next(&$form_state) {
   $form = $form_state['complete form'];
+
+  /** @var Flexiform $flexiform */
   $flexiform = $form['#flexiform'];
+
+  /** @var FlexiformBuilderInterface $builder */
   $builder = $form['#flexiform_builder'];
   $form_settings = flexiform_multistep_settings_get($flexiform->form);
   $step_settings = isset($form_state['step_group']->format_settings['instance_settings']['flexiform_multistep']) ? $form_state['step_group']->format_settings['instance_settings']['flexiform_multistep'] : array();
@@ -158,4 +162,18 @@ function flexiform_multistep_step_finish(&$form_state) {
   // Pass onto the normal step submission.
   $form_state['last_step'] = TRUE;
   flexiform_multistep_step_next($form_state);
+
+  // Deal with the completion redirect.
+  $form_settings = flexiform_multistep_settings_get($form_state['complete form']['#flexiform']->form);
+  if (!empty($form_settings['redirect'])) {
+    $builder = $form_state['complete form']['#flexiform_builder'];
+    $flexiform_state = &$builder->getFlexiformState($form_state['complete form'], $form_state);
+    $entity_manager = $builder->getEntityManager($flexiform_state);
+    $replacements = array();
+    foreach ($entity_manager->getEntities() AS $namespace => $entity) {
+      $wrapper = entity_metadata_wrapper($entity_manager->getEntityType($namespace), $entity);
+      $replacements['%' . $namespace] = $wrapper->getIdentifier();
+    }
+    $form_state['redirect'] = strtr($form_settings['redirect'], $replacements);
+  }
 }
