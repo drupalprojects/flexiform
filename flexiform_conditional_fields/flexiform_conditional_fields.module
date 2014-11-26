@@ -205,5 +205,4 @@ function flexiform_conditional_fields_form_flexiform_field_configure_form_alter(
   );
 
   $form['conditional_fields'] += flexiform_conditional_fields_flexiform_element_configure_form($form['conditional_fields'], $form_state, $form);
-  $form['#submit'][] = 'flexiform_conditional_fields_flexiform_element_configure_form_submit';
 }
