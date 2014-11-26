@@ -72,7 +72,7 @@ class FlexiformDisplayBase implements FlexiformDisplayInterface {
    *
    * @var Flexiform
    */
-  private $flexiform;
+  protected $flexiform;
 
   /**
    * {@inheritdoc}

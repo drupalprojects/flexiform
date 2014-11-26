@@ -15,7 +15,7 @@ class FlexiformDisplayUserCategory extends FlexiformDisplayBase {
   public function hook_menu_alter(&$items) {
     $path = 'user/%user_category/edit/' . $this->configuration['category'];
     $items[$path]['page callback'] = 'flexiform_page_wrapper';
-    $items[$path]['page arguments'] = array($this->flexiform->form, get_class($this), 1);
+    $items[$path]['page arguments'] = array($this->getFlexiform()->form, get_class($this), 1);
     $items[$path]['module'] = 'flexiform';
     $items[$path]['file'] = 'flexiform.pages.inc';
   }
