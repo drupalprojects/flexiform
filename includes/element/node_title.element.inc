@@ -112,13 +112,4 @@ class FlexiformElementNodeTitle extends FlexiformElement {
 
     parent::configureFormSubmit($form, $form_state, $flexiform);
   }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function toSettingsArray() {
-    $settings = parent::toSettingsArray();
-    $settings['default_value'] = $this->settings['default_value'];
-    return $settings;
-  }
 }

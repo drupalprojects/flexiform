@@ -342,8 +342,7 @@ class FlexiformElement implements FlexiformElementInterface {
       'element_name' => $this->element_name,
       'weight' => $this->getWeight(),
       'label' => $this->label(),
-      'display_options' => $this->settings['display_options'],
-    );
+    ) + $this->settings;
 
     return $settings;
   }

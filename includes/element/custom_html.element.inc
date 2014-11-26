@@ -69,18 +69,4 @@ class FlexiformElementCustomHtml extends FlexiformRepeatableElement {
 
     parent::configureFormSubmit($form, $form_state, $flexiform);
   }
-
-  /**
-   * Adds custom html to the settings array.
-   *
-   * @return array $settings
-   *   The settings to be saved for the form element.
-   */
-  public function toSettingsArray() {
-    $settings = parent::toSettingsArray();
-    $settings['custom_html'] = $this->settings['custom_html'];
-
-    return $settings;
-  }
-
 }
