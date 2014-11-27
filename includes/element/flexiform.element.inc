@@ -49,8 +49,14 @@ class FlexiformElementFlexiform extends FlexiformElement {
    * Build the configure form for the element.
    */
   public function configureForm($form, &$form_state, $flexiform) {
+    $form = parent::configureForm($form, $form_state, $flexiform);
+
     $link = l(t('Edit @flexiform', array('@flexiform' => $this->label())), 'admin/structure/flexiform/manage/' . $this->form);
-    $form['description']['#markup'] = t('There are no settings for @flexiform as it is a nested form. You can edit the flexiform by clicking on the link below, however these changes will effect the form everywhere it is used.<br />!link', array('@flexiform' => $this->label(), '!link' => $link));
+    $form['description'] = array(
+      '#weight' => -1,
+      '#markup' => t('There are no settings for @flexiform as it is a nested form. You can edit the flexiform by clicking on the link below, however these changes will effect the form everywhere it is used.<br />!link', array('@flexiform' => $this->label(), '!link' => $link)),
+    );
+
     return $form;
   }
 
