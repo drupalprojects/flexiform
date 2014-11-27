@@ -27,7 +27,7 @@ class FlexiformDisplayUserCategory extends FlexiformDisplayBase {
   public function hook_user_categories() {
     return array(array(
       'name' => check_plain($this->configuration['category']),
-      'title' => check_plain($this->configuration['title']),
+      'title' => $this->configuration['title'],
       'weight' => 0,
     ));
   }
