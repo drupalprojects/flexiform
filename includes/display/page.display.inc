@@ -22,6 +22,7 @@ abstract class FlexiformDisplayPageBase extends FlexiformDisplayBase {
       'page arguments' => $this->getMenuArguments(),
       'access callback' => TRUE,
       'file' => 'flexiform.pages.inc',
+      'weight' => isset($this->configuration['weight']) ? $this->configuration['weight'] : 0,
     );
 
     // Add the menu name if we have one.
@@ -116,6 +117,14 @@ abstract class FlexiformDisplayPageBase extends FlexiformDisplayBase {
       '#states' => array(
         'visible' => array(':input[name="displays[flexiform_create_entity_page][type]"]' => array('!value' => MENU_CALLBACK)),
       ),
+    );
+
+    $form['weight'] = array(
+      '#title' => t('Weight'),
+      '#type' => 'weight',
+      '#description' => t('Heavier items will sink and lighter items will be positioned near the top.'),
+      '#default_value' => isset($this->configuration['weight']) ? $this->configuration['weight'] : 0,
+      '#delta' => 30,
     );
 
     $form['access'] = array(

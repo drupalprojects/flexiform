@@ -18,6 +18,7 @@ class FlexiformDisplayUserCategory extends FlexiformDisplayBase {
     $items[$path]['page arguments'] = array($this->getFlexiform()->form, get_class($this), 1);
     $items[$path]['module'] = 'flexiform';
     $items[$path]['file'] = 'flexiform.pages.inc';
+    $items[$path]['weight'] = isset($this->configuration['weight']) ? $this->configuration['weight'] : 0;
   }
 
   /**
@@ -50,6 +51,14 @@ class FlexiformDisplayUserCategory extends FlexiformDisplayBase {
       '#type' => 'textfield',
       '#default_value' => isset($this->configuration['category']) ? $this->configuration['category'] : NULL,
       '#description' => t('The path component for this category.'),
+    );
+
+    $form['weight'] = array(
+      '#title' => t('Weight'),
+      '#type' => 'weight',
+      '#description' => t('Heavier items will sink and lighter items will be positioned near the top.'),
+      '#default_value' => isset($this->configuration['weight']) ? $this->configuration['weight'] : 0,
+      '#delta' => 30,
     );
 
     return $form;
