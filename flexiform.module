@@ -180,6 +180,15 @@ function flexiform_access($op, $type = NULL, $account = NULL) {
 }
 
 /**
+ * Access callback for widget type form.
+ */
+function flexiform_field_widget_type_form_access($flexiform, $element_namespace) {
+  $element = FlexiformElement::getElement($flexiform, $element_namespace);
+  return ($element instanceof FlexiformElementFieldAPIInterface)
+  && user_access('administer flexiforms');
+}
+
+/**
  * Gets an array of all flexiforms, keyed by the type name.
  *
  * @param $type_name

@@ -1033,15 +1033,6 @@ function flexiform_field_remove_form_submit($form, &$form_state) {
 }
 
 /**
- * Access callback for widget type form.
- */
-function flexiform_field_widget_type_form_access($flexiform, $element_namespace) {
-  $element = FlexiformElement::getElement($flexiform, $element_namespace);
-  return ($element instanceof FlexiformElementFieldAPIInterface)
-    && user_access('administer flexiforms');
-}
-
-/**
  * Choose a widget type
  */
 function flexiform_field_widget_type_form($form, &$form_state, $flexiform, $element_namespace) {
