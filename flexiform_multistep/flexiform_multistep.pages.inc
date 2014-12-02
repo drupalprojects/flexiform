@@ -153,7 +153,7 @@ function flexiform_multistep_step_next(&$form_state) {
   /** @var FlexiformBuilderInterface $builder */
   $builder = $form['#flexiform_builder'];
   $form_settings = flexiform_multistep_settings_get($flexiform->form);
-  $step_settings = isset($form_state['step_group']->format_settings['instance_settings']['flexiform_multistep']) ? $form_state['step_group']->format_settings['instance_settings']['flexiform_multistep'] : array();
+  $step_settings = isset($form_state['step_group']->format_settings['instance_settings']) ? $form_state['step_group']->format_settings['instance_settings'] : array();
 
   // Inherit settings from the form if we're supposed to.
   if (!isset($step_settings['save_entities'])) {
