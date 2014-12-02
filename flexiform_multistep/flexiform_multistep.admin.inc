@@ -231,5 +231,13 @@ function _flexiform_multistep_field_group_format_settings($group) {
     $form['instance_settings']['save_entities_custom']['#options'][$namespace] = $entity['label'];
   }
 
+
+  $form['instance_settings']['page_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Page title'),
+    '#description' => t('Optionally provide a page title.'),
+    '#default_value' => isset($group->format_settings['instance_settings']['page_title']) ? $group->format_settings['instance_settings']['page_title'] : NULL,
+  );
+
   return $form;
 }

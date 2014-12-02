@@ -87,6 +87,11 @@ function flexiform_multistep_step_form($form, &$form_state, $flexiform, $base_en
     }
   }
 
+  // Set the page title if requested.
+  if (!empty($form_state['step_group']->format_settings['instance_settings']['page_title'])) {
+    drupal_set_title($form_state['step_group']->format_settings['instance_settings']['page_title']);
+  }
+
   // Hide any elements that aren't in this step.
   foreach (element_children($form) as $key) {
     // Preserve special items.
