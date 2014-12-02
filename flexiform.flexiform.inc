@@ -286,9 +286,11 @@ function flexiform_flexiform_element_info() {
   foreach ($fields_info as $entity_type => $entity_fields) {
     foreach ($entity_fields as $bundle => $bundle_fields) {
       foreach ($bundle_fields as $field_name => $instance) {
+        $field = field_info_field($instance['field_name']);
+        $field_class = 'FlexiformElementField_' . $field['type'];
         $elements[$entity_type][$bundle]['field:' . $field_name] = array(
           'label' => $instance['label'],
-          'class' => 'FlexiformElementField',
+          'class' => class_exists($field_class) ? $field_class : 'FlexiformElementField',
           'type' => 'field',
           'group' => 'Field',
           'field_name' => $field_name,
