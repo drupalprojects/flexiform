@@ -2,7 +2,7 @@
 /**
  * @file
  * Page callbacks for Flexiform Multistep.
- */ 
+ */
 
 /**
  * Page callback for CTools Multistep Forms.
@@ -46,6 +46,7 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = N
         'form id' => 'flexiform_multistep_step_form',
         'title' => $group->label,
         'weight' => $group->weight,
+        'group' => $group,
       );
     }
   }
@@ -69,20 +70,18 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = N
  * Form constructor for a specific step of a multistep flexiform.
  */
 function flexiform_multistep_step_form($form, &$form_state, $flexiform, $base_entity) {
-  $step = $form_state['step'];
+  // Get hold of the full form.
   $form = drupal_retrieve_form('flexiform__' . $flexiform->form, $form_state);
 
   // Clear out the standard submission buttons.
   unset($form['actions']);
 
-  // Clear out the un-wanted field groups, preserving our current step.
-  $form_state['step_group'] = NULL;
+  // Get our current group.
+  $form_state['step_group'] = $form_state['form_info']['forms'][$form_state['step']]['group'];
+
+  // Clear out the multi step field groups.
   foreach ($form['#groups'] as $name => $group) {
     if ($group->format_type == 'flexiform_step') {
-      if ($name == 'group_' . $step) {
-        $form_state['step_group'] = $group;
-      }
-
       unset($form['#groups'][$name]);
       unset($form['#fieldgroups'][$name]);
     }
