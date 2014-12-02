@@ -10,6 +10,13 @@
 class FlexiformDisplayNull extends FlexiformDisplayBase {
 
   /**
+   * {@inheritdoc}
+   */
+  public function isEnabled() {
+    return FALSE;
+  }
+
+  /**
    * Build the form ready for rendering.
    */
   public function build($context = array()) {
