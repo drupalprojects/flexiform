@@ -96,6 +96,13 @@ function flexiform_schema() {
         'serialize' => TRUE,
         'description' => 'A serialized array of displays of this flexiform.',
       ),
+      'settings' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'A serialized array of general settings for this flexiform.',
+      ),
     ) + entity_exportable_schema_fields(),
     'primary key' => array('id'),
     'unique keys' => array(
@@ -532,4 +539,17 @@ function flexiform_update_7011(&$sandbox) {
   }
 
   $sandbox['#finished'] = !empty($sandbox['max']) ? $sandbox['progress'] / $sandbox['max'] : 1;
+}
+
+/**
+ * Add the settings column to flexiforms.
+ */
+function flexiform_update_7012() {
+  db_add_field('flexiform', 'settings', array(
+    'type' => 'text',
+    'not null' => FALSE,
+    'size' => 'big',
+    'serialize' => TRUE,
+    'description' => 'A serialized array of general settings for this flexiform.',
+  ));
 }

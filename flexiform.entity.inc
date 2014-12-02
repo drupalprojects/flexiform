@@ -15,6 +15,7 @@ class Flexiform extends Entity {
   public $elements = array();
   public $entities = array();
   public $displays = array();
+  public $settings = array();
 
   public function __construct($values = array()) {
     parent::__construct($values, 'flexiform');
