@@ -38,7 +38,7 @@ function flexiform_add_pane_content_type_content_types() {
   $forms = entity_load('flexiform');
 
   foreach ($forms as $form) {
-    if (empty($form->displays['flexiform_add_entity_pane']['enabled'])) {
+    if (!($display = $form->getDisplay('FlexiformDisplayAddPane')) || !$display->isEnabled()) {
       continue;
     }
 
