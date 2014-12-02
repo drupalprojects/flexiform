@@ -38,6 +38,7 @@ files[] = includes/element/node_status.element.inc
 files[] = includes/element/node_sticky.element.inc
 files[] = includes/element/custom_html.element.inc
 files[] = includes/element/node_author.element.inc
+files[] = includes/element/fields/taxonomy_term_reference.inc
 
 ; Form Entities
 files[] = includes/flexiform.form_entity.inc
