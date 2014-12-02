@@ -195,7 +195,7 @@ class FlexiformElementField extends FlexiformElement implements FlexiformElement
       '#type' => 'textfield',
       '#title' => t('Default Value Function'),
       '#description' => t('If you wish to use a custom default value function, enter the name of it here. Reccommended for advanced users only.'),
-      '#default_value' => $instance['default_value_function'],
+      '#default_value' => isset($instance['default_value_function']) ? $instance['default_value_function'] : NULL,
       '#states' => array('invisible' => array(':input[name="instance[use_default_value_function]"]' => array('checked' => FALSE))),
     );
     $form['instance']['default_value_widget'] = field_ui_default_value_widget($this->getField(), $instance, $form, $form_state);
