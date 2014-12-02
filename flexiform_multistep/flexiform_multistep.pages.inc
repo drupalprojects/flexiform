@@ -79,6 +79,40 @@ function flexiform_multistep_step_form($form, &$form_state, $flexiform, $base_en
   // Get our current group.
   $form_state['step_group'] = $form_state['form_info']['forms'][$form_state['step']]['group'];
 
+  // Set up the more advanced trail.
+  if (!empty($form['ctools_trail'])) {
+    unset($form['ctools_trail']['#markup']);
+    $form['ctools_trail']['#theme'] = 'item_list';
+    $form['ctools_trail']['#type'] = 'ol';
+    $form['ctools_trail']['#attributes']['class'][] = 'flexiform-multistep-progress';
+    $form['ctools_trail']['#attributes']['class'][] = 'clearfix';
+    $form['ctools_trail']['#attributes']['class'][] = 'inline';
+
+    $past_current = FALSE;
+    foreach ($form_state['form_info']['forms'] as $step => $info) {
+      $item = array(
+        'class' => array($info['group']->group_name),
+      );
+
+      if (!$past_current) {
+        $params = ctools_wizard_get_path($form_state['form_info'], $step);
+        $params[] = array();
+        $item['class'][] = 'available';
+        $item['data'] = l($info['group']->label, $params[0], $params[1]);
+      }
+      else {
+        $item['data'] = '<span>' . $info['group']->label . '</span>';
+      }
+
+      if ($step == $form_state['step']) {
+        $item['class'][] = 'active';
+        $past_current = TRUE;
+      }
+
+      $form['ctools_trail']['#items'][$step] = $item;
+    }
+  }
+
   // Clear out the multi step field groups.
   foreach ($form['#groups'] as $name => $group) {
     if ($group->format_type == 'flexiform_step') {
