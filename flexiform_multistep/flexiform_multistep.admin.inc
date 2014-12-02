@@ -8,9 +8,9 @@
  * Implements hook_form_FORM_ID_alter() for flexiform_manage_form_fields_form().
  */
 function _flexiform_multistep_form_flexiform_manage_form_fields_form_alter(&$form, &$form_state, $form_id) {
-  $settings = flexiform_multistep_settings_get($form['#flexiform']->form);
+  $settings = isset($form['#flexiform']->settings['flexiform_multistep']) ? $form['#flexiform']->settings['flexiform_multistep'] : array();
 
-  $form['#submit'][] = 'flexiform_multistep_manage_form_fields_submit';
+  array_unshift($form['#submit'], 'flexiform_multistep_manage_form_fields_submit');
 
   $form['additional_settings']['flexiform_multistep'] = array(
     '#type' => 'fieldset',
@@ -183,7 +183,7 @@ function flexiform_multistep_manage_form_fields_submit(&$form, &$form_state) {
   // Clear out empties.
   $settings['form_info'] = array_filter($settings['form_info']);
 
-  flexiform_multistep_settings_set($form['#flexiform']->form, $settings);
+  $form_state['#flexiform']->settings['flexiform_multistep'] = $settings;
 }
 
 /**
@@ -191,7 +191,7 @@ function flexiform_multistep_manage_form_fields_submit(&$form, &$form_state) {
  */
 function _flexiform_multistep_field_group_format_settings($group) {
   $flexiform = flexiform_load($group->bundle);
-  $settings = flexiform_multistep_settings_get($flexiform->form);
+  $settings = isset($flexiform->settings['flexiform_multistep']) ? $flexiform->settings['flexiform_multistep'] : array();
 
   $form = array(
     'instance_settings' => array(

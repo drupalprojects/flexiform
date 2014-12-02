@@ -44,30 +44,11 @@ function flexiform_multistep_field_group_formatter_info() {
  *  Implements hook_flexiform_wrapper_alter().
  */
 function flexiform_multistep_flexiform_wrapper_alter(&$wrapper, FlexiformDisplayInterface $display, $context) {
-  $settings = flexiform_multistep_settings_get($display->getFlexiform()->form);
+  $flexiform = $display->getFlexiform();
+  $settings = isset($flexiform->settings['flexiform_multistep']) ? $flexiform->settings['flexiform_multistep'] : array();
+
   if (!empty($settings['enabled'])) {
     $wrapper = 'flexiform_multistep_wrapper';
     module_load_include('inc', 'flexiform_multistep', 'flexiform_multistep.pages');
   }
-}
-
-/**
- * Get the multistep settings for a flexiform.
- *
- * @return array
- */
-function flexiform_multistep_settings_get($form) {
-  $settings = variable_get('flexiform_multistep', array());
-  return isset($settings[$form]) ? $settings[$form] : array();
-}
-
-/**
- * Set the multistep settings for a flexiform.
- *
- * @return array
- */
-function flexiform_multistep_settings_set($form, $form_settings) {
-  $settings = variable_get('flexiform_multistep', array());
-  $settings[$form] = $form_settings;
-  variable_set('flexiform_multistep', $settings);
 }

@@ -20,7 +20,7 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = N
   ctools_include('wizard');
 
   $menu_item = menu_get_item();
-  $settings = flexiform_multistep_settings_get($flexiform->form);
+  $settings = isset($flexiform->settings['flexiform_multistep']) ? $flexiform->settings['flexiform_multistep'] : array();
 
   $form_info = array(
     'id' => 'flexiform_multistep_' . $flexiform->form,
@@ -152,7 +152,7 @@ function flexiform_multistep_step_next(&$form_state) {
 
   /** @var FlexiformBuilderInterface $builder */
   $builder = $form['#flexiform_builder'];
-  $form_settings = flexiform_multistep_settings_get($flexiform->form);
+  $form_settings = isset($flexiform->settings['flexiform_multistep']) ? $flexiform->settings['flexiform_multistep'] : array();
   $step_settings = isset($form_state['step_group']->format_settings['instance_settings']) ? $form_state['step_group']->format_settings['instance_settings'] : array();
 
   // Inherit settings from the form if we're supposed to.
@@ -202,7 +202,8 @@ function flexiform_multistep_step_finish(&$form_state) {
   flexiform_multistep_step_next($form_state);
 
   // Deal with the completion redirect.
-  $form_settings = flexiform_multistep_settings_get($form_state['complete form']['#flexiform']->form);
+  $form_settings = isset($form_state['complete form']['#flexiform']->settings['flexiform_multistep']) ? $form_state['complete form']['#flexiform']->settings['flexiform_multistep'] : array();
+
   if (!empty($form_settings['redirect'])) {
     $builder = $form_state['complete form']['#flexiform_builder'];
     $flexiform_state = &$builder->getFlexiformState($form_state['complete form'], $form_state);
