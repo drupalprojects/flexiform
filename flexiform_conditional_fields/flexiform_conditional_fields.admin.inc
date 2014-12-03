@@ -592,7 +592,6 @@ function flexiform_conditional_fields_configure_form_submit($form, &$form_state)
       $value = array();
       field_default_extract_form_values(NULL, NULL, array('field_name' => $dependee_field['field_name']), NULL, LANGUAGE_NONE, $value, $form['value']['field'], $form_state);
       $options['value'] = $value;
-      $options['value_form'] = $value;
     }
     elseif ($options['values_set'] == CONDITIONAL_FIELDS_DEPENDENCY_VALUES_REGEX) {
       // The regular expression is inserted in an associative array, so it will

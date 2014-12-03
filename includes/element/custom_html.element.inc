@@ -20,6 +20,7 @@ class FlexiformElementCustomHtml extends FlexiformRepeatableElement {
     $value = $this->replaceCtoolsSubstitutions($value, $form['#flexiform_entities']);
 
     $form[$this->element_namespace] = array(
+      '#type' => 'item',
       '#markup' => check_markup($value, $format),
       '#parents' => $parents,
     );

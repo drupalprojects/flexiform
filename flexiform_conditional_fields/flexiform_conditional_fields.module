@@ -58,8 +58,9 @@ function flexiform_conditional_fields_element_after_build($element, &$form_state
     // Some fields are wrapped in containers before processing.
     $field = $element[$element['#language']];
   }
+  // This isn't a field, but we'll allow it through anyway..
   else {
-    return $element;
+    $field = $element;
   }
 
   // Only act on flexiforms.
@@ -76,17 +77,11 @@ function flexiform_conditional_fields_element_after_build($element, &$form_state
 
   // Work out the field_array_parents.
   $field_array_parents = $field['#array_parents'];
-  $flexiform_element = NULL;
-  $key = array_pop($field_array_parents);
-  while ($key !== NULL) {
-    $key_parts = explode(':', $key);
-    if (count($key_parts) == 3) {
-      $field_array_parents[] = $key;
-      $flexiform_element = drupal_array_get_nested_value($form, $field_array_parents);
-      break;
-    }
+  $flexiform_element = $field;
 
-    $key = array_pop($field_array_parents);
+  while (count($field_array_parents) && empty($flexiform_element['#flexiform_element'])) {
+    array_pop($field_array_parents);
+    $flexiform_element = drupal_array_get_nested_value($form, $field_array_parents);
   }
 
   if (empty($flexiform_element['#flexiform_element'])) {
