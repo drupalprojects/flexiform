@@ -379,7 +379,7 @@ class FlexiformElementField extends FlexiformElement implements FlexiformElement
     // @todo Work out a way of not calling this loads and loads of times.
     foreach (module_implements('field_attach_validate') as $module) {
       $function = $module . '_field_attach_validate';
-      $function($entity_type, $entity, $errors);
+      $function($this->getEntityType(), $entity, $errors);
     }
 
     // Pass field-level validation errors back to widgets for accurate error
