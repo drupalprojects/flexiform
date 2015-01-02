@@ -55,6 +55,7 @@ abstract class FlexiformDisplayPageBase extends FlexiformDisplayBase {
     return array(
       $this->getFlexiform()->form,
       get_class($this),
+      NULL,
     );
   }
 

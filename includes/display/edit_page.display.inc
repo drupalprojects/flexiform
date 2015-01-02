@@ -48,7 +48,7 @@ class FlexiformDisplayEditPage extends FlexiformDisplayPageBase {
    */
   protected function getMenuArguments() {
     $args = parent::getMenuArguments();
-    $args[] = $this->getBaseIdPosition();
+    $args[2] = $this->getBaseIdPosition();
     return $args;
   }
 
