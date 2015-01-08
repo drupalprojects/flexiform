@@ -51,6 +51,7 @@ files[] = includes/form_entity/load.form_entity.inc
 files[] = includes/form_entity/new.form_entity.inc
 files[] = includes/form_entity/party_data_set.form_entity.inc
 files[] = includes/form_entity/party_from_user.form_entity.inc
+files[] = includes/form_entity/reply.form_entity.inc
 
 ; Form Entity Manager
 files[] = includes/flexiform.form_entity_manager.inc

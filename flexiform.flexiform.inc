@@ -206,6 +206,42 @@ function flexiform_flexiform_entity_getter_info() {
       }
     }
   }
+
+  // Build reply module getters.
+  if (module_exists('reply')) {
+    $fields = db_select('field_config', 'fc')
+      ->condition('type', 'reply')
+      ->fields('fc', array('field_name'))
+      ->execute()
+      ->fetchCol();
+
+    foreach ($fields as $field_name) {
+      $field = field_info_field($field_name);
+
+      foreach ($field['bundles'] as $base_entity_type => $bundles) {
+        $base_entity_info = entity_get_info($base_entity_type);
+
+        // Prepare replacements for the label.
+        $label_replacements = array(
+          '@base' => $base_entity_info['label'],
+          '@field' => $field_name,
+        );
+
+        $getters["reply_new__{$field_name}__{$base_entity_type}"] = array(
+          'label' => t('New Reply: @field from @base', $label_replacements),
+          'description' => t('Get a new reply on the entity.'),
+          'field_name' => $field_name,
+          'params' => array(
+            'base' => array(
+              'entity_type' => $base_entity_type,
+            ),
+          ),
+          'entity_types' => array('reply'),
+          'class' => 'FlexifromFormEntityNewReply',
+        );
+      }
+    }
+  }
   return $getters;
 }
 
