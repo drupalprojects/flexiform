@@ -374,6 +374,31 @@ function flexiform_flexiform_element_info() {
       'group' => 'Node',
     );
   }
+  
+  $elements['user']['user']['user:name'] = array(
+    'label' => t('Name'),
+    'class' => 'FlexiformElementUserName',
+    'type' => 'name',
+    'group' => 'User',
+  );
+  $elements['user']['user']['user:pass'] = array(
+    'label' => t('Password'),
+    'class' => 'FlexiformElementUserPass',
+    'type' => 'pass',
+    'group' => 'User',
+  );
+  $elements['user']['user']['user:mail'] = array(
+    'label' => t('E-mail'),
+    'class' => 'FlexiformElementUserMail',
+    'type' => 'mail',
+    'group' => 'User',
+  );
+  $elements['user']['user']['user:roles'] = array(
+    'label' => t('Roles'),
+    'class' => 'FlexiformElementUserRoles',
+    'type' => 'roles',
+    'group' => 'User',
+  );
 
   return $elements;
 }

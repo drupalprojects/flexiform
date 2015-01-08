@@ -38,6 +38,10 @@ files[] = includes/element/node_status.element.inc
 files[] = includes/element/node_sticky.element.inc
 files[] = includes/element/custom_html.element.inc
 files[] = includes/element/node_author.element.inc
+files[] = includes/element/user_mail.element.inc
+files[] = includes/element/user_name.element.inc
+files[] = includes/element/user_pass.element.inc
+files[] = includes/element/user_roles.element.inc
 files[] = includes/element/fields/taxonomy_term_reference.inc
 
 ; Form Entities
