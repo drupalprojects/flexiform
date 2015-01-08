@@ -197,7 +197,7 @@ function flexiform_conditional_fields_flexiform_element_configure_form_submit($f
   $flexiform = $form['#flexiform'];
   $element_namespace = $form['#flexiform_element']->getElementNamespace();
 
-  $values = $form_state['values']['conditional_fields']['table']['add_new_dependency'];
+  $values = $form_state['input']['conditional_fields']['table']['add_new_dependency'];
   $options = array(
     'state' => $values['state'],
     'condition' => $values['condition'],
