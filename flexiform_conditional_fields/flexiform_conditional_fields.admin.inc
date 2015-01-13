@@ -48,6 +48,11 @@ function flexiform_conditional_fields_flexiform_element_configure_form($form, &$
 
     foreach ($dependees as $dependency_key => $options) {
       list($dependee) = explode('|', $dependency_key);
+      if (empty($flexiform->elements[$dependee])) {
+        unset($flexiform->elements[$element_namespace]['conditional_fields'][$dependency_key]);
+        unset($dependees[$dependency_key]);
+        continue;
+      }
       $form['table'][$dependency_key] = array();
       $dependee_count = count($dependees);
       $dependee_element = FlexiformElement::getElement($flexiform, $dependee);
