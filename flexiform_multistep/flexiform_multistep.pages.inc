@@ -127,6 +127,7 @@ function flexiform_multistep_step_form($form, &$form_state, $flexiform, $base_en
   }
 
   // Hide any elements that aren't in this step.
+  $old_form = $form;
   foreach (element_children($form) as $key) {
     // Preserve special items.
     if (in_array($key, array('ctools_trail', 'buttons'))) {
@@ -135,6 +136,113 @@ function flexiform_multistep_step_form($form, &$form_state, $flexiform, $base_en
 
     if (!in_array($key, $form_state['step_group']->children)) {
       unset($form[$key]);
+    }
+    else if(module_exists('flexiform_conditional_fields')) {
+      $el_settings = $form[$key]['#flexiform_element']->getSettings();
+      if (empty($el_settings['conditional_fields'])) {
+        continue;
+      }
+
+      foreach ($el_settings['conditional_fields'] as $dependency_key => $options) {
+        list($dependee) = explode('|', $dependency_key);
+        if (in_array($dependee, $form_state['step_group']->children)) {
+          // If the dependee is also on this page then we don't need to do
+          // anything.
+          continue;
+        }
+        $condition_met = FALSE;
+        $dependee_element = $old_form[$dependee];
+        if (!empty($dependee_element[$dependee_element['#language']])) {
+          $dependee_element = $dependee_element[$dependee_element['#language']];
+        }
+
+        $values = array();
+        if (element_children($dependee_element)) {
+        }
+        else {
+          $values = $dependee_element['#default_value'];
+          if (!is_array($values)) {
+            $values = array(
+              $dependee_element['#delta'] => $values,
+            );
+          }
+          foreach ($values as $delta => $value) {
+            if (!is_array($value)) {
+              $values[$delta] = array(
+                $dependee_element['#value_key'] => $value,
+              );
+            }
+          }
+        }
+
+        switch ($options['condition']) {
+          case '!empty':
+            $condition_met = !empty($values);
+            break;
+          case 'empty':
+            $condition_met = empty($values);
+            break;
+          case 'focused':
+            break;
+          case '!focused':
+            $condition_met = TRUE;
+            break;
+          case 'checked':
+            $condition_met = ($dependee_element['#type'] == 'checkbox' && $dependee_element['#default_value'] == 1);
+            break;
+          case '!checked':
+            $condition_met = ($dependee_element['#type'] == 'checkbox' && !$dependee_element['#default_value'] == 1);
+            break;
+          case 'value':
+            if ($values == $options['value']) {
+              $condition_met = TRUE;
+            }
+            break;
+        }
+
+        if ($condition_met) {
+          switch ($options['state']) {
+            case 'visible':
+              break;
+            case '!visible':
+              $form[$key]['#access'] = FALSE;
+              break;
+            case '!disabled':
+              $form[$key]['#disabled'] = FALSE;
+              break;
+            case 'disabled':
+              $form[$key]['#disabled'] = TRUE;
+              break;
+            case '!required':
+              $form[$key]['#required'] = TRUE;
+              break;
+            case 'required':
+              $form[$key]['#required'] = FALSE;
+              break;
+          }
+        }
+        else {
+          switch ($options['state']) {
+            case 'visible':
+              $form[$key]['#access'] = FALSE;
+              break;
+            case '!visible':
+              break;
+            case '!disabled':
+              $form[$key]['#disabled'] = TRUE;
+              break;
+            case 'disabled':
+              $form[$key]['#disabled'] = FALSE;
+              break;
+            case '!required':
+              $form[$key]['#required'] = TRUE;
+              break;
+            case 'required':
+              $form[$key]['#required'] = FALSE;
+              break;
+          }
+        }
+      }
     }
   }
 
