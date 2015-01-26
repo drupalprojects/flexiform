@@ -52,3 +52,12 @@ function flexiform_multistep_flexiform_wrapper_alter(&$wrapper, FlexiformDisplay
     module_load_include('inc', 'flexiform_multistep', 'flexiform_multistep.pages');
   }
 }
+
+/**
+ * Implements hook_flexiform_rules_arguments_alter().
+ */
+function flexiform_multistep_flexiform_rules_arguments_alter(&$args, $form_state, $event) {
+  if (!empty($form_state['step'])) {
+    $args['flexiform_step'] = $form_state['step'];
+  }
+}

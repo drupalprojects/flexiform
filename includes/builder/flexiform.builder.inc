@@ -192,8 +192,14 @@ class FlexiformBuilderFlexiform extends FlexiformBuilder {
       );
 
       // Fire the most specific rules first and track back to the less specific.
+      $rule_name = 'flexiform_submit_'.$this->flexiform->form;
+      drupal_alter('flexiform_rules_arguments', $form['#flexiform_entities'], $form_state, $rule_name);
       rules_invoke_event_by_args('flexiform_submit_'.$this->flexiform->form, $form['#flexiform_entities']);
+      $rule_name = 'flexiform_group_submit_'.$this->flexiform->form_group;
+      drupal_alter('flexiform_rules_arguments', $args, $form_state, $rule_name);
       rules_invoke_event_by_args('flexiform_group_submit_'.$this->flexiform->form_group, $args);
+      $rule_name = 'flexiform_any_submit';
+      drupal_alter('flexiform_rules_arguments', $args, $form_state, $rule_name);
       rules_invoke_event_by_args('flexiform_any_submit', $args);
     }
   }
