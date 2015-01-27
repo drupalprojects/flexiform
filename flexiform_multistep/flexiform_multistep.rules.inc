@@ -9,7 +9,7 @@
  */
 function flexiform_multistep_rules_event_info_alter(&$events) {
   foreach ($events as $name => &$event) {
-    if (substr($name, 0, 0) == 'flexiform' && !empty($event['variables']['base_entity'])) {
+    if (substr($name, 0, 9) == 'flexiform' && !empty($event['variables']['base_entity'])) {
       $event['variables']['flexiform_step'] = array(
         'type' => 'text',
         'label' => t('Step'),
