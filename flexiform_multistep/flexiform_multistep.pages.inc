@@ -264,7 +264,7 @@ function flexiform_multistep_step_next(&$form_state) {
   $step_settings = isset($form_state['step_group']->format_settings['instance_settings']) ? $form_state['step_group']->format_settings['instance_settings'] : array();
 
   // Inherit settings from the form if we're supposed to.
-  if (!isset($step_settings['save_entities'])) {
+  if (empty($step_settings['save_entities'])) {
     $step_settings['save_entities'] = !empty($form_settings['save_entities']) ? 'y' : 'n';
   }
 
