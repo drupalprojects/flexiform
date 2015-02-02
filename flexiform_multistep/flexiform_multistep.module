@@ -5,6 +5,37 @@
  */
 
 /**
+ * Implements hook_form_alter() on behalf of inline entity form for multistep.
+ *
+ * In a ctools wizard the 'next' button is in a different location in the form
+ * array and inline entity form does not cater for this.
+ *
+ * @see inline_entity_form_form_alter
+ */
+function flexiform_multistep_form_alter(&$form, &$form_state, $form_id) {
+  if (!empty($form_state['inline_entity_form'])) {
+    $submit_element = NULL;
+    if ((!empty($form['buttons']['next'])) {
+      $submit_element = &$form['buttons']['next'];
+    }
+
+    if ($submit_element) {
+      $submit = array_merge(array('inline_entity_form_trigger_submit'), $form['#submit']);
+      if (!empty($submit_element['#submit'])){
+        $submit = array_merge($submit, $submit_element['#submit']);
+        // $form['#submit'] and $submit_element['#submit'] might have matching
+        // callbacks, resulting in duplicates and double processing.
+        $submit_element['#submit'] = array_unique($submit);
+      }
+      else{
+        $submit_element['#submit'] = $submit;
+      }
+      $submit_element['#ief_submit_all'] = TRUE;
+    }
+  }
+}
+
+/**
  * Implements hook_form_FORM_ID_alter() for flexiform_manage_form_fields_form().
  */
 function flexiform_multistep_form_flexiform_manage_form_fields_form_alter(&$form, &$form_state, $form_id) {
