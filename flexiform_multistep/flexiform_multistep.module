@@ -15,7 +15,7 @@
 function flexiform_multistep_form_alter(&$form, &$form_state, $form_id) {
   if (!empty($form_state['inline_entity_form'])) {
     $submit_element = NULL;
-    if ((!empty($form['buttons']['next'])) {
+    if (!empty($form['buttons']['next'])) {
       $submit_element = &$form['buttons']['next'];
     }
 
