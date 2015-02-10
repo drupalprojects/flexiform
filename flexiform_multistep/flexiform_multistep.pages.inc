@@ -54,6 +54,7 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = N
 
   // Build our form state with our arguments.
   $form_state = array(
+    'flexiform_multistep' => TRUE,
     'build_info' => array(
       'args' => array(
         $flexiform,
