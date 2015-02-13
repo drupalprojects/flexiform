@@ -14,6 +14,7 @@ function flexiform_multistep_rules_event_info_alter(&$events) {
         'type' => 'text',
         'label' => t('Step'),
         'description' => t('The step that has been submitted.'),
+        'optional' => TRUE,
       );
     }
   }
