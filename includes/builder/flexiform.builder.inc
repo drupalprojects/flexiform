@@ -41,7 +41,13 @@ class FlexiformBuilderFlexiform extends FlexiformBuilder {
     $this->entityManager->setBaseEntity($this->base_entity);
     $state['flexiform_entity_manager'] = $this->entityManager;
     return $this->entityManager;
+  }
 
+  /**
+   * Set a entity callback.
+   */
+  public function registerEntityCallback($type, $namespace, $callback, $extra = array(), &$state = array()) {
+    $this->getEntityManager($state)->registerCallback($type, $namespace, $callback, $extra);
   }
 
   /**

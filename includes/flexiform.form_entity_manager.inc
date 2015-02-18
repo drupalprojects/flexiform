@@ -76,6 +76,12 @@ class FlexiformFormEntityManagerDefault implements FlexiformFormEntityManagerInt
   protected $builder;
 
   /**
+   * An array of callbacks keyed by $type and $entity_namespace
+   * @var array
+   */
+  protected $callbacks = array();
+
+  /**
    * The entity settings keyed by entity namespace.
    * @var array
    */
@@ -327,12 +333,58 @@ class FlexiformFormEntityManagerDefault implements FlexiformFormEntityManagerInt
       }
 
       if ($handler = $this->getEntityHandler($namespace)) {
+        $this->executeCallbacks('preSave', $namespace);
         $handler->saveEntity($this->getEntity($namespace));
+        $this->executeCallbacks('postSave', $namespace);
       }
     }
 
     // Reset the skip entities.
     $this->skip_save = array();
+  }
+
+  /**
+   * Execute Save Callbacks.
+   *
+   * Save callbacks can be registered against an entity_namespace to be run
+   * just after (post) or just before (pre) an entity is saved. If an entity is
+   * skipped for whatever reason these callbacks do not run.
+   *
+   * @param string $type
+   *   The type of callback to fire, either 'postSave' or 'preSave'
+   * @param string $namespace
+   *   The namespace of the entity.
+   */
+  public function executeCallbacks($type, $namespace) {
+    if (empty($this->callbacks[$type][$namespace])) {
+      return;
+    }
+
+    foreach ($this->callbacks[$type][$namespace] as $callback) {
+      array_unshift($callback['extra_args'], $this->getEntity($namespace));
+      call_user_func_array($callback['callback'], $callback['extra_args']);
+    }
+  }
+
+  /**
+   * Register a Callback
+   *
+   * Register callbacks to be run at certain times by the entity manager.
+   *
+   * @param string $type
+   *   The type of callback to fire, either 'post' or 'pre'
+   * @param string $namespace
+   *   The namespace of the entity.
+   * @param callable $callback
+   *   The callback to fire.
+   * @param array $extra
+   *   Array of extra arguments to pass to the callback.
+   */
+  public function registerCallback($type, $namespace, $callback, $extra = array()) {
+    $this->callbacks[$type][$namespace][] = array(
+      'callback' => $callback,
+      'extra_args' => $extra,
+    );
   }
 
   /**
