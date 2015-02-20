@@ -129,6 +129,27 @@ class FlexiformElementField extends FlexiformElement implements FlexiformElement
   }
 
   /**
+   * Check widget behavior.
+   *
+   * @param array $instance
+   *   (optional) The instance array to check the widget behavior of. Defaults
+   *   to the result of getInstance().
+   * @param string $op
+   *   (optional) The $op to check the behavior of, either 'default value' (default) or 'multiple values'.
+   * @param $behavior
+   *   (optional) The behavior.
+   *
+   * @see field_behaviors_widget()
+   */
+  public function checkWidgetBehavior($instance = array(), $op = 'default value', $behavior = FIELD_BEHAVIOR_DEFAULT) {
+    if (empty($instance)) {
+      $instance = $this->getInstance();
+    }
+
+    return (field_behaviors_widget($op, $instance) == $behavior);
+  }
+
+  /**
    * Get the Difference of two settings arrays.
    *
    * @see http://uk1.php.net/manual/en/function.array-diff-assoc.php#111675
@@ -185,41 +206,46 @@ class FlexiformElementField extends FlexiformElement implements FlexiformElement
     $fake_form_id = 'field_ui_field_edit_form';
     drupal_alter($hooks, $form, $form_state, $fake_form_id);*/
 
-    // Allow changes to the default values regardless of anything else thats going on.
-    $form['instance']['use_default_value_function'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Use a Default Value Function'),
-      '#default_value' => !(field_behaviors_widget('default value', $instance) == FIELD_BEHAVIOR_DEFAULT && empty($instance['default_value_function'])),
-    );
-    $form['instance']['default_value_function'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Default Value Function'),
-      '#description' => t('If you wish to use a custom default value function, enter the name of it here. Reccommended for advanced users only.'),
-      '#default_value' => isset($instance['default_value_function']) ? $instance['default_value_function'] : NULL,
-      '#states' => array('invisible' => array(':input[name="instance[use_default_value_function]"]' => array('checked' => FALSE))),
-    );
-    $form['instance']['default_value_widget'] = field_ui_default_value_widget($this->getField(), $instance, $form, $form_state);
-    $form['instance']['default_value_widget']['#states'] = array(
-      'visible' => array(':input[name="instance[use_default_value_function]"]' => array('checked' => FALSE)),
-    );
-    $form['instance']['use_default_value_tokens'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Use Tokens in Default Value'),
-      '#default_value' => !empty($instance['use_default_value_tokens']),
-      '#states' => array(
+    // If the default value behaviour is default, expose our better default
+    // value form.
+    if ($this->checkWidgetBehavior()) {
+      // Allow changes to the default values regardless of anything else thats
+      // going on.
+      $form['instance']['use_default_value_function'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Use a Default Value Function'),
+        '#default_value' => !empty($instance['default_value_function']),
+      );
+      $form['instance']['default_value_function'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Default Value Function'),
+        '#description' => t('If you wish to use a custom default value function, enter the name of it here. Reccommended for advanced users only.'),
+        '#default_value' => isset($instance['default_value_function']) ? $instance['default_value_function'] : NULL,
+        '#states' => array('invisible' => array(':input[name="instance[use_default_value_function]"]' => array('checked' => FALSE))),
+      );
+      $form['instance']['default_value_widget'] = field_ui_default_value_widget($this->getField(), $instance, $form, $form_state);
+      $form['instance']['default_value_widget']['#states'] = array(
         'visible' => array(':input[name="instance[use_default_value_function]"]' => array('checked' => FALSE)),
-      ),
-    );
-    $form['instance']['contexts'] = array(
-      '#title' => t('Substitutions'),
-      '#type' => 'fieldset',
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-      '#status' => array(
-        'visible' => array(':input[name="instance[use_default_value_tokens]"]' => array('checked' => TRUE)),
-      ),
-    );
-    $form['instance']['contexts']['contexts'] = $this->getCtoolsSubstitutionsList();
+      );
+      $form['instance']['use_default_value_tokens'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Use Tokens in Default Value'),
+        '#default_value' => !empty($instance['use_default_value_tokens']),
+        '#states' => array(
+          'visible' => array(':input[name="instance[use_default_value_function]"]' => array('checked' => FALSE)),
+        ),
+      );
+      $form['instance']['contexts'] = array(
+        '#title' => t('Substitutions'),
+        '#type' => 'fieldset',
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+        '#status' => array(
+          'visible' => array(':input[name="instance[use_default_value_tokens]"]' => array('checked' => TRUE)),
+        ),
+      );
+      $form['instance']['contexts']['contexts'] = $this->getCtoolsSubstitutionsList();
+    }
 
     // Rename the boxes and discourage use of field settings.
     $form['instance']['#title'] = t('Form Settings');
@@ -244,7 +270,8 @@ class FlexiformElementField extends FlexiformElement implements FlexiformElement
    * Overrides FlexiformElement::configureFormValidate().
    */
   public function configureFormValidate($form, &$form_state, $flexiform) {
-    if ($form_state['values']['instance']['use_default_value_function']) {
+    if ($this->checkWidgetBehavior()
+        && $form_state['values']['instance']['use_default_value_function']) {
       unset($form['instance']['default_value_widget']);
     }
 
@@ -270,18 +297,20 @@ class FlexiformElementField extends FlexiformElement implements FlexiformElement
     $instance = array_merge($element_instance, $instance);
     $original_instance = field_read_instance($instance['entity_type'], $instance['field_name'], $instance['bundle']);
 
-    if (!$instance['use_default_value_function']) {
-      $element = $form['instance']['default_value_widget'];
+    if ($this->checkWidgetBehavior()) {
+      if (!$instance['use_default_value_function']) {
+        $element = $form['instance']['default_value_widget'];
 
-      // Extract field values.
-      $items = array();
-      field_default_extract_form_values(NULL, NULL, $element_field, $element_instance, LANGUAGE_NONE, $items, $element, $form_state);
-      field_default_submit(NULL, NULL, $element_field, $element_instance, LANGUAGE_NONE, $items, $element, $form_state);
+        // Extract field values.
+        $items = array();
+        field_default_extract_form_values(NULL, NULL, $element_field, $element_instance, LANGUAGE_NONE, $items, $element, $form_state);
+        field_default_submit(NULL, NULL, $element_field, $element_instance, LANGUAGE_NONE, $items, $element, $form_state);
 
-      $instance['default_value'] = $items ? $items : NULL;
-    }
-    else {
-      unset($instance['default_value']);
+        $instance['default_value'] = $items ? $items : NULL;
+      }
+      else {
+        unset($instance['default_value']);
+      }
     }
 
     // Cast Required to a boolean so it doesn't get erroneously stored.
@@ -306,7 +335,8 @@ class FlexiformElementField extends FlexiformElement implements FlexiformElement
     $instance = $this->getInstance();
 
     // Deal with default value tokens.
-    if (!empty($instance['use_default_value_tokens'])) {
+    if ($this->checkWidgetBehavior()
+        && !empty($instance['use_default_value_tokens'])) {
       $defaults = &$instance['default_value'];
       foreach ($defaults as $delta => &$item) {
         foreach ($item as &$value) {
