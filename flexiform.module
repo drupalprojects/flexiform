@@ -271,6 +271,10 @@ function flexiform_formfield_load($string) {
  */
 function flexiform_theme() {
   return array(
+    'flexiform' => array(
+      'render element' => 'element',
+      'template' => 'flexiform',
+    ),
     'flexiform_field_table' => array(
       'render element' => 'elements',
     ),
@@ -282,6 +286,14 @@ function flexiform_theme() {
       'file' => 'flexiform.admin.inc',
     ),
   );
+}
+
+/**
+ * Preprocessor for flexiforms.
+ */
+function template_preprocess_flexiform(&$variables) {
+  $variables['form'] = drupal_render_children($variables['element']);
+  $variables['form_html_id'] = 'flexiform--' . $variables['element']['#id'];
 }
 
 /**
