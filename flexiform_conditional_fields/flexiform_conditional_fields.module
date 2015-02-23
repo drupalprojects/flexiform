@@ -104,6 +104,18 @@ function flexiform_conditional_fields_element_after_build($element, &$form_state
         if (!empty($field_parents)) {
           $field['#field_parents'] = $field_parents;
         }
+
+        // Add validator to check required status on submit.
+        if ($element['#type'] != 'container'
+          && in_array($dependency['options']['state'], array('required', '!required'))
+          && !empty($form[$dependency['dependee']]['#flexiform_element'])) {
+          $element['#element_validate']['fcfv'] = 'flexiform_conditional_fields_required_element_validate';
+          $element['#fcfv_elements'][$dependency['dependee']] = array(
+            'element' => $form[$dependency['dependee']],
+            'state' => $dependency['options']['state'],
+            'options' => $dependency['options'],
+          );
+        }
       }
     }
   }
@@ -125,7 +137,108 @@ function flexiform_conditional_fields_element_after_build($element, &$form_state
     unset ($form['#conditional_fields'][$field_name]);
   }
 
+  // We must make sure flexiform's after build goes last.
+  foreach ($form['#after_build'] as $key => $after) {
+    if ($after == 'flexiform_conditional_fields_form_after_build') {
+      unset($form['#after_build'][$key]);
+    }
+  }
+  _conditional_fields_element_add_property($form, '#after_build', 'flexiform_conditional_fields_form_after_build', 'append');
+
   return $element;
+}
+
+/**
+ * Remove conditional fields validate handler.
+ */
+function flexiform_conditional_fields_form_after_build($form, &$form_state) {
+  // Unset the normal conditional fields validator.
+  foreach ($form['#validate'] as $key => $validate) {
+    if ($validate == 'conditional_fields_form_validate') {
+      unset($form['#validate'][$key]);
+    }
+  }
+
+  // Unset the normal conditional fields element validator.
+  foreach (element_children($form) as $child) {
+    if (!empty($form[$child]['#element_validate'])) {
+      foreach ($form[$child]['#element_validate'] as $key => $validate) {
+        if ($validate == 'conditional_fields_dependent_validate') {
+          unset($form[$child]['#element_validate'][$key]);
+        }
+      }
+    }
+  }
+
+  return $form;
+}
+
+/**
+ * Validate elements that have a required dependency.
+ */
+function flexiform_conditional_fields_required_element_validate($element, &$form_state, $form) {
+  // Get the flexiform_element.
+  $flexiform_element = FALSE;
+  if (!empty($element['#flexiform_element'])) {
+    $flexiform_element = $element['#flexiform_element'];
+  }
+  else {
+    $array_parents = $element['#array_parents'];
+    while (array_pop($array_parents) !== FALSE) {
+      $el = drupal_array_get_nested_value($form, $array_parents);
+      if (!empty($el['#flexiform_element'])) {
+        $flexiform_element = $el['#flexiform_element'];
+        break;
+      }
+    }
+  }
+
+  // If we never found a flexiform_element, skip over.
+  if (!$flexiform_element) {
+    return;
+  }
+
+  // If the element is not empty, then we're never going to validate badly.
+  if (!$flexiform_element->formIsEmpty($form, $form_state, $element['#entity'], $element['#language'])) {
+    return;
+  }
+
+  // Now we need to work out whether any of the conditions were met.
+  foreach ($element['#fcfv_elements'] as $namespace => $dependency) {
+    $condition_met = flexiform_conditional_fields_element_condition_met($dependency['element'], $form_state, $dependency['options']);
+    if (($dependency['state'] == 'required' && $condition_met)
+        || (!$condition_met && $dependency['state'] == '!required')) {
+      form_error($element, t('@label is required', array('@label' => $flexiform_element->label())));
+    }
+  }
+}
+
+/**
+ * Work out whether a conditional field condition has been met by the values in form_state.
+ */
+function flexiform_conditional_fields_element_condition_met($element, &$form_state, $dependency) {
+  $condition = $dependency['condition'];
+  $flexiform_element = $element['#flexiform_element'];
+
+  // Get the entity and language.
+  $language = $element['#language'];
+  $entity = NULL;
+  if (!empty($element['#entity'])) {
+    $entity = $element['#entity'];
+  }
+  else if (!empty($element[$language]['#entity'])) {
+    $entity = $element[$language]['#entity'];
+  }
+  else {
+    $children = element_children($element[$language]);
+    $child = reset($children);
+    if (!empty($element[$language][$child]['#entity'])) {
+      $entity = $element[$language][$child]['#entity'];
+    }
+  }
+
+  $values = $flexiform_element->formExtractValues($form_state['complete form'], $form_state, $entity, $language);
+  return conditional_fields_evaluate_dependency('edit', $values, $dependency);
 }
 
 /**
