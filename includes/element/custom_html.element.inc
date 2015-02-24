@@ -21,6 +21,7 @@ class FlexiformElementCustomHtml extends FlexiformRepeatableElement {
 
     $form[$this->element_namespace] = array(
       '#type' => 'item',
+      '#support_flexiform_conditional_fields' => TRUE,
       '#markup' => check_markup($value, $format),
       '#parents' => $parents,
     );

@@ -52,22 +52,47 @@ function flexiform_conditional_fields_element_info_alter(&$types) {
 function flexiform_conditional_fields_element_after_build($element, &$form_state) {
   // Ensure that the element is a field.
   if (isset($element['#field_name'])) {
-    $field = $element;
+    $field = &$element;
   }
   elseif (isset($element['#language'], $element[$element['#language']], $element[$element['#language']]['#field_name'])) {
     // Some fields are wrapped in containers before processing.
-    $field = $element[$element['#language']];
+    $field = &$element[$element['#language']];
   }
   // This isn't a field, but we'll allow it through anyway..
-  else {
-    $field = $element;
+  elseif (!empty($element['#support_flexiform_conditional_fields'])) {
+    $field = &$element;
+  }
+
+  if (empty($field)) {
+    return $element;
   }
 
   // Only act on flexiforms.
-  $form = &$form_state['complete form'];
+  $total_form = &$form_state['complete form'];
+  $form = FALSE;
+  if (empty($form_state['flexiform_state'])) {
+    return $element;
+  }
+
+  if (!empty($form_state['flexiform_state']['flexiform_form_parents'])) {
+    $array_parents = $form_state['flexiform_state']['flexiform_form_parents'];
+    $form = &drupal_array_get_nested_value($total_form, $array_parents);
+  }
+  else {
+    $array_parents = $field['#array_parents'];
+    while (array_pop($array_parents) !== FALSE) {
+      $form_state['flexiform_state']['flexiform_form_parents'] = $array_parents;
+      $form = &drupal_array_get_nested_value($total_form, $array_parents);
+      if (!empty($form['#flexiform_builder'])) {
+        break;
+      }
+    }
+  }
+
   if (empty($form['#flexiform'])) {
     return $element;
   }
+
   $flexiform = $form['#flexiform'];
 
   $dependencies = flexiform_conditional_fields_load_depencies($flexiform);
@@ -81,7 +106,7 @@ function flexiform_conditional_fields_element_after_build($element, &$form_state
 
   while (count($field_array_parents) && empty($flexiform_element['#flexiform_element'])) {
     array_pop($field_array_parents);
-    $flexiform_element = drupal_array_get_nested_value($form, $field_array_parents);
+    $flexiform_element = drupal_array_get_nested_value($total_form, $field_array_parents);
   }
 
   if (empty($flexiform_element['#flexiform_element'])) {
@@ -94,23 +119,24 @@ function flexiform_conditional_fields_element_after_build($element, &$form_state
   // Attach dependent.
   if (isset($dependencies['dependents'][$element_namespace])) {
     foreach ($dependencies['dependents'][$element_namespace] as $id => $dependency) {
-      if (!isset($form['#conditional_fields'][$element_namespace]['dependees'][$id])) {
+      if (!isset($total_form['#conditional_fields'][$element_namespace]['dependees'][$id])) {
         if (!empty($field['#field_parents'])) {
           $field_parents = $field['#field_parents'];
         }
         $field['#field_parents'] = $field_array_parents;
         array_pop($field['#field_parents']);
-        conditional_fields_attach_dependency($form, array('#field_name' => $dependency['dependee']), $field, $dependency['options'], $id);
+        conditional_fields_attach_dependency($total_form, array('#field_name' => $dependency['dependee']), $field, $dependency['options'], $id);
         if (!empty($field_parents)) {
           $field['#field_parents'] = $field_parents;
         }
 
         // Add validator to check required status on submit.
-        if ($element['#type'] != 'container'
+        // We add this to the actual input item rather than the container.
+        if (!empty($field['#type']) && $field['#type'] != 'container'
           && in_array($dependency['options']['state'], array('required', '!required'))
           && !empty($form[$dependency['dependee']]['#flexiform_element'])) {
-          $element['#element_validate']['fcfv'] = 'flexiform_conditional_fields_required_element_validate';
-          $element['#fcfv_elements'][$dependency['dependee']] = array(
+          $field['#element_validate']['fcfv'] = 'flexiform_conditional_fields_required_element_validate';
+          $field['#fcfv_elements'][$dependency['dependee']] = array(
             'element' => $form[$dependency['dependee']],
             'state' => $dependency['options']['state'],
             'options' => $dependency['options'],
@@ -126,8 +152,8 @@ function flexiform_conditional_fields_element_after_build($element, &$form_state
   // define per-element sets of dependency values.
   if (isset($dependencies['dependees'][$element_namespace])) {
     foreach ($dependencies['dependees'][$element_namespace] as $id => $dependency) {
-      if (!isset($form['#conditional_fields'][$element_namespace]['dependents'][$id])) {
-        conditional_fields_attach_dependency($form, $field, array('#field_name' => $dependency['dependent']), $dependency['options'], $id);
+      if (!isset($total_form['#conditional_fields'][$element_namespace]['dependents'][$id])) {
+        conditional_fields_attach_dependency($total_form, $field, array('#field_name' => $dependency['dependent']), $dependency['options'], $id);
       }
     }
   }
@@ -143,7 +169,7 @@ function flexiform_conditional_fields_element_after_build($element, &$form_state
       unset($form['#after_build'][$key]);
     }
   }
-  _conditional_fields_element_add_property($form, '#after_build', 'flexiform_conditional_fields_form_after_build', 'append');
+  _conditional_fields_element_add_property($total_form, '#after_build', 'flexiform_conditional_fields_form_after_build', 'append');
 
   return $element;
 }
@@ -198,14 +224,24 @@ function flexiform_conditional_fields_required_element_validate($element, &$form
     return;
   }
 
+  // Get the form element that is the root of the flexiform.
+  while (array_pop($array_parents) !== FALSE) {
+    $el = drupal_array_get_nested_value($form, $array_parents);
+    if (!empty($el['#flexiform_builder'])) {
+      $flexiform_form = $el;
+      break;
+    }
+  }
+
+
   // If the element is not empty, then we're never going to validate badly.
-  if (!$flexiform_element->formIsEmpty($form, $form_state, $element['#entity'], $element['#language'])) {
+  if (!$flexiform_element->formIsEmpty($flexiform_form, $form_state, $element['#entity'], $element['#language'])) {
     return;
   }
 
   // Now we need to work out whether any of the conditions were met.
   foreach ($element['#fcfv_elements'] as $namespace => $dependency) {
-    $condition_met = flexiform_conditional_fields_element_condition_met($dependency['element'], $form_state, $dependency['options']);
+    $condition_met = flexiform_conditional_fields_element_condition_met($dependency['element'], $flexiform_form, $form_state, $dependency['options']);
     if (($dependency['state'] == 'required' && $condition_met)
         || (!$condition_met && $dependency['state'] == '!required')) {
       form_error($element, t('@label is required', array('@label' => $flexiform_element->label())));
@@ -216,7 +252,7 @@ function flexiform_conditional_fields_required_element_validate($element, &$form
 /**
  * Work out whether a conditional field condition has been met by the values in form_state.
  */
-function flexiform_conditional_fields_element_condition_met($element, &$form_state, $dependency) {
+function flexiform_conditional_fields_element_condition_met($element, $form, &$form_state, $dependency) {
   $condition = $dependency['condition'];
   $flexiform_element = $element['#flexiform_element'];
 
@@ -237,8 +273,19 @@ function flexiform_conditional_fields_element_condition_met($element, &$form_sta
     }
   }
 
-  $values = $flexiform_element->formExtractValues($form_state['complete form'], $form_state, $entity, $language);
-  return conditional_fields_evaluate_dependency('edit', $values, $dependency);
+  $values = $flexiform_element->formExtractValues($form, $form_state, $entity, $language);
+  switch ($condition) {
+    case 'value':
+      return conditional_fields_evaluate_dependency('edit', $values, $dependency);
+    case 'checked':
+      return !empty($values[0]['value']);
+    case '!checked':
+      return empty($values[0]['value']);
+    case 'empty':
+    case '!empty':
+      $is_empty = $flexiform_element->formIsEmpty($form, $form_state, $entity, $language);
+      return $condition == '!empty' Xor $is_empty;
+  }
 }
 
 /**
