@@ -192,7 +192,7 @@ class FlexiformUIController extends EntityDefaultUIController {
       'access arguments' => array('administer flexiforms'),
     );
 
-    $items["{$this->path}/manage/{$wildcard}/edit"]['context'] = MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE;
+    $items["{$this->path}/manage/%entity_object/edit"]['context'] = MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE;
 
     $items["{$this->path}/manage/{$wildcard}/form-fields"] = array(
       'title' => 'Manage form fields',
