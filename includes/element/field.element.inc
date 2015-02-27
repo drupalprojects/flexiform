@@ -193,11 +193,68 @@ class FlexiformElementField extends FlexiformElement implements FlexiformElement
   }
 
   /**
+   * Add the Field Settings section to the config form.
+   *
+   * We add this method separately as it allows us to pass our overridden field
+   * settings to the form, whereas field_ui_field_edit_form assumes
+   * field_info_field will provide the correct values.
+   *
+   * @param array $element
+   *   The Field Settings section of the form.
+   * @param array &$form_state
+   *   The form state.
+   * @param array $instance
+   *   Instance settings.
+   * @param array $field
+   *   The field settings.
+   *
+   * @return array
+   *   The form element for the field settings.
+   */
+  public function configureFieldSettingsForm($element, $form_state, $field, $instance) {
+    $has_data = field_has_data($field);
+
+    // Create a form structure for the field values.
+    $element = array(
+      '#type' => 'fieldset',
+      '#title' => t('Field Settings'),
+      '#description' => t('These settings will override default Field API settings for this field. Overrides will only apply to this flexiform. <strong>Handle with care: Altering these settings can cause unexpected results.</strong>'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
+    );
+
+    // Build the configurable field values.
+    $description = t('Maximum number of values users can enter for this field.');
+    if (field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT) {
+      $description .= '<br/>' . t("'Unlimited' will provide an 'Add more' button so the users can add as many values as they like.");
+    }
+    $element['cardinality'] = array(
+      '#type' => 'select',
+      '#title' => t('Number of values'),
+      '#options' => array(FIELD_CARDINALITY_UNLIMITED => t('Unlimited')) + drupal_map_assoc(range(1, 10)),
+      '#default_value' => $field['cardinality'],
+      '#description' => $description,
+    );
+
+    // Add additional field type settings. The field type module is
+    // responsible for not returning settings that cannot be changed if
+    // the field already has data.
+    $additions = module_invoke($field['module'], 'field_settings_form', $field, $instance, $has_data);
+    if (is_array($additions)) {
+      $element['settings'] = $additions;
+    }
+
+    return $element;
+  }
+
+  /**
    * Overrides FlexiformElement::configureForm().
    */
   public function configureForm($form, &$form_state, $flexiform) {
     form_load_include($form_state, 'inc', 'field_ui', 'field_ui.admin');
     $instance = $this->getInstance();
+    $field = $this->getField();
     $form = field_ui_field_edit_form($form, $form_state, $instance);
 
     // Invoke hook_form_alter() and hook_form_field_ui_field_edit_form_alter()
@@ -250,10 +307,7 @@ class FlexiformElementField extends FlexiformElement implements FlexiformElement
     // Rename the boxes and discourage use of field settings.
     $form['instance']['#title'] = t('Form Settings');
     $form['instance']['#description'] = t('These settings will override default Field API settings for this field instance. Overrides will only apply to this flexiform.');
-    $form['field']['#title'] = t('Field Settings');
-    $form['field']['#description'] = t('These settings will override default Field API settings for this field. Overrides will only apply to this flexiform. <strong>Handle with care: Altering these settings can cause unexpected results.</strong>');
-    $form['field']['#collapsible'] = TRUE;
-    $form['field']['#collapsed'] = TRUE;
+    $form['field'] = $this->configureFieldSettingsForm($form, $form_state, $field, $instance);
 
     // Delete the 'Save Settings' button added by FieldUI.
     unset($form['actions']);
