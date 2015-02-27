@@ -44,6 +44,16 @@ class FlexiformUIController extends EntityDefaultUIController {
       '#default_value' => drupal_implode_tags($tags),
       '#autocomplete_path' => 'admin/structure/flexiforms/autocomplete_tags',
     );
+    $groups = flexiform_get_groups();
+    if (count($groups) > 0) {
+      $form['filter']['form_group'] = array(
+        '#title' => t('Filter by group'),
+        '#type' => 'select',
+      );
+      foreach ($groups as $group => $info) {
+        $form['filter']['form_group']['#options'][$group] = $info['label'];
+      }
+    }
     $form['filter']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Filter'),
