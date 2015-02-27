@@ -822,7 +822,7 @@ function flexiform_manage_form_fields_form($form, &$form_state, $flexiform) {
   $max_weight = flexiform_field_max_weight($flexiform);
   $entity_options = array();
   foreach($entities as $entity_namespace => $info) {
-    $entity_options[$entity_namespace] = $entity_namespace;
+    $entity_options[$entity_namespace] = $info['label'];
   }
 
   if (isset($form_state['values']['fields']['_add_element']['entity'])) {
