@@ -12,6 +12,9 @@ function flexiform_flexiform_group_info() {
     'general' => array(
       'label' => t('General'),
     ),
+    'test' => array(
+      'label' => t('Test'),
+    ),
   );
 }
 
@@ -374,7 +377,7 @@ function flexiform_flexiform_element_info() {
       'group' => 'Node',
     );
   }
-  
+
   $elements['user']['user']['user:name'] = array(
     'label' => t('Name'),
     'class' => 'FlexiformElementUserName',

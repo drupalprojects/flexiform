@@ -34,6 +34,13 @@ function flexiform_webform_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'form_group' => array(
+        'description' => 'The group that this flexiform webform belongs to.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => 'general',
+      ),
       'data' => array(
         'type' => 'text',
         'not null' => FALSE,
@@ -112,4 +119,23 @@ function flexiform_webform_schema() {
   );
 
   return $schema;
+}
+
+/**
+ * Add form group column.
+ */
+function flexiform_webform_update_7001() {
+  $spec = array(
+    'description' => 'The group that this flexiform webform belongs to.',
+    'type' => 'varchar',
+    'length' => 255,
+    'not null' => TRUE,
+    'default' => 'general',
+  );
+  $keys = array(
+    'indexes' => array(
+      'form_group' => array('form_group'),
+    ),
+  );
+  db_add_field('flexiform_webform', 'form_group', $spec, $keys);
 }
