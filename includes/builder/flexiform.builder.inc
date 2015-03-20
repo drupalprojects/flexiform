@@ -136,6 +136,7 @@ class FlexiformBuilderFlexiform extends FlexiformBuilder {
 
       // Don't show form elements for entities that don't exist.
       if (!$this->getFormEntity($element->getEntityNamespace(), $flexiform_state)) {
+        watchdog('flexiform', 'The "@element" element\'s entity is not gettable, so nothing to show for it on the form.', array('@element' => $element->getElementNamespace()), WATCHDOG_WARNING);
         continue;
       }
 
