@@ -24,11 +24,11 @@ class flexiform_handler_field_add_page_url extends views_handler_field {
     $id = $values->{$this->aliases['id']};
     $flexiform = entity_load_single('flexiform', $id);
 
-    if (empty($flexiform->displays['flexiform_create_entity_page']['enabled'])) {
+    if (empty($flexiform->displays['FlexiformDisplayCreatePage']['enabled'])) {
       return '';
     }
 
-    $path = $flexiform->displays['flexiform_create_entity_page']['path'];
+    $path = $flexiform->displays['FlexiformDisplayCreatePage']['path'];
     return $path;
   }
 }
