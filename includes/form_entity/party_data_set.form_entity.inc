@@ -32,8 +32,10 @@ class FlexiformFormEntityPartyDataSet extends FlexiformFormEntityBase {
 
     // Get the party entity. We like to party. We like to, we like to party.
     $party = $this->getParam('party');
-    $party->getDataSetController($this->getter['data_set_name'])
-      ->attachEntity($entity)
-      ->save(TRUE);
+    if ($party && $entity) {
+      $party->getDataSetController($this->getter['data_set_name'])
+        ->attachEntity($entity)
+        ->save(TRUE);
+    }
   }
 }
