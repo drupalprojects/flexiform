@@ -354,6 +354,48 @@ function flexiform_webform_form_submit(&$form, &$form_state) {
     $message .= drupal_render($list);
     drupal_set_message($message);
   }
+
+  // If the module is enabled clone Panelizer Settings
+  if (module_exists('panelizer')) {
+    $settings = variable_get('panelizer_defaults_flexiform_webform_submission_'.$original, array());
+    variable_set('panelizer_defaults_flexiform_webform_submission_'.$webform->webform, $settings);
+
+    $handler = panelizer_entity_plugin_get_handler('flexiform_webform_submission');
+    foreach ($settings['view modes'] as $mode => $info) {
+      if (empty($info['default'])) {
+        continue;
+      }
+
+      $panelizer = $handler->get_default_panelizer_object($original.'.'.$mode, 'flexiform_webform_submission:'.$original.':default:'.$mode);
+      $panelizer_clone = clone $panelizer;
+      $panelizer_clone->pnid = NULL;
+      $panelizer_clone->did = NULL;
+      $panelizer_clone->export_type = NULL;
+      $panelizer_clone->panelizer_key = $webform->webform;
+      $panelizer_clone->name = 'flexiform_webform_submission:'.$webform->webform.':default';
+
+      if ($mode != 'page_manager') {
+        $panelizer_clone->name .= ":{$mode}";
+      }
+
+      // In order to ensure we don't actually use and modify the default display,
+      // we export and re-import it.
+      $code = panels_export_display($panelizer->display);
+      ob_start();
+      eval($code);
+      ob_end_clean();
+
+      $panelizer_clone->display = $display;
+
+      // First write the display
+      panels_save_display($panelizer_clone->display);
+
+      // Make sure we have the new did.
+      $panelizer_clone->did = $panelizer_clone->display->did;
+
+      ctools_export_crud_save('panelizer_defaults', $panelizer_clone);
+    }
+  }
 }
 
 /**
