@@ -543,7 +543,7 @@ function flexiform_webform_form_flexiform_field_configure_form_fc_submit($form, 
 /**
  * Implements hook_flexiform_build_alter().
  */
-function flexiform_webform_flexiform_build_alter(&$form, &$form_state, $flexifo>
+function flexiform_webform_flexiform_build_alter(&$form, &$form_state, $flexiform) {
   // Do nothing if the fc module is not enabled.
   if (!module_exists('fc')) {
     return;
@@ -553,7 +553,7 @@ function flexiform_webform_flexiform_build_alter(&$form, &$form_state, $flexifo>
   if ($flexiform->base_entity != 'flexiform_webform_submission') {
     return;
   }
-  $webform = entity_load_single('flexiform_webform', $flexiform->base_entity_bu>
+  $webform = entity_load_single('flexiform_webform', $flexiform->base_entity_bundle);
   if (empty($webform->data['fc']['form'])
     || $webform->data['fc']['form'] != $flexiform->form) {
     return;
@@ -571,13 +571,13 @@ function flexiform_webform_flexiform_build_alter(&$form, &$form_state, $flexifo>
 
     $fc = $settings['instance']['settings']['fc'];
     if ($fc['fc_include'] == 'always'
-      || ($fc['fc_include'] == 'entity_exists' && !empty($form['#flexiform_enti>
+      || ($fc['fc_include'] == 'entity_exists' && !empty($form['#flexiform_entities'][$fc['fc_include__entity_exists']]))) {
       $form[$namespace]['#attributes']['class'][] = 'field-fc-included';
       $needs_css = TRUE;
     }
   }
 
   if ($needs_css) {
-    $form['#attached']['css'][] = drupal_get_path('module', 'flexiform_webform'>
+    $form['#attached']['css'][] = drupal_get_path('module', 'flexiform_webform') . '/css/flexiform-webform.fc.css';
   }
 }
