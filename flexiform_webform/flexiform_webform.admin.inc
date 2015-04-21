@@ -285,15 +285,18 @@ function flexiform_webform_form_submit(&$form, &$form_state) {
   $forms = array_filter($form_state['values']['clone_flexiforms']);
   $cloned = array();
   $original = $form_state['values']['cloned_from'];
+  $original_webform = entity_load_single('flexiform_webform', $original);
   foreach (entity_load('flexiform', $forms) as $oldform) {
     $newForm = clone $oldform;
 
     // Clear id
     unset($newForm->id);
 
-    // Work out new machine name.
+    // Work out new label and machine name.
     $new_form = str_replace($original, $webform->webform, $oldform->form, $count);
     $newForm->form = (!empty($count)) ? $new_form : $newForm->form . '_' . $webform->webform;
+    $new_label = str_replace($original_webform->label, $webform->label, $oldform->label, $count);
+    $newForm->label = (!empty($count)) ? $new_label : $oldform->label . ' (' . $webform->label . ')';
 
     // Stop from getting too long
     if (strlen($newForm->form) > 252) {
@@ -324,15 +327,23 @@ function flexiform_webform_form_submit(&$form, &$form_state) {
 
     // Work out menu paths:
     $displays = array(
-      'flexiform_create_entity_page',
-      'flexiform_edit_entity_page'
+      'FlexiformDisplayCreatePage',
+      'FlexiformDisplayEditPage'
     );
 
     foreach ($displays as $display) {
-      if ($newForm->displays[$display]['enabled']) {
+      if (!empty($newForm->displays[$display]['path'])) {
         $path = &$newForm->displays[$display]['path'];
         $new_path = str_replace($original, $webform->webform, $path, $count);
         $path = (!empty($count)) ? $new_path : $path . '/' . $webform->webform;
+      }
+
+      if (!empty($newForm->displays[$display]['title'])) {
+        $title = &$newForm->displays[$display]['title'];
+        $new_title = str_replace($original_webform->label, $webform->label, $title, $count);
+        if (!empty($count)) {
+          $title = $new_title;
+        }
       }
     }
 
