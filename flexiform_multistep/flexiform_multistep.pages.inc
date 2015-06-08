@@ -114,11 +114,18 @@ function flexiform_multistep_step_form($form, &$form_state, $flexiform, $base_en
     }
   }
 
-  // Clear out the multi step field groups.
+  // Clear out the multi step field groups and groups that are not part of this
+  // step.
   foreach ($form['#groups'] as $name => $group) {
     if ($group->format_type == 'flexiform_step') {
       unset($form['#groups'][$name]);
       unset($form['#fieldgroups'][$name]);
+
+      foreach ($form['#group_children'] as $child => $parent) {
+        if ($parent == $name) {
+          unset ($form['#group_children'][$child]);
+        }
+      }
     }
   }
 
@@ -128,6 +135,21 @@ function flexiform_multistep_step_form($form, &$form_state, $flexiform, $base_en
   }
 
   // Hide any elements that aren't in this step.
+  // First, get a list of all of the children of this step group.
+  $step_children = $form_state['step_group']->children;
+  foreach ($form['#groups'] as $group_name => $group_info) {
+    if (in_array($group_name, $step_children)) {
+      $step_children = array_merge($step_children, $group_info->children);
+    }
+  }
+
+  // Remove groups that are not a child of this step.
+  foreach ($form['#groups'] as $name => $group) {
+    if (!in_array($name, $step_children)) {
+      unset($form['#groups'][$name]);
+      unset($form['#fieldgroups'][$name]);
+    }
+  }
   $old_form = $form;
   foreach (element_children($form) as $key) {
     // Preserve special items.
@@ -135,7 +157,7 @@ function flexiform_multistep_step_form($form, &$form_state, $flexiform, $base_en
       continue;
     }
 
-    if (!in_array($key, $form_state['step_group']->children)) {
+    if (!in_array($key, $step_children)) {
       unset($form[$key]);
     }
     else if(module_exists('flexiform_conditional_fields')) {
