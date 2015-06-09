@@ -298,18 +298,6 @@ function flexiform_flexiform_element_info() {
     ->execute()
     ->fetchAllAssoc('form');
 
-  // Add custom form elements to every entity type.
-  foreach (entity_get_info() as $entity_type => $info) {
-    foreach ($info['bundles'] as $bundle => $info) {
-      $elements[$entity_type][$bundle]['custom:html'] = array(
-        'label' => t('Custom HTML'),
-        'class' => 'FlexiformElementCustomHtml',
-        'type' => 'custom_html',
-        'group' => 'Custom',
-      );
-    }
-  }
-
   foreach ($forms as $form) {
     $elements[$form->base_entity][$form->base_entity_bundle]['flexiform:' . $form->form] = array(
       'label' => $form->label,
@@ -402,6 +390,63 @@ function flexiform_flexiform_element_info() {
     'type' => 'roles',
     'group' => 'User',
   );
+
+  // Include ctools content stuff.
+  $panes = $entity_panes = array();
+  if (module_exists('ctools')) {
+    ctools_include('content');
+
+    // Trying to make all ctools content types available is to expensive to fit
+    // into a reasonable load time so limit the exposed content types. Extra
+    // types can be exposed by changing the value of this variable.
+    $exposed_types = variable_get('flexiform_exposed_ctools_content', array('views_panes', 'entity_view'));
+    foreach ($exposed_types as $name) {
+      $type = ctools_get_content_type($name);
+      foreach (ctools_content_get_subtypes($type) as $sub => $info) {
+        if (!empty($info['required context']) && (!is_array($info['required context']) || count($info['required context']) === 1)) {
+          $context = $info['required context'];
+          if (is_array($context)) {
+            $context = reset($context);
+          }
+
+          $entity_type = $context->keywords;
+          if (substr($entity_type, 0, 7) == 'entity:') {
+            $entity_type = substr($entity_type, 7);
+          }
+
+          $entity_panes[$entity_type]["{$name}:{$sub}"] = array(
+            'type' => $name,
+            'subtype' => $sub,
+            'title' => $info['title'],
+            'category' => (is_array($info['category'])) ? reset($info['category']) : $info['category'],
+          );
+        }
+      }
+    }
+  }
+
+  // Add custom form elements to every entity type.
+  foreach (entity_get_info() as $entity_type => $info) {
+    foreach ($info['bundles'] as $bundle => $info) {
+      $elements[$entity_type][$bundle]['custom:html'] = array(
+        'label' => t('Custom HTML'),
+        'class' => 'FlexiformElementCustomHtml',
+        'type' => 'custom_html',
+        'group' => 'Custom',
+      );
+
+      foreach ($entity_panes[$entity_type] as $name => $pinfo) {
+        $elements[$entity_type][$bundle]['ctools:'.$name] = array(
+          'label' => $pinfo['title'],
+          'class' => 'FlexiformElementCtoolsContent',
+          'type' => 'ctools_content',
+          'group' => $pinfo['category'],
+          'content_type' => $pinfo['type'],
+          'sub_type' => $pinfo['subtype'],
+        );
+      }
+    }
+  }
 
   return $elements;
 }
