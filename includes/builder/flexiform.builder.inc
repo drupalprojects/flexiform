@@ -209,5 +209,7 @@ class FlexiformBuilderFlexiform extends FlexiformBuilder {
       drupal_alter('flexiform_rules_arguments', $args, $form_state, $rule_name);
       rules_invoke_event_by_args('flexiform_any_submit', $args);
     }
+
+    $this->setFlexiformState($form, $form_state);
   }
 }

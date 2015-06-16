@@ -16,8 +16,11 @@
  *   The page array.
  */
 function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = NULL) {
+  global $user;
+
   // Start setting up our ctools wizard multistep form info.
   ctools_include('wizard');
+  ctools_include('object-cache');
 
   $menu_item = menu_get_item();
   $settings = isset($flexiform->settings['flexiform_multistep']) ? $flexiform->settings['flexiform_multistep'] : array();
@@ -52,17 +55,42 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = N
   }
   uasort($form_info['forms'], 'drupal_sort_weight');
 
+  // Cache important objects to maintain state between steps.
+  $cache_key = $form_info['id'];
+  if ($base_entity->is_new) {
+    $entity_info = entity_get_info($flexiform->base_entity);
+    $cache_key .= ':'.$base_entity->{$entity_info['entity keys']['id']};
+  }
+  $cache_key .= ':'.$user->uid;
+
+  // Clear cache if were not on a step.
+  if (empty($current_step)) {
+    ctools_object_cache_clear('flexiform_multistep', $cache_key);
+  }
+  $object = ctools_object_cache_get('flexiform_multistep', $cache_key);
+
+  if (empty($object['base_entity'])) {
+    $object['base_entity'] = $base_entity;
+  }
+
   // Build our form state with our arguments.
   $form_state = array(
     'flexiform_multistep' => TRUE,
     'build_info' => array(
       'args' => array(
         $flexiform,
-        $base_entity,
+        $object['base_entity'],
       ),
     ),
   );
   form_load_include($form_state, 'inc', 'flexiform_multistep', 'flexiform_multistep.pages');
+
+
+  $form_state['object_id'] = $cache_key;
+  $form_state['object'] = $object;
+  if (isset($object['flexiform_state'])) {
+    $form_state['flexiform_state'] = $object['flexiform_state'];
+  }
 
   return ctools_wizard_multistep_form($form_info, $current_step, $form_state);
 }
@@ -73,6 +101,9 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = N
 function flexiform_multistep_step_form($form, &$form_state, $flexiform, $base_entity) {
   // Get hold of the full form.
   $form = drupal_retrieve_form('flexiform__' . $flexiform->form, $form_state);
+
+  // Add the flexiform state to the object.
+  $form_state['object']['flexiform_state'] = $form_state['flexiform_state'];
 
   // Clear out the standard submission buttons.
   unset($form['actions']);
@@ -322,6 +353,11 @@ function flexiform_multistep_step_next(&$form_state) {
   }
 
   $builder->formSubmit($form, $form_state);
+
+  $object = $form_state['object'];
+  $object['flexiform_state'] = $form_state['flexiform_state'];
+  $object['base_entity'] = $form['#flexiform_base_entity'];
+  ctools_object_cache_set('flexiform_multistep', $form_state['object_id'], $object);
 }
 
 /**
