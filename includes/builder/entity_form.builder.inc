@@ -40,7 +40,7 @@ class FlexiformBuilderEntityForm extends FlexiformBuilder {
     entity_save($this->base_entity_type, $this->base_entity);
 
     if (module_exists('rules')) {
-      $base_entity_wrapper = entity_metadata_wrapper($flexiform->base_entity, $form['#flexiform_base_entity']);
+      $base_entity_wrapper = entity_metadata_wrapper($this->flexiform->base_entity, $form['#flexiform_base_entity']);
       $args = array(
         'base_entity' => $base_entity_wrapper,
       );
