@@ -456,8 +456,17 @@ class FlexiformElement implements FlexiformElementInterface {
 
       $class_name = $element_info['class'];
       if (!class_exists($class_name)
-        || !in_array('FlexiformElementInterface', class_implements($class_name))) {
-        throw new Exception('Invalid Flexiform Element class ' . $class_name . ' for element ' . $element_name);
+          || !in_array('FlexiformElementInterface', class_implements($class_name))) {
+        watchdog(
+          'flexiform',
+          'Invalid Flexiform Element class !class_name for element !element_name',
+          array(
+            '!class_name' => $class_name,
+            '!element_name' => $element_name,
+          ),
+          WATCHDOG_WARNING
+        );
+        $class_name = 'FlexiformElementBroken';
       }
 
       $cached_elements[$flexiform->form][$element_namespace] = new $class_name($flexiform, $settings, $element_namespace);
@@ -479,8 +488,17 @@ class FlexiformElement implements FlexiformElementInterface {
 
     $class_name = $element_info['class'];
     if (!class_exists($class_name)
-      || !in_array('FlexiformElementInterface', class_implements($class_name))) {
-      throw new Exception('Invalid Flexiform Element class ' . $class_name . ' for element ' . $element_name);
+        || !in_array('FlexiformElementInterface', class_implements($class_name))) {
+      watchdog(
+        'flexiform',
+        'Invalid Flexiform Element class !class_name for element !element_name',
+        array(
+          '!class_name' => $class_name,
+          '!element_name' => $element_name,
+        ),
+        WATCHDOG_WARNING
+      );
+      $class_name = 'FlexiformElementBroken';
     }
 
     return new $class_name($flexiform, $settings);

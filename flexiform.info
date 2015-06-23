@@ -30,6 +30,7 @@ files[] = includes/builder/entity_form.builder.inc
 files[] = includes/flexiform.element.inc
 files[] = includes/flexiform.element_repeatable.inc
 files[] = includes/flexiform.element_field.inc
+files[] = includes/element/broken.element.inc
 files[] = includes/element/flexiform.element.inc
 files[] = includes/element/field.element.inc
 files[] = includes/element/node_title.element.inc

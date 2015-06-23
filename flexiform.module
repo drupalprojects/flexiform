@@ -543,11 +543,11 @@ function flexiform_get_element_info($entity_type = '', $bundle = '', $name = '',
   if (!empty($entity_type)) {
     if (!empty($bundle)) {
       if (!empty($name)) {
-        return $elements[$entity_type][$bundle][$name];
+        return isset($elements[$entity_type][$bundle][$name]) ? $elements[$entity_type][$bundle][$name] : FALSE;
       }
-      return $elements[$entity_type][$bundle];
+      return isset($elements[$entity_type][$bundle]) ? $elements[$entity_type][$bundle] : FALSE;
     }
-    return $elements[$entity_type];
+    return isset($elements[$entity_type]) ? $elements[$entity_type] : FALSE;
   }
 
   return $elements;
