@@ -13,6 +13,8 @@ class FlexifromFormEntityNewReply extends FlexiformFormEntityBase {
    * {@inheritdoc}
    */
   public function getEntity() {
+    parent::getEntity();
+
     $base_type = $this->getParamType('base');
 
     // Get the base entity.

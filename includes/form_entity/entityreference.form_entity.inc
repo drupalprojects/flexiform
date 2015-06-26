@@ -13,6 +13,8 @@ class FlexiformFormEntityEntityReference extends FlexiformFormEntityBase {
    * {@inheritdoc}
    */
   public function getEntity() {
+    parent::getEntity();
+
     $settings = $this->settings;
 
     // Get the base entity.
@@ -76,6 +78,8 @@ class FlexiformFormEntityEntityReference extends FlexiformFormEntityBase {
    * {@inheritdoc}
    */
   public function configForm($form, &$form_state) {
+    $form = parent::configForm($form, $form_state);
+
     $field = field_info_field($this->getter['field_name']);
 
     // Allow the selection of which one to use.
@@ -103,17 +107,6 @@ class FlexiformFormEntityEntityReference extends FlexiformFormEntityBase {
         '#default_value' => !empty($this->settings['delta']) ? $this->settings['delta'] : 0,
       );
     }
-    else {
-      return parent::configForm($form, $form_state);
-    }
-
-    $form['actions'] = array(
-      '#type' => 'actions',
-    );
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Save Settings'),
-    );
 
     return $form;
   }

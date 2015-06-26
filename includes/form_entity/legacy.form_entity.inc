@@ -13,6 +13,8 @@ class FlexiformFormEntityLegacy extends FlexiformFormEntityBase {
    * {@inheritdoc}
    */
   public function getEntity() {
+    parent::getEntity();
+
     $getter = $this->getter;
     $base_entity = $this->manager->getBaseEntity();
     $entities = $this->manager->getEntitiesRaw();

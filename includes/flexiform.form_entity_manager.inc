@@ -127,7 +127,6 @@ class FlexiformFormEntityManagerDefault implements FlexiformFormEntityManagerInt
    */
   public function setBaseEntity($entity, $namespace = 'base_entity') {
     $this->entities[$namespace] = $entity;
-    $this->prepared[$namespace] = TRUE;
     $this->base_entity_key = $namespace;
     return $this;
   }
@@ -164,8 +163,8 @@ class FlexiformFormEntityManagerDefault implements FlexiformFormEntityManagerInt
 
     // If this is the base entity and its not prepared we must throw an error
     // as without a base entity set nothing is going to work.
-    if ($namespace === $this->base_entity_key) {
-      throw new Exception(t('Cannot Prepare Base Entity, this must be set using setBaseEntity.'));
+    if (empty($this->entities[$this->base_entity_key])) {
+      throw new Exception(t('Cannot Prepare Entities without the base entity being set, this must be set using setBaseEntity.'));
     }
 
     $info = $this->getEntitySettings($namespace);

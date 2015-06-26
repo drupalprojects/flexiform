@@ -13,6 +13,8 @@ class FlexiformFormEntityNew extends FlexiformFormEntityBase {
    * {@inheritdoc}
    */
   public function getEntity() {
+    parent::getEntity();
+
     $values = array();
 
     // Work out if there is a bundle key.

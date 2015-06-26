@@ -13,6 +13,8 @@ class FlexiformFormEntityFieldCollection extends FlexiformFormEntityBase {
    * {@inheritdoc}
    */
   public function getEntity() {
+    parent::getEntity();
+
     $settings = $this->settings;
     $base_type = $this->getParamType('base');
 

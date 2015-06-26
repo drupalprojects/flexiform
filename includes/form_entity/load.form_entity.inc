@@ -13,6 +13,8 @@ class FlexiformFormEntityLoad extends FlexiformFormEntityBase {
    * {@inheritdoc}
    */
   public function getEntity() {
+    parent::getEntity();
+
     $id = $this->settings['entity_id'];
 
     // Don't do anything if the $id is empty.
@@ -45,10 +47,7 @@ class FlexiformFormEntityLoad extends FlexiformFormEntityBase {
    * {@inheritdoc}
    */
   public function configForm($form, &$form_state) {
-    $form['settings'] = array(
-      '#type' => 'container',
-      '#tree' => TRUE,
-    );
+    $form = parent::configForm($form, $form_state);
 
     $form['settings']['entity_id'] = array(
       '#type' => 'textfield',
@@ -56,14 +55,6 @@ class FlexiformFormEntityLoad extends FlexiformFormEntityBase {
       '#description' => t('You may also specify a position in the path to take the id from, e.g. "%2" will use the third section of the page path.'),
       '#default_value' => !empty($this->settings['entity_id']) ? $this->settings['entity_id'] : '',
       '#required' => TRUE,
-    );
-
-    $form['actions'] = array(
-      '#type' => 'actions',
-    );
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Save Settings'),
     );
 
     return $form;

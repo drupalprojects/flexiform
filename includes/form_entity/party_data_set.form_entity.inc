@@ -13,6 +13,8 @@ class FlexiformFormEntityPartyDataSet extends FlexiformFormEntityBase {
    * {@inheritdoc}
    */
   public function getEntity() {
+    parent::getEntity();
+
     $settings = $this->settings;
 
     // Get the party entity.

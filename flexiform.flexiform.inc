@@ -57,7 +57,7 @@ function flexiform_flexiform_entity_getter_info() {
     'label' => 'Base Entity',
     'description' => 'The Base Entity for this Flexiform',
     'entity_types' => array_keys(entity_get_info()),
-    'class' => 'FlexiformFormEntityBase',
+    'class' => 'FlexiformFormEntityBaseEntity',
   );
 
   // Load entity getter.

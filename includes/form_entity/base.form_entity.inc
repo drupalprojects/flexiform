@@ -5,7 +5,7 @@
  */
 
 /**
- * Form Entity Class for Managing the Base Entity.
+ * Default Form Entity Class for Managing a form Entity.
  */
 class FlexiformFormEntityBase implements FlexiformFormEntityInterface {
 
@@ -103,7 +103,11 @@ class FlexiformFormEntityBase implements FlexiformFormEntityInterface {
    * {@inheritdoc}
    */
   public function getEntity() {
-    return $this->manager->getBaseEntity();
+    if (isset($this->settings['save_on_submit']) && empty($this->settings['save_on_submit'])) {
+      $this->manager->skipOnSave($this->entity_namespace, TRUE);
+    }
+
+    return NULL;
   }
 
   /**
@@ -117,9 +121,25 @@ class FlexiformFormEntityBase implements FlexiformFormEntityInterface {
    * {@inheritdoc}
    */
   public function configForm($form, &$form_state) {
-    if (empty($this->getter['configurable'])) {
-      $form['message']['#markup'] = t('This entity has no configuration options available.');
-    }
+    $form['settings'] = array(
+      '#type' => 'container',
+      '#tree' => TRUE,
+    );
+
+    $form['settings']['save_on_submit'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Save Entity on Submit'),
+      '#description' => t('Should this entity always be saved on submit?'),
+      '#default_value' => isset($this->settings['save_on_submit']) ? $this->settings['save_on_submit'] : TRUE,
+    );
+
+    $form['actions'] = array(
+      '#type' => 'actions',
+    );
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save Settings'),
+    );
 
     return $form;
   }

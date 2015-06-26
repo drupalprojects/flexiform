@@ -16,6 +16,7 @@ class FlexiformFormEntityCurrentUser extends FlexiformFormEntityBase {
    */
   public function getEntity() {
     global $user;
+    parent::getEntity();
 
     if ($user->uid == 0) {
       return FALSE;
