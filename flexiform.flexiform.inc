@@ -409,6 +409,10 @@ function flexiform_flexiform_element_info() {
             $context = reset($context);
           }
 
+          if (!$context) {
+            continue;
+          }
+
           $entity_type = $context->keywords;
           if (substr($entity_type, 0, 7) == 'entity:') {
             $entity_type = substr($entity_type, 7);
@@ -435,15 +439,17 @@ function flexiform_flexiform_element_info() {
         'group' => 'Custom',
       );
 
-      foreach ($entity_panes[$entity_type] as $name => $pinfo) {
-        $elements[$entity_type][$bundle]['ctools:'.$name] = array(
-          'label' => $pinfo['title'],
-          'class' => 'FlexiformElementCtoolsContent',
-          'type' => 'ctools_content',
-          'group' => $pinfo['category'],
-          'content_type' => $pinfo['type'],
-          'sub_type' => $pinfo['subtype'],
-        );
+      if (!empty($entity_panes[$entity_type])) {
+        foreach ($entity_panes[$entity_type] as $name => $pinfo) {
+          $elements[$entity_type][$bundle]['ctools:'.$name] = array(
+            'label' => $pinfo['title'],
+            'class' => 'FlexiformElementCtoolsContent',
+            'type' => 'ctools_content',
+            'group' => $pinfo['category'],
+            'content_type' => $pinfo['type'],
+            'sub_type' => $pinfo['subtype'],
+          );
+        }
       }
     }
   }
