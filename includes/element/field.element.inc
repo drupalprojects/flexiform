@@ -438,66 +438,16 @@ class FlexiformElementField extends FlexiformElement implements FlexiformElement
    */
   public function formValidate($form, &$form_state, $entity, $language = LANGUAGE_NONE) {
     $entity = clone $entity;
-
-    // Prepare arrays.
-    $items = isset($entity->{$this->field_name}[$language]) ? $entity->{$this->field_name}[$language] : array();
-    $errors = array();
-    $field = $this->getField();
-
-    // Extract form values.
     $form_elements = $this->extractFormElements($form);
-    field_default_extract_form_values($this->getEntityType(), $entity, $field, $this->getInstance(), $language, $items, $form_elements, $form_state);
-
-    // Set items onto the entity.
-    if ($items !== array() || isset($entity->{$this->field_name}[$language])) {
-      $entity->{$this->field_name}[$language] = $items;
-    }
-
-    // Validate values
-    field_default_validate($this->getEntityType(), $entity, $field, $this->getInstance(), $language, $items, $errors);
-    $specific_func = $field['module'] . '_field_validate';
-    if (function_exists($specific_func)) {
-      $specific_func($this->getEntityType(), $entity, $field, $this->getInstance(), $language, $items, $errors);
-    }
-
-    // Let other modules validate the entity.
-    // Avoid module_invoke_all() to let $errors be taken by reference.
-    // @todo Work out a way of not calling this loads and loads of times.
-    foreach (module_implements('field_attach_validate') as $module) {
-      $function = $module . '_field_attach_validate';
-      $function($this->getEntityType(), $entity, $errors);
-    }
-
-    // Pass field-level validation errors back to widgets for accurate error
-    // flagging.
-    foreach ($errors as $field_name => $field_errors) {
-      foreach ($field_errors as $langcode => $errors) {
-        $field_state = field_form_get_state($form_elements['#parents'], $field_name, $language, $form_state);
-        $field_state['errors'] = $errors;
-        field_form_set_state($form_elements['#parents'], $field_name, $language, $form_state, $field_state);
-      }
-    }
-
-    field_default_form_errors($this->getEntityType(), $entity, $field, $this->getInstance(), $language, $items, $form_elements, $form_state);
+    field_attach_form_validate($this->getEntityType(), $entity, $form_elements, $form_state, array('field_name' => $this->field_name));
   }
 
   /**
    * Submit callback for this form.
    */
   function formSubmit($form, &$form_state, $entity, $language = LANGUAGE_NONE) {
-    // Prepare arrays.
-    $items = isset($entity->{$this->field_name}[$language]) ? $entity->{$this->field_name}[$language] : array();
-    $field = $this->getField();
-
-    // Extract form values.
     $form_elements = $this->extractFormElements($form);
-    field_default_extract_form_values($this->getEntityType(), $entity, $field, $this->getInstance(), $language, $items, $form_elements, $form_state);
-    field_default_submit($this->getEntityType(), $entity, $field, $this->getInstance(), $language, $items, $form_elements, $form_state);
-
-    // Set items onto the entity.
-    if ($items !== array() || isset($entity->{$this->field_name}[$language])) {
-      $entity->{$this->field_name}[$language] = $items;
-    }
+    field_attach_submit($this->getEntityType(), $entity, $form_elements, $form_state, array('field_name' => $this->field_name));
   }
 
   /**
