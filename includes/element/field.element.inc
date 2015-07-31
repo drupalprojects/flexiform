@@ -437,6 +437,8 @@ class FlexiformElementField extends FlexiformElement implements FlexiformElement
    * Validate this element.
    */
   public function formValidate($form, &$form_state, $entity, $language = LANGUAGE_NONE) {
+    $entity = clone $entity;
+
     // Prepare arrays.
     $items = isset($entity->{$this->field_name}[$language]) ? $entity->{$this->field_name}[$language] : array();
     $errors = array();
