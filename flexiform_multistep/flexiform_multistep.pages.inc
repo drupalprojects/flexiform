@@ -57,7 +57,7 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = N
 
   // Cache important objects to maintain state between steps.
   $cache_key = $form_info['id'];
-  if ($base_entity->is_new) {
+  if (!empty($base_entity->is_new)) {
     $entity_info = entity_get_info($flexiform->base_entity);
     $cache_key .= ':'.$base_entity->{$entity_info['entity keys']['id']};
   }
