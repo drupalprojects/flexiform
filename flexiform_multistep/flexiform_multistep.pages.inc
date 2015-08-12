@@ -317,28 +317,27 @@ function flexiform_multistep_step_next(&$form_state) {
   $form_settings = isset($flexiform->settings['flexiform_multistep']) ? $flexiform->settings['flexiform_multistep'] : array();
   $step_settings = isset($form_state['step_group']->format_settings['instance_settings']) ? $form_state['step_group']->format_settings['instance_settings'] : array();
 
-  // Inherit settings from the form if we're supposed to.
-  if (empty($step_settings['save_entities'])) {
-    $step_settings['save_entities'] = !empty($form_settings['save_entities']) ? 'y' : 'n';
-  }
-
   // Tweak our flexiform state so we can skip saving particular items.
   $flexiform_state = &$builder->getFlexiformState($form, $form_state);
   $entity_manager = $builder->getEntityManager($flexiform_state);
   $entities = array_keys($flexiform->entities);
   $save_entities = array();
 
-  // Save the custom step of entities.
-  if ($step_settings['save_entities'] == 'c') {
+  // If we are using the default and we're not saving on each step we can take a
+  // simple approach.
+  if (empty($step_settings['save_entities']) && empty($form_settings['save_entities'])) {
+    // Save everything on the last step, nothing otherwise.
+    if (!empty($form_state['last_step'])) {
+      $save_entities = $entities;
+    }
+  }
+  // If we've got a manual list, copy that over.
+  elseif ($step_settings['save_entities'] == 'c') {
     $save_entities = array_filter($step_settings['save_entities_custom']);
   }
-  // If this is the last step, switch to 'y' mode.
-  elseif ($step_settings['save_entities'] == 'n' && !empty($form_state['last_step'])) {
-    $step_settings['save_entities'] = 'y';
-  }
-
-  // If we're not on the last step, only save entities we've exposed.
-  if ($step_settings['save_entities'] == 'y' && empty($form_state['last_step'])) {
+  // Any case other than not saving anything, we now pull the entities based on
+  // the elements that have been shown on this step.
+  elseif ($step_settings['save_entities'] != 'n') {
     foreach (element_children($form) as $element) {
       if (!empty($form[$element]['#flexiform_element'])) {
         $namespace = $form[$element]['#flexiform_element']->getEntityNamespace();

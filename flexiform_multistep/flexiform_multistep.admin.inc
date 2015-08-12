@@ -202,16 +202,14 @@ function _flexiform_multistep_field_group_format_settings($group) {
 
   $form['instance_settings']['save_entities'] = array(
     '#type' => 'select',
-    '#title' => t('Save entities on page submission'),
-    '#empty_option' => t('Use form default'),
+    '#title' => t('Entities to save on submission'),
+    '#empty_option' => t('Use form default - @default', array('@default' => t(!empty($settings['save_entities']) ? 'save entities on this page' : 'save all entities on last page'))),
     '#options' => array(
-      'y' => t('Yes'),
-      'n' => t('No'),
+      'y' => t('Save entities exposed on this page'),
+      'n' => t("Don't save any entities on this page"),
       'c' => t('Choose which entities to save'),
     ),
-    '#description' => t('Choose whether to save entities on page submission. The current default is %default.', array(
-      '%default' => !empty($settings['save_entities']) ? t('yes') : t('no'),
-    )),
+    '#description' => t('Choose which entities should be saved on the submission of this page.'),
     '#default_value' => isset($group->format_settings['instance_settings']['save_entities']) ? $group->format_settings['instance_settings']['save_entities'] : NULL,
   );
 
