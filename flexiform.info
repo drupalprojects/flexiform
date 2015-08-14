@@ -40,6 +40,7 @@ files[] = includes/element/node_sticky.element.inc
 files[] = includes/element/custom_html.element.inc
 files[] = includes/element/ctools_content.element.inc
 files[] = includes/element/node_author.element.inc
+files[] = includes/element/property.element.inc
 files[] = includes/element/user_mail.element.inc
 files[] = includes/element/user_name.element.inc
 files[] = includes/element/user_pass.element.inc

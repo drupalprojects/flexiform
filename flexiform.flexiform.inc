@@ -308,8 +308,68 @@ function flexiform_flexiform_element_info() {
     );
   }
 
+  // Get all entity properties
+  foreach (entity_get_property_info() as $entity_type => $info) {
+    $entity_properties = $info['properties'];
+    if (isset($info['bundles'])) {
+      foreach ($info['bundles'] as $bundle => $binfo) {
+        $properties = $binfo['properties'] + $entity_properties;
+        foreach ($properties as $name => $property) {
+          // If it is a field api field. Use the field api logic.
+          if (!empty($property['field'])) {
+            $field = field_info_field($name);
+            $field_class = 'FlexiformElementField_' . $field['type'];
+            $elements[$entity_type][$bundle]['field:' . $name] = array(
+              'label' => $property['label'],
+              'class' => class_exists($field_class) ? $field_class : 'FlexiformElementField',
+              'type' => 'field',
+              'group' => 'Field',
+              'field_name' => $name,
+            );
+          }
+          else if (!empty($property['setter callback'])) {
+            $class = 'FlexiformElementEntityProperty';
+            if (!empty($property['type'])) {
+              $type = $property['type'];
+              if ($list = entity_property_list_extract_type($type)) {
+                $type = $list;
+              }
+              $class = 'FlexiformElementEntityProperty__' . $type;
+            }
+
+            $elements[$entity_type][$bundle]['property:' . $name] = array(
+              'label' => $property['label'],
+              'class' => class_exists($class) ? $class : 'FlexiformElementEntityProperty',
+              'type' => 'property',
+              'group' => 'Property',
+              'property' => $name,
+            );
+          }
+        }
+      }
+    }
+    else {
+      foreach ($entity_properties as $name => $property) {
+        if (!empty($property['setter callback'])) {
+          $class = 'FlexiformElementProperty';
+          if (!empty($property['type'])) {
+            $class = 'FlexiformElementProperty__' . $property['type'];
+          }
+
+          $elements[$entity_type][$entity_type]['property:' . $name] = array(
+            'label' => $property['label'],
+            'class' => class_exists($class) ? $class : 'FlexiformElementProperty',
+            'type' => 'property',
+            'group' => 'Property',
+            'property' => $name,
+          );
+        }
+      }
+    }
+  }
+
   // Get all the field elements.
-  $fields_info = field_info_instances();
+  /*$fields_info = field_info_instances();
   foreach ($fields_info as $entity_type => $entity_fields) {
     foreach ($entity_fields as $bundle => $bundle_fields) {
       foreach ($bundle_fields as $field_name => $instance) {
@@ -324,7 +384,7 @@ function flexiform_flexiform_element_info() {
         );
       }
     }
-  }
+  }*/
 
   // Get node elements
   foreach (node_type_get_types() as $bundle => $info) {
