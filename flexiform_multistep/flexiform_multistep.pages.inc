@@ -48,13 +48,13 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = N
         'title' => $group->label,
         'weight' => $group->weight,
         'group' => $group,
-        'submit' => 'flexiform_multistep_step_next',
       );
+      $form_info['order'][$step] = $group->label;
     }
   }
   uasort($form_info['forms'], 'drupal_sort_weight');
-  $last_step = end(array_keys($form_info['forms']));
-  $form_info['forms'][$last_step]['submit'] = 'flexiform_multistep_step_finish';
+  $last_step = end(array_keys($form_info['order']));
+  $form_info['forms'][$last_step]['submit'] = 'flexiform_multistep_step_form_submit_redirect';
 
   // Cache important objects to maintain state between steps.
   $cache_key = $form_info['id'];
@@ -83,6 +83,7 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = N
         $object['base_entity'],
       ),
     ),
+    'last_step' => $last_step == $current_step,
   );
   form_load_include($form_state, 'inc', 'flexiform_multistep', 'flexiform_multistep.pages');
 
@@ -302,7 +303,7 @@ function flexiform_multistep_step_form($form, &$form_state, $flexiform, $base_en
 /**
  * Form submission handler for flexiform_multistep_step_form().
  */
-function flexiform_multistep_step_next(&$form, &$form_state) {
+function flexiform_multistep_step_form_submit(&$form, &$form_state) {
   /** @var Flexiform $flexiform */
   $flexiform = $form['#flexiform'];
 
@@ -356,11 +357,7 @@ function flexiform_multistep_step_next(&$form, &$form_state) {
 /**
  * Form submission handler for flexiform_multistep_step_form().
  */
-function flexiform_multistep_step_finish(&$form, &$form_state) {
-  // Pass onto the normal step submission.
-  $form_state['last_step'] = TRUE;
-  flexiform_multistep_step_next($form, $form_state);
-
+function flexiform_multistep_step_form_submit_redirect(&$form, &$form_state) {
   // Deal with the completion redirect.
   $form_settings = isset($form['#flexiform']->settings['flexiform_multistep']) ? $form['#flexiform']->settings['flexiform_multistep'] : array();
 
