@@ -28,8 +28,6 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = N
   $form_info = array(
     'id' => 'flexiform_multistep_' . $flexiform->form,
     'path' => $menu_item['href'] . '/%step',
-    'next callback' => 'flexiform_multistep_step_next',
-    'finish callback' => 'flexiform_multistep_step_finish',
   );
   if (isset($settings['form_info'])) {
     $form_info += $settings['form_info'];
@@ -50,10 +48,13 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = N
         'title' => $group->label,
         'weight' => $group->weight,
         'group' => $group,
+        'submit' => 'flexiform_multistep_step_next',
       );
     }
   }
   uasort($form_info['forms'], 'drupal_sort_weight');
+  $last_step = end(array_keys($form_info['forms']));
+  $form_info['forms'][$last_step]['submit'] = 'flexiform_multistep_step_finish';
 
   // Cache important objects to maintain state between steps.
   $cache_key = $form_info['id'];
@@ -306,9 +307,7 @@ function flexiform_multistep_step_form($form, &$form_state, $flexiform, $base_en
 /**
  * Form submission handler for flexiform_multistep_step_form().
  */
-function flexiform_multistep_step_next(&$form_state) {
-  $form = $form_state['complete form'];
-
+function flexiform_multistep_step_next(&$form, &$form_state) {
   /** @var Flexiform $flexiform */
   $flexiform = $form['#flexiform'];
 
@@ -362,17 +361,17 @@ function flexiform_multistep_step_next(&$form_state) {
 /**
  * Form submission handler for flexiform_multistep_step_form().
  */
-function flexiform_multistep_step_finish(&$form_state) {
+function flexiform_multistep_step_finish(&$form, &$form_state) {
   // Pass onto the normal step submission.
   $form_state['last_step'] = TRUE;
-  flexiform_multistep_step_next($form_state);
+  flexiform_multistep_step_next($form, $form_state);
 
   // Deal with the completion redirect.
-  $form_settings = isset($form_state['complete form']['#flexiform']->settings['flexiform_multistep']) ? $form_state['complete form']['#flexiform']->settings['flexiform_multistep'] : array();
+  $form_settings = isset($form['#flexiform']->settings['flexiform_multistep']) ? $form['#flexiform']->settings['flexiform_multistep'] : array();
 
   if (!empty($form_settings['redirect'])) {
-    $builder = $form_state['complete form']['#flexiform_builder'];
-    $flexiform_state = &$builder->getFlexiformState($form_state['complete form'], $form_state);
+    $builder = $form['#flexiform_builder'];
+    $flexiform_state = &$builder->getFlexiformState($form, $form_state);
     $entity_manager = $builder->getEntityManager($flexiform_state);
     $replacements = array();
     foreach ($entity_manager->getEntities() AS $namespace => $entity) {
