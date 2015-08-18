@@ -168,12 +168,7 @@ function flexiform_multistep_step_form($form, &$form_state, $flexiform, $base_en
 
   // Hide any elements that aren't in this step.
   // First, get a list of all of the children of this step group.
-  $step_children = $form_state['step_group']->children;
-  foreach ($form['#groups'] as $group_name => $group_info) {
-    if (in_array($group_name, $step_children)) {
-      $step_children = array_merge($step_children, $group_info->children);
-    }
-  }
+  $step_children = flexiform_multistep_field_group_descendants($form['#groups'], $form_state['step_group']);
 
   // Remove groups that are not a child of this step.
   foreach ($form['#groups'] as $name => $group) {
@@ -380,4 +375,33 @@ function flexiform_multistep_step_finish(&$form, &$form_state) {
     }
     $form_state['redirect'] = strtr($form_settings['redirect'], $replacements);
   }
+}
+
+/**
+ * Get all descendants of a field group.
+ *
+ * @param array $groups
+ *   An array of group objects keyed by machine name, e.g. $form['#groups'].
+ * @param $group
+ *   Either the machine name or a group object we want the descendants of.
+ *
+ * @return array
+ *   An array of element names that are descendants of $group.
+ */
+function flexiform_multistep_field_group_descendants($groups, $group) {
+  if (!is_object($group)) {
+    $group = $groups[$group];
+  }
+
+  // Get the children from this group.
+  $children = $group->children;
+
+  // See if there are any groups as children and, if so, recurse.
+  foreach ($group->children as $child) {
+    if (isset($groups[$child])) {
+      $children = array_merge($children, flexiform_multistep_field_group_descendants($groups, $child));
+    }
+  }
+
+  return $children;
 }
