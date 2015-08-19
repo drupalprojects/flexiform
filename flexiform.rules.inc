@@ -51,6 +51,7 @@ function flexiform_rules_event_info() {
       $variable = array(
         'type' => $settings['entity_type'],
         'label' => $settings['label'],
+        'optional' => ($entity_namespace != 'base_entity'),
       );
       $event['variables'][$entity_namespace] = $variable;
     }

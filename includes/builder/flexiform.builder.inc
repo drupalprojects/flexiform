@@ -198,10 +198,18 @@ class FlexiformBuilderFlexiform extends FlexiformBuilder {
         'base_entity' => $base_entity_wrapper,
       );
 
+      // All Arguments: Rules needs nulls as null rather than false.
+      $all_args = $form['#flexiform_entities'];
+      foreach ($all_args as &$ent) {
+        if (empty($ent)) {
+          $ent = NULL;
+        }
+      }
+
       // Fire the most specific rules first and track back to the less specific.
       $rule_name = 'flexiform_submit_'.$this->flexiform->form;
-      drupal_alter('flexiform_rules_arguments', $form['#flexiform_entities'], $form_state, $rule_name);
-      rules_invoke_event_by_args('flexiform_submit_'.$this->flexiform->form, $form['#flexiform_entities']);
+      drupal_alter('flexiform_rules_arguments', $all_args, $form_state, $rule_name);
+      rules_invoke_event_by_args('flexiform_submit_'.$this->flexiform->form, $all_args);
       $rule_name = 'flexiform_group_submit_'.$this->flexiform->form_group;
       drupal_alter('flexiform_rules_arguments', $args, $form_state, $rule_name);
       rules_invoke_event_by_args('flexiform_group_submit_'.$this->flexiform->form_group, $args);
