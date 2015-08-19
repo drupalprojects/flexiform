@@ -313,10 +313,8 @@ function flexiform_flexiform_element_info() {
     $entity_properties = empty($info['properties']) ? array() : $info['properties'];
     if (isset($info['bundles'])) {
       foreach ($info['bundles'] as $bundle => $binfo) {
-        $properties = $entity_properties;
-        if (is_array($binfo['properties'])) {
-          $properties += $binfo['properties'];
-        }
+        $properties = empty($binfo['properties']) ? array() : $binfo['properties'];
+        $properties += $entity_properties;
 
         foreach ($properties as $name => $property) {
           // If it is a field api field. Use the field api logic.
