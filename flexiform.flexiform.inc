@@ -310,10 +310,14 @@ function flexiform_flexiform_element_info() {
 
   // Get all entity properties
   foreach (entity_get_property_info() as $entity_type => $info) {
-    $entity_properties = $info['properties'];
+    $entity_properties = empty($info['properties']) ? array() : $info['properties'];
     if (isset($info['bundles'])) {
       foreach ($info['bundles'] as $bundle => $binfo) {
-        $properties = $binfo['properties'] + $entity_properties;
+        $properties = $entity_properties;
+        if (is_array($binfo['properties'])) {
+          $properties += $binfo['properties'];
+        }
+
         foreach ($properties as $name => $property) {
           // If it is a field api field. Use the field api logic.
           if (!empty($property['field'])) {
