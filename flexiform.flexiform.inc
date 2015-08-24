@@ -317,17 +317,9 @@ function flexiform_flexiform_element_info() {
         $properties += $entity_properties;
 
         foreach ($properties as $name => $property) {
-          // If it is a field api field. Use the field api logic.
+          // If it is a field api field. Use the field api logic later.
           if (!empty($property['field'])) {
-            $field = field_info_field($name);
-            $field_class = 'FlexiformElementField_' . $field['type'];
-            $elements[$entity_type][$bundle]['field:' . $name] = array(
-              'label' => $property['label'],
-              'class' => class_exists($field_class) ? $field_class : 'FlexiformElementField',
-              'type' => 'field',
-              'group' => 'Field',
-              'field_name' => $name,
-            );
+            continue;
           }
           else if (!empty($property['setter callback'])) {
             $class = 'FlexiformElementEntityProperty';
@@ -347,6 +339,19 @@ function flexiform_flexiform_element_info() {
               'property' => $name,
             );
           }
+        }
+
+        // Add field_api_fields.
+        foreach (field_info_instances($entity_type, $bundle) as $field_name => $instance) {
+          $field = field_info_field($field_name);
+          $field_class = 'FlexiformElementField_' . $field['type'];
+          $elements[$entity_type][$bundle]['field:' . $field_name] = array(
+            'label' => $instance['label'],
+            'class' => class_exists($field_class) ? $field_class : 'FlexiformElementField',
+            'type' => 'field',
+            'group' => 'Field',
+            'field_name' => $field_name,
+          );
         }
       }
     }
