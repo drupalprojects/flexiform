@@ -196,7 +196,7 @@ function flexiform_multistep_step_form($form, &$form_state, $flexiform, $base_en
 
       foreach ($el_settings['conditional_fields'] as $dependency_key => $options) {
         list($dependee) = explode('|', $dependency_key);
-        if (in_array($dependee, $form_state['step_group']->children)) {
+        if (in_array($dependee, $step_children)) {
           // If the dependee is also on this page then we don't need to do
           // anything.
           continue;
