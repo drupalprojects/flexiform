@@ -39,8 +39,13 @@ function flexiform_conditional_fields_module_implements_alter(&$implementations,
  * Implements hook_flexiform_build_alter().
  */
 function flexiform_conditional_fields_element_info_alter(&$types) {
-  foreach ($types as $type => $info) {
-    $types[$type]['#after_build'][] = 'flexiform_conditional_fields_element_after_build';
+  foreach ($types as $type => &$info) {
+    if (isset($info['#after_build'])) {
+      $pos = array_search('conditional_fields_element_after_build', $info['#after_build']);
+      if ($pos !== FALSE) {
+        $info['#after_build'][$pos] = 'flexiform_conditional_fields_element_after_build';
+      }
+    }
   }
 }
 
@@ -50,6 +55,12 @@ function flexiform_conditional_fields_element_info_alter(&$types) {
  * Add conditional fields information.
  */
 function flexiform_conditional_fields_element_after_build($element, &$form_state) {
+  // If we are not in a flexiform, pass onto the normal conditional fields after
+  // build. Otherwise we take it over completely.
+  if (empty($form_state['flexiform_state'])) {
+    return conditional_fields_element_after_build($element, $form_state);
+  }
+
   // Ensure that the element is a field.
   if (isset($element['#field_name'])) {
     $field = &$element;
@@ -70,9 +81,6 @@ function flexiform_conditional_fields_element_after_build($element, &$form_state
   // Only act on flexiforms.
   $total_form = &$form_state['complete form'];
   $form = FALSE;
-  if (empty($form_state['flexiform_state'])) {
-    return $element;
-  }
 
   if (!empty($form_state['flexiform_state']['flexiform_form_parents'])) {
     $array_parents = $form_state['flexiform_state']['flexiform_form_parents'];
