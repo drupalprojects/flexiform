@@ -311,7 +311,11 @@ function flexiform_conditional_fields_element_selector($element) {
  * @param $flexiform.
  */
 function flexiform_conditional_fields_load_depencies($flexiform) {
-  $dependencies = &drupal_static(__FUNCTION__, array());
+  static $drupal_static_fast;
+  if (!isset($drupal_static_fast)) {
+    $drupal_static_fast['dependencies'] = &drupal_static(__FUNCTION__, array());
+  }
+  $dependencies = &$drupal_static_fast['dependencies'];
 
   if (isset($dependencies[$flexiform->form])) {
     return $dependencies[$flexiform->form];
