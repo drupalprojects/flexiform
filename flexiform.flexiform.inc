@@ -245,6 +245,20 @@ function flexiform_flexiform_entity_getter_info() {
       }
     }
   }
+
+  if (module_exists('commerce_line_item')) {
+    $getters['commerce_line_item_new'] = array(
+      'label' => t('New Line Item for Order'),
+      'description' => t('Get a new line item for the order.'),
+      'params' => array(
+        'base' => array(
+          'entity_type' => 'commerce_order',
+        ),
+      ),
+      'entity_types' => array('commerce_line_item'),
+      'class' => 'FlexiformFormEntityNewCommerceLineItem',
+    );
+  }
   return $getters;
 }
 
