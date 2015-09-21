@@ -550,12 +550,15 @@ function flexiform_webform_flexiform_build_alter(&$form, &$form_state, $flexifor
   }
 
   // Work out whether this form is being used as the completeness handler.
-  if ($flexiform->base_entity != 'flexiform_webform_submission') {
+  $base_entity_info = entity_get_info($flexiform->base_entity);
+  if (empty($base_entity_info['fc handler class'])
+      || (!is_subclass_of($base_entity_info['fc handler class'], 'FlexiformFCHandler')
+      && $base_entity_info['fc handler class'] != 'FlexiformFCHandler')) {
     return;
   }
-  $webform = entity_load_single('flexiform_webform', $flexiform->base_entity_bundle);
-  if (empty($webform->data['fc']['form'])
-    || $webform->data['fc']['form'] != $flexiform->form) {
+
+  $handler = fcComplete::build($flexiform->base_entity, $form['#flexiform_base_entity']);
+  if ($handler->getForm() != $flexiform->form) {
     return;
   }
 
