@@ -49,10 +49,12 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = N
         'weight' => $group->weight,
         'group' => $group,
       );
-      $form_info['order'][$step] = $group->label;
     }
   }
   uasort($form_info['forms'], 'drupal_sort_weight');
+  foreach ($form_info['forms'] as $step => $info) {
+    $form_info['order'][$step] = $info['title'];
+  }
   $last_step = end(array_keys($form_info['order']));
   $form_info['forms'][$last_step]['submit'] = 'flexiform_multistep_step_form_submit_redirect';
 
