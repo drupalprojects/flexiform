@@ -365,14 +365,24 @@ function flexiform_multistep_step_form_submit_redirect(&$form, &$form_state) {
 
   if (!empty($form_settings['redirect'])) {
     $builder = $form['#flexiform_builder'];
-    $flexiform_state = &$builder->getFlexiformState($form, $form_state);
-    $entity_manager = $builder->getEntityManager($flexiform_state);
-    $replacements = array();
-    foreach ($entity_manager->getEntities() AS $namespace => $entity) {
-      $wrapper = entity_metadata_wrapper($entity_manager->getEntityType($namespace), $entity);
-      $replacements['%' . $namespace] = $wrapper->getIdentifier();
+
+    // See if we can skip the weight of substitutions.
+    if (strpos($form_settings['redirect'], '%') === FALSE) {
+      $form_state['redirect'] = $form_settings['redirect'];
     }
-    $form_state['redirect'] = strtr($form_settings['redirect'], $replacements);
+    // Otherwise build the tokens an replace.
+    else {
+      $flexiform_state = &$builder->getFlexiformState($form, $form_state);
+      $entity_manager = $builder->getEntityManager($flexiform_state);
+      $replacements = array();
+      foreach ($entity_manager->getEntities() AS $namespace => $entity) {
+        if ($entity) {
+          $wrapper = entity_metadata_wrapper($entity_manager->getEntityType($namespace), $entity);
+          $replacements['%' . $namespace] = $wrapper->getIdentifier();
+        }
+      }
+      $form_state['redirect'] = strtr($form_settings['redirect'], $replacements);
+    }
   }
 }
 
