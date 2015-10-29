@@ -88,9 +88,15 @@ function flexiform($form, &$form_state, $flexiform, $base_entity) {
     $submit += $form['#submit'];
   }
 
+  // Get button settings.
+  $submit_text = t('Save');
+  if (!empty($flexiform->settings['buttons']['submit_text'])) {
+    $submit_text = $flexiform->settings['buttons']['submit_text'];
+  }
+
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save'),
+    '#value' => $submit_text,
     '#submit' => $submit + array('flexiform_submit'),
   );
 

@@ -911,11 +911,34 @@ function flexiform_manage_form_fields_form($form, &$form_state, $flexiform) {
 
   $form['fields'] = $table;
 
+  $form['additional_settings'] = array(
+    '#type' => 'vertical_tabs',
+    '#theme_wrappers' => array('vertical_tabs'),
+    '#prefix' => '<div>',
+    '#suffix' => '</div>',
+    '#tree' => TRUE,
+  );
+
+  $buttons_settings = !empty($flexiform->settings['buttons']) ? $flexiform->settings['buttons'] : array();
+  $form['additional_settings']['buttons'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Buttons'),
+    '#description' => t('Configure the buttons that appear on this form.'),
+  );
+  $form['additional_settings']['buttons']['submit_text'] = array(
+    '#title' => t('Submit Button Text'),
+    '#description' => t('What the submit button should say.'),
+    '#type' => 'textfield',
+    '#default_value' => !empty($buttons_settings['submit_text']) ? $buttons_settings['submit_text'] : t('Save'),
+  );
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
 
   $form['#attached']['css'][] = drupal_get_path('module', 'flexiform') . '/flexiform_ui.css';
   $form['#attached']['js'][] = drupal_get_path('module', 'flexiform') . '/flexiform_ui.js';
+  $form['#attached']['js'][] = 'misc/form.js';
+  $form['#attached']['js'][] = 'misc/collapse.js';
 
   // Add tabledrag behavior.
   $form['#attached']['drupal_add_tabledrag'][] = array('field-overview', 'order', 'sibling', 'field-weight');
@@ -978,6 +1001,9 @@ function flexiform_manage_form_fields_form_submit($form, &$form_state) {
 
     // Send the User to the Instance Settings page
   }
+
+  // Sort out additional settings.
+  $flexiform->settings['buttons'] = $form_state['values']['additional_settings']['buttons'];
   $flexiform->save();
 
   drupal_set_message(t('Your settings have been saved'));
