@@ -623,7 +623,7 @@ function flexiform_form($form, &$form_state, $flexiform, $op = 'edit') {
     );
     $options = array(
       'show plugin' => FALSE,
-      'base path' => current_path(),
+      'base path' => 'admin/config/workflow/rules/reaction',
     );
 
     $form['rules']['active'] = rules_ui()->overviewTable($conditions, $options);
