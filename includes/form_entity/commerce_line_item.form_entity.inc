@@ -45,6 +45,12 @@ class FlexiformFormEntityNewCommerceLineItem extends FlexiformFormEntityBase {
       $entity->order_id = $order->order_id;
     }
 
+    // Make sure commerce_unit_price has components.
+    if (!empty($entity->commerce_unit_price[LANGUAGE_NONE][0]) && empty($entity->commerce_unit_price[LANGUAGE_NONE][0]['data']['components'])) {
+      $price = &$entity->commerce_unit_price[LANGUAGE_NONE][0];
+      $price['data'] = commerce_price_component_add($price, 'base_price', $price, TRUE);
+    }
+
     commerce_line_item_save($entity);
     $order->commerce_line_items[LANGUAGE_NONE][] = array(
       'line_item_id' => $entity->line_item_id,
