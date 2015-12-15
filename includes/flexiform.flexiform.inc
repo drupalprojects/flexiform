@@ -100,6 +100,16 @@ function flexiform($form, &$form_state, $flexiform, $base_entity) {
     '#submit' => $submit + array('flexiform_submit'),
   );
 
+  if (!empty($flexiform->settings['ajax']['submit'])) {
+    $wrapper_id = drupal_html_id($form_state['build_info']['form_id'].'-ajax-wrapper');
+    $form['#prefix'] = '<div id="'.$wrapper_id.'">';
+    $form['#suffix'] = '</div>';
+    $form['actions']['submit']['#ajax'] = array(
+      'wrapper' => $wrapper_id,
+      'callback' => 'flexiform_submit_ajax',
+    );
+  }
+
   // We append the validate handler to #validate in case a form callback_wrapper
   // is used to add validate handlers earlier.
   $form['#validate'][] = 'flexiform_validate';
@@ -119,6 +129,75 @@ function flexiform_validate($form, &$form_state) {
  */
 function flexiform_submit($form, &$form_state) {
   $form['#flexiform_builder']->formSubmit($form, $form_state);
+}
+
+/**
+ * Submit AJAX callback for a flexiform.
+ */
+function flexiform_submit_ajax($form, $form_state) {
+  $flexiform = $form['#flexiform'];
+  if (empty($form_state['executed'])) {
+    return $form;
+  }
+
+  switch ($flexiform->settings['ajax']['response']) {
+    case 'refresh':
+      $wrapper = $form_state['triggering_element']['#ajax']['wrapper'];
+
+      // Prevent submitted values bleeding into the new form.
+      $original_post = $_POST;
+      $_POST = array();
+      $new_form = call_user_func_array('drupal_get_form', array_merge(array($form_state['build_info']['form_id']), $form_state['build_info']['args']));
+      $_POST = $original_post;
+      unset($original_post);
+
+      $commands = array(
+        ajax_command_prepend(
+          '#'.$wrapper,
+          theme('status_messages')
+        ),
+        ajax_command_replace(
+          '#'.$wrapper,
+          drupal_render($new_form)
+        ),
+      );
+      break;
+    case 'reload':
+      ctools_include('ajax');
+      $commands = array(
+        ctools_ajax_command_reload(),
+      );
+      break;
+    case 'redirect':
+      ctools_include('ajax');
+      $redirect = !empty($flexiform->settings['ajax']['redirect']) ? $flexiform->settings['ajax']['redirect'] : '';
+      $options = array();
+      if (!empty($form_state['redirect'])) {
+        if (is_array($form_state['redirect'])) {
+          $redirect = $form_state['redirect'][0];
+          $options = $form_state['redirect'][1];
+        }
+        else {
+          $redirect = $form_state['redirect'];
+        }
+      }
+      $commands = array(
+        ctools_ajax_command_redirect($redirect, 0, $options),
+      );
+      break;
+  }
+
+  $context = array(
+    'flexiform' => $flexiform,
+    'form' => $form,
+    'form_state' => $form_state,
+  );
+  drupal_alter('flexiform_ajax_submit_commands', $commands, $context);
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
 }
 
 /**

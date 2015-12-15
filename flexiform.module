@@ -13,6 +13,7 @@ function flexiform_hook_info() {
   $hooks['flexiform_display_info'] = array('group' => 'flexiform');
   $hooks['flexiform_element_info'] = array('group' => 'flexiform');
   $hooks['flexiform_entity_getter_info'] = array('group' => 'flexiform');
+  $hooks['flexiform_ajax_submit_commands_alter'] = array('group' => 'flexiform');
   $hooks['flexiform_submission_access'] = array('group' => 'flexiform');
   $hooks['default_flexiform'] = array('group' => 'flexiform_default');
   $hooks['default_flexiform_alter'] = array('group' => 'flexiform_default');

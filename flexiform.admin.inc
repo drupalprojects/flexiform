@@ -932,6 +932,47 @@ function flexiform_manage_form_fields_form($form, &$form_state, $flexiform) {
     '#default_value' => !empty($buttons_settings['submit_text']) ? $buttons_settings['submit_text'] : t('Save'),
   );
 
+  $ajax_settings = !empty($flexiform->settings['ajax']) ? $flexiform->settings['ajax'] : array();
+  $form['additional_settings']['ajax'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('AJAX'),
+    '#description' => t('Configure settings for submitting a form with ajax.'),
+  );
+  $form['additional_settings']['ajax']['submit'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Submit with AJAX'),
+    '#description' => t('Submit this form without reloading the page.'),
+    '#default_value' => !empty($ajax_settings['submit']),
+  );
+  $form['additional_settings']['ajax']['response'] = array(
+    '#type' => 'select',
+    '#title' => t('Response'),
+    '#description' => t('What should happen after the form has been submitted?'),
+    '#options' => array(
+      'refresh' => t('Refresh Form'),
+      'reload' => t('Reload Page'),
+      'redirect' => t('Redirect'),
+    ),
+    '#default_value' => !empty($ajax_settings['response']) ? $ajax_settings['response'] : 'refresh',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="additional_settings[ajax][submit]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['additional_settings']['ajax']['redirect'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Redirect Path'),
+    '#description' => t('The path to redirect to.'),
+    '#default_value' => !empty($ajax_settings['redirect']) ? $ajax_settings['redirect'] : '',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="additional_settings[ajax][submit]"]' => array('checked' => TRUE),
+        ':input[name="additional_settings[ajax][response]"]' => array('value' => 'redirect'),
+      ),
+    ),
+  );
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
 
@@ -1004,6 +1045,7 @@ function flexiform_manage_form_fields_form_submit($form, &$form_state) {
 
   // Sort out additional settings.
   $flexiform->settings['buttons'] = $form_state['values']['additional_settings']['buttons'];
+  $flexiform->settings['ajax'] = $form_state['values']['additional_settings']['ajax'];
   $flexiform->save();
 
   drupal_set_message(t('Your settings have been saved'));

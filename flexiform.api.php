@@ -362,3 +362,18 @@ function hook_flexiform_wrapper_alter($wrapper, FlexiformDisplayInterface $displ
     $wrapper = 'my_wrapper';
   }
 }
+
+/**
+ * Alter the AJAX commands before they are sent on the submission of a form.
+ *
+ * @param array $commands
+ *   The ajax commands that are about to be sent.
+ * @param array $context
+ *   And array of helpful contextual information, including:
+ *   - flexiform: The flexiform configuration entity,
+ *   - form: The built form array.
+ *   - form_state: The form state of the submitted element.
+ */
+function hook_flexiform_ajax_submit_commands_alter(&$commands, $context) {
+  // No Example.
+}
