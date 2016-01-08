@@ -307,10 +307,19 @@ function flexiform_forms($form_id, $args) {
   if ($parts[0] == 'flexiform') {
     $forms[$form_id] = array(
       'callback' => 'flexiform',
+      'wrapper_callback' => 'flexiform_form_wrapper',
     );
   }
 
   return $forms;
+}
+
+/**
+ * Flexiform Form Wrapper to ensure that the flexiform include file is always present.
+ */
+function flexiform_form_wrapper($form, &$form_state) {
+  form_load_include($form_state, 'inc', 'flexiform', 'includes/flexiform.flexiform');
+  return $form;
 }
 
 /**
