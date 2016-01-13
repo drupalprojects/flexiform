@@ -317,6 +317,9 @@ class FlexiformElementField extends FlexiformElement implements FlexiformElement
     // Unset the label field added by  FlexiformElementBase.
     unset($form['label']);
 
+    // Allow the field label to be longer.
+    $form['instance']['label']['#maxlength'] = NULL;
+
     return $form;
   }
 
