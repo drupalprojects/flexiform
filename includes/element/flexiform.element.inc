@@ -73,6 +73,7 @@ class FlexiformElementFlexiform extends FlexiformElement {
     $builder = $this->getFlexiform()->getBuilder($entity);
     $form[$this->element_namespace]['#flexiform_builder'] = $builder;
     $form[$this->element_namespace]['#flexiform_element'] = $this;
+    $form[$this->element_namespace]['#flexiform'] = $this->getFlexiform();
     $form[$this->element_namespace]['#type'] = 'fieldset';
     $form[$this->element_namespace]['#title'] = $this->label();
     $form[$this->element_namespace] += $builder->form($sub_form, $form_state, $entity);

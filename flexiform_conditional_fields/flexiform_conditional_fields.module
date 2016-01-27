@@ -82,18 +82,13 @@ function flexiform_conditional_fields_element_after_build($element, &$form_state
   $total_form = &$form_state['complete form'];
   $form = FALSE;
 
-  if (!empty($form_state['flexiform_state']['flexiform_form_parents'])) {
-    $array_parents = $form_state['flexiform_state']['flexiform_form_parents'];
+  // Get the nearest parent flexiform. Do not store in flexiform state as it
+  // kills the conditional fields in nexted forms.
+  $array_parents = $field['#array_parents'];
+  while (array_pop($array_parents) !== FALSE) {
     $form = &drupal_array_get_nested_value($total_form, $array_parents);
-  }
-  else {
-    $array_parents = $field['#array_parents'];
-    while (array_pop($array_parents) !== FALSE) {
-      $form_state['flexiform_state']['flexiform_form_parents'] = $array_parents;
-      $form = &drupal_array_get_nested_value($total_form, $array_parents);
-      if (!empty($form['#flexiform_builder'])) {
-        break;
-      }
+    if (!empty($form['#flexiform_builder'])) {
+      break;
     }
   }
 
