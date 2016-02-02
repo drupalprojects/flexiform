@@ -53,4 +53,32 @@ function flexiform_views_data_alter(&$data) {
       ),
     ),
   );
+
+  // Add fields for the modal buttons.
+  $entity_info = entity_get_info();
+  foreach (entity_load('flexiform') as $flexiform) {
+    $display = $flexiform->getDisplay('FlexiformDisplayEditModal');
+    if (!$display->isEnabled()) {
+      continue;
+    }
+
+    if (empty($data[$entity_info[$flexiform->base_entity]['base table']])) {
+      continue;
+    }
+
+    $table = &$data[$entity_info[$flexiform->base_entity]['base table']];
+    $table['flexiform__'.$flexiform->form] = array(
+      'field' => array(
+        'title' => t(
+          '!flexiform modal button',
+          array(
+            '!flexiform' => $flexiform->label,
+          )
+        ),
+        'help' => t('Show a button that opens the flexiform in a modal window.'),
+        'flexiform' => $flexiform->form,
+        'handler' => 'flexiform_views_handler_field_flexiform_modal_button',
+      ),
+    );
+  }
 }

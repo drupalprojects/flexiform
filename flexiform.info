@@ -20,6 +20,8 @@ files[] = includes/display/add_page.display.inc
 files[] = includes/display/edit_page.display.inc
 files[] = includes/display/add_pane.display.inc
 files[] = includes/display/edit_pane.display.inc
+files[] = includes/display/add_modal.display.inc
+files[] = includes/display/edit_modal.display.inc
 files[] = includes/display/user_category.display.inc
 
 ; Builders
@@ -72,4 +74,5 @@ files[] = includes/flexiform.form_entity_manager.inc
 files[] = includes/views/handlers/flexiform_handler_field_add_page_url.inc
 files[] = includes/views/handlers/flexiform_handler_field_tags.inc
 files[] = includes/views/handlers/flexiform_handler_filter_tags.inc
+files[] = includes/views/handlers/flexiform_views_handler_field_flexiform_modal_button.inc
 

@@ -288,6 +288,16 @@ function flexiform_flexiform_display_info() {
       'label' => t('Edit Pane (Ctools Content)'),
       'description' => t('Expose the form in a Ctools Content Plugin.'),
     );
+
+    $displays['FlexiformDisplayCreateModal'] = array(
+      'label' => t('Add Modal Form'),
+      'description' => t('Expose the form in a Ctools modal.'),
+    );
+
+    $displays['FlexiformDisplayEditModal'] = array(
+      'label' => t('Edit Modal Form'),
+      'description' => t('Expose the form in a Ctools modal.'),
+    );
   }
 
   if (module_exists('user')) {
