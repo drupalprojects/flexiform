@@ -21,13 +21,13 @@ function flexiform_multistep_form_alter(&$form, &$form_state, $form_id) {
 
     if ($submit_element) {
       $submit = array_merge(array('inline_entity_form_trigger_submit'), $form['#submit']);
-      if (!empty($submit_element['#submit'])){
+      if (!empty($submit_element['#submit'])) {
         $submit = array_merge($submit, $submit_element['#submit']);
         // $form['#submit'] and $submit_element['#submit'] might have matching
         // callbacks, resulting in duplicates and double processing.
         $submit_element['#submit'] = array_unique($submit);
       }
-      else{
+      else {
         $submit_element['#submit'] = $submit;
       }
       $submit_element['#ief_submit_all'] = TRUE;

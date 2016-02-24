@@ -14,7 +14,7 @@ function _flexiform_multistep_form_flexiform_manage_form_fields_form_alter(&$for
 
   $form['additional_settings']['flexiform_multistep'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Mulit-page'),
+    '#title' => t('Multi-page'),
     '#description' => t('Configure this form for server side multi-pages.'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
