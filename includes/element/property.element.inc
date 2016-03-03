@@ -82,6 +82,9 @@ class FlexiformElementEntityProperty extends FlexiformElement {
         $value = $this->replaceCtoolsSubstitutions($value, $form['#flexiform_entities']);
       }
     }
+    else if (entity_get_info($this->dataType)) {
+      $value = entity_id($this->dataType, $value);
+    }
 
     $form[$this->element_namespace] = array(
       '#type' => 'textfield',
