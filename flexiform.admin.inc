@@ -408,6 +408,7 @@ function flexiform_add_for_entity($entity_type, $bundle) {
  * Generates the model type editing form.
  */
 function flexiform_form($form, &$form_state, $flexiform, $op = 'edit') {
+  $form_state['op'] = $op;
   $form['#flexiform'] = $flexiform;
 
   if ($op == 'clone') {
@@ -603,9 +604,20 @@ function flexiform_form($form, &$form_state, $flexiform, $op = 'edit') {
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save Flexiform'),
+    '#value' => t('Save'),
     '#weight' => 40,
   );
+  if ($op == 'add') {
+    $form['actions']['submit_entity'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save & Add Entities'),
+      '#weight' => 41,
+      '#submit' => array(
+        'flexiform_form_submit',
+        'flexiform_form_submit_entity_redirect',
+      ),
+    );
+  }
 
   // Submit Rule Actions
   // @todo: Remove dependency on rules admin by implement our own form for
@@ -684,10 +696,22 @@ function flexiform_form_submit(&$form, &$form_state) {
 
   $flexiform->save();
   if (empty($form_state['redirect'])) {
-    $form_state['redirect'] = 'admin/structure/flexiforms';
+    if ($form_state['op'] == 'add') {
+      $form_state['redirect'] = 'admin/structure/flexiforms/manage/'.$flexiform->form.'/form-fields';
+    }
+    else {
+      $form_state['redirect'] = 'admin/structure/flexiforms';
+    }
   }
 
   $form['#flexiform'] = $flexiform;
+}
+
+/**
+ * Form API submit callback to redirect to the entities page.
+ */
+function flexiform_form_submit_entity_redirect($form, &$form_state) {
+  $form_state['redirect'] = 'admin/structure/flexiforms/manage/'.$form_state['flexiform']->form.'/form-entities';
 }
 
 /**
