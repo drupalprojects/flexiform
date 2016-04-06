@@ -14,6 +14,7 @@ function flexiform_hook_info() {
   $hooks['flexiform_element_info'] = array('group' => 'flexiform');
   $hooks['flexiform_entity_getter_info'] = array('group' => 'flexiform');
   $hooks['flexiform_ajax_submit_commands_alter'] = array('group' => 'flexiform');
+  $hooks['flexiform_access'] = array('group' => 'flexiform');
   $hooks['flexiform_submission_access'] = array('group' => 'flexiform');
   $hooks['default_flexiform'] = array('group' => 'flexiform_default');
   $hooks['default_flexiform_alter'] = array('group' => 'flexiform_default');
@@ -176,8 +177,23 @@ function flexiform_permission() {
 /**
  * Access callback for the entity API.
  */
-function flexiform_access($op, $type = NULL, $account = NULL) {
-  return user_access('administer flexiforms', $account);
+function flexiform_access($op, $flexiform = NULL, $account = NULL) {
+  if (user_access('administer flexiforms', $account)) {
+    return TRUE;
+  }
+
+  // Allow modules to grant / deny access.
+  $access = module_invoke_all('flexiform_access', $op, $flexiform, $account);
+
+  // Only grant access if at least one module granted access and no one denied
+  // access.
+  if (in_array(FALSE, $access, TRUE)) {
+    return FALSE;
+  }
+  elseif (in_array(TRUE, $access, TRUE)) {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 /**
