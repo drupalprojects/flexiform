@@ -95,6 +95,8 @@ function flexiform_add_modal_button_content_type_render($subtype, $conf, $panel_
   ctools_include('ajax');
   ctools_include('modal');
 
+  ctools_modal_add_js();
+
   $path = "flexiform/{$subtype}/ajax";
   $content = '';
   if (drupal_valid_path($path)) {

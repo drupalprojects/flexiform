@@ -101,6 +101,8 @@ function flexiform_edit_modal_button_content_type_render($subtype, $conf, $panel
   ctools_include('ajax');
   ctools_include('modal');
 
+  ctools_modal_add_js();
+
   $path = "flexiform/{$subtype}/ajax/".$wrapper->getIdentifier();
   $content = '';
 
