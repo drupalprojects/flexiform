@@ -36,7 +36,7 @@ class FlexiformAccess {
     $contexts = array();
 
     // Build the base entity context.
-    if (!isset($base_entity)) {
+    if (empty($base_entity)) {
       $context = ctools_context_create_empty('entity:'.$this->flexiform->base_entity);
     }
     else {
