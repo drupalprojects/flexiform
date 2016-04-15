@@ -383,6 +383,13 @@ class FlexiformElementField extends FlexiformElement implements FlexiformElement
   public function form($form, &$form_state, $entity, $language = LANGUAGE_NONE) {
     $items = field_get_items($this->entity_type, $entity, $this->field_name, $language);
 
+    // field_default_form expects $items to be an array or NULL but
+    // field_get_items returns FALSE when there are none. If $items is FALSE
+    // turn it into an empty array to prevent errors later on.
+    if (!$items) {
+      $items = array();
+    }
+
     if (!field_info_field($this->field_name)
       || !field_info_instance($this->entity_type, $this->field_name, $this->bundle)) {
       debug("Error in " . __CLASS__ . "::" . __METHOD__ .": Field <em>{$this->field_name}</em> does not exist or does not have an instance on {$this->entity_type}:{$this->bundle}.", "error");
