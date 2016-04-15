@@ -382,14 +382,14 @@ function flexiform_flexiform_element_info() {
     else {
       foreach ($entity_properties as $name => $property) {
         if (!empty($property['setter callback'])) {
-          $class = 'FlexiformElementProperty';
+          $class = 'FlexiformElementEntityProperty';
           if (!empty($property['type'])) {
-            $class = 'FlexiformElementProperty__' . $property['type'];
+            $class = 'FlexiformElementEntityProperty__' . $property['type'];
           }
 
           $elements[$entity_type][$entity_type]['property:' . $name] = array(
             'label' => $property['label'],
-            'class' => class_exists($class) ? $class : 'FlexiformElementProperty',
+            'class' => class_exists($class) ? $class : 'FlexiformElementEntityProperty',
             'type' => 'property',
             'group' => 'Property',
             'property' => $name,
