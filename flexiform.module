@@ -495,6 +495,19 @@ function flexiform_entity_type_get_builders($entity_type) {
   return $applicable_builders;
 }
 
+/**
+ * Access callback for form-entities and form-fields tabs that are only
+ * available for some builders.
+ *
+ * @param Flexiform $flexiform
+ *   The flexiform to check.
+ * @param string $component
+ *   The component to check access for, normally 'elements' or 'entities'
+ */
+function flexiform_builder_admin_access($flexiform, $component) {
+  return user_access('administer flexiforms') && $flexiform->getBuilder()->supportsComponent($component);
+}
+
 //-----------------------------------------------------------------------------
 // Entity Getter and Setter API
 

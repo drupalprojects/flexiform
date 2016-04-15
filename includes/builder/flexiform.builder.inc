@@ -220,4 +220,11 @@ class FlexiformBuilderFlexiform extends FlexiformBuilder {
 
     $this->setFlexiformState($form, $form_state);
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function supportsComponent($component) {
+    return in_array($component, array('entities', 'elements'));
+  }
 }

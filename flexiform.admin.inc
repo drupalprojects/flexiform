@@ -208,12 +208,13 @@ class FlexiformUIController extends EntityDefaultUIController {
       'title' => 'Manage form fields',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('flexiform_manage_form_fields_form', 4),
+      'access callback' => 'flexiform_builder_admin_access',
+      'access arguments' => array(4, 'elements'),
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
       'weight' => 2,
       'file' => 'flexiform.admin.inc',
       'file path' => drupal_get_path('module', 'flexiform'),
-      'access arguments' => array('administer flexiforms'),
     );
 
     $items["{$this->path}/manage/{$wildcard}/form-fields/%flexiform_formfield"] = array(
@@ -260,12 +261,13 @@ class FlexiformUIController extends EntityDefaultUIController {
       'title' => 'Manage form entities',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('flexiform_manage_form_entities_form', 4),
+      'access callback' => 'flexiform_builder_admin_access',
+      'access arguments' => array(4, 'entities'),
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
       'weight' => 3,
       'file' => 'flexiform.admin.inc',
       'file path' => drupal_get_path('module', 'flexiform'),
-      'access arguments' => array('administer flexiforms'),
     );
 
     $items["{$this->path}/manage/{$wildcard}/form-entities/%"] = array(
