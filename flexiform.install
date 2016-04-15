@@ -96,6 +96,13 @@ function flexiform_schema() {
         'serialize' => TRUE,
         'description' => 'A serialized array of displays of this flexiform.',
       ),
+      'access' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'A serialized array of access settings for this flexiform.',
+      ),
       'settings' => array(
         'type' => 'text',
         'not null' => FALSE,
@@ -551,5 +558,18 @@ function flexiform_update_7012() {
     'size' => 'big',
     'serialize' => TRUE,
     'description' => 'A serialized array of general settings for this flexiform.',
+  ));
+}
+
+/**
+ * Add the access settings column to flexiform.
+ */
+function flexiform_update_7013() {
+  db_add_field('flexiform', 'access', array(
+    'type' => 'text',
+    'not null' => FALSE,
+    'size' => 'big',
+    'serialize' => TRUE,
+    'description' => 'A serialized array of access settings for this flexiform.',
   ));
 }

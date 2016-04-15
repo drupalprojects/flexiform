@@ -7,7 +7,7 @@
 /**
  * Class for edit panel panes.
  */
-class FlexiformDisplayEditPane extends FlexiformDisplayBase {
+class FlexiformDisplayEditPane extends FlexiformDisplayAddPane {
 
   /**
    * {@inheritdoc}

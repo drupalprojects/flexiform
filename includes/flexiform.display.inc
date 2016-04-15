@@ -60,6 +60,18 @@ interface FlexiformDisplayInterface {
    */
   public function getPath($base_entity_id = NULL);
 
+  /**
+   * Check the access for this form display.
+   *
+   * @param array $context
+   *   (optional) An array of settings and values to help the plugin return the
+   *   entity
+   *
+   * @return bool
+   *   TRUE if the user can access this display. False otherwise.
+   */
+  public function access($context = array());
+
 }
 
 /**
@@ -166,6 +178,16 @@ class FlexiformDisplayBase implements FlexiformDisplayInterface {
    */
   public function getPath($base_entity_id = NULL) {
     return NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function access($context = array()) {
+    $base_entity = $this->getBaseEntity($context);
+    return $this->getFlexiform()
+      ->getAccessController(get_class($this))
+      ->checkAccess($base_entity);
   }
 
 }

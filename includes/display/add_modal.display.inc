@@ -18,7 +18,8 @@ class FlexiformDisplayCreateModal extends FlexiformDisplayPageBase {
       'title arguments' => $this->getMenuArguments(),
       'page callback' => 'flexiform_modal_page_wrapper',
       'page arguments' => $this->getMenuArguments(),
-      'access callback' => TRUE,
+      'access callback' => 'flexiform_page_access',
+      'access arguments' => $this->getMenuArguments(),
       'theme callback' => 'ajax_base_page_theme',
       'file' => 'flexiform.pages.inc',
     );

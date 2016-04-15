@@ -16,6 +16,8 @@ class Flexiform extends Entity {
   public $entities = array();
   public $displays = array();
   public $settings = array();
+  public $access = array();
+  protected $access_controllers = array();
 
   public function __construct($values = array()) {
     parent::__construct($values, 'flexiform');
@@ -87,6 +89,16 @@ class Flexiform extends Entity {
 
   public function updateElement($element) {
     $this->elements[$element->getElementNamespace()] = $element->toSettingsArray();
+  }
+
+  /**
+   * Get the access controller for a given display.
+   */
+  public function getAccessController($display = '') {
+    if (empty($this->access_controllers[$display])) {
+      $this->access_controllers[$display] = new FlexiformAccess($this, $display);
+    }
+    return $this->access_controllers[$display];
   }
 }
 

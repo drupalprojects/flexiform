@@ -16,6 +16,8 @@ class FlexiformDisplayUserCategory extends FlexiformDisplayBase {
     $path = 'user/%user_category/edit/' . $this->configuration['category'];
     $items[$path]['page callback'] = 'flexiform_page_wrapper';
     $items[$path]['page arguments'] = array($this->getFlexiform()->form, get_class($this), 1);
+    $items[$path]['access callback'] = 'flexiform_user_category_access';
+    $items[$path]['access arguments'] = array($this->getFlexiform()->form, get_class($this), 1);
     $items[$path]['module'] = 'flexiform';
     $items[$path]['file'] = 'flexiform.pages.inc';
     $items[$path]['weight'] = isset($this->configuration['weight']) ? $this->configuration['weight'] : 0;

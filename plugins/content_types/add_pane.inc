@@ -81,6 +81,12 @@ function flexiform_add_pane_content_type_admin_title($subtype, $conf, $context) 
  */
 function flexiform_add_pane_content_type_render($subtype, $conf, $panel_args, $context) {
   $flexiform = entity_load_single('flexiform', $subtype);
+
+  // Check flexiform access.
+  if (!$flexiform->getDisplay('FlexiformDisplayAddPane')->access()) {
+    return;
+  }
+
   $content = $flexiform->getDisplay('FlexiformDisplayAddPane')->build();
   $title = $flexiform->getDisplay('FlexiformDisplayAddPane')->title();
 

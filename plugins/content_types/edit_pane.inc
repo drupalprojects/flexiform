@@ -89,6 +89,11 @@ function flexiform_edit_pane_content_type_render($subtype, $conf, $panel_args, $
     'base_entity' => $context,
   );
   $flexiform = entity_load_single('flexiform', $subtype);
+
+  if (!$flexiform->getDisplay('FlexiformDisplayEditPane')->access($display_context)) {
+    return;
+  }
+
   $content = $flexiform->getDisplay('FlexiformDisplayEditPane')->build($display_context);
   $title = $flexiform->getDisplay('FlexiformDisplayEditPane')->title($display_context);
 

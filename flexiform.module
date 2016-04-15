@@ -388,6 +388,42 @@ function flexiform_page_title($flexiform, $display, $base_entity_id = NULL) {
 }
 
 /**
+ * Access callback for flexiform pages.
+ */
+function flexiform_page_access($flexiform, $display, $base_entity_id = NULL) {
+  if (!is_object($flexiform)) {
+    $flexiform = flexiform_load($flexiform);
+  }
+
+  if (!$flexiform) {
+    return FALSE;
+  }
+
+  $context = array(
+    'base_entity_id' => $base_entity_id,
+  );
+  return $flexiform->getDisplay($display)->access($context);
+}
+
+/**
+ * Access callback for flexiform user categories.
+ */
+function flexiform_user_category_access($flexiform, $display, $user) {
+  if (!is_object($flexiform)) {
+    $flexiform = flexiform_load($flexiform);
+  }
+
+  if (!$flexiform) {
+    return FALSE;
+  }
+
+  $context = array(
+    'base_entity_id' => $user,
+  );
+  return user_edit_access($user) && $flexiform->getDisplay($display)->access($context);
+}
+
+/**
  * Implements hook_field_create_instance().
  */
 function flexiform_field_create_instance() {
@@ -648,4 +684,28 @@ function flexiform_entity_type_get_displays($entity_type) {
  */
 function flexiform_display($flexiform, $display, $context = array()) {
   return $flexiform->getDisplay($display)->build($context);
+}
+
+/**
+ * Implements hook_ctools_access_get.
+ */
+function flexiform_ctools_access_get($argument) {
+  $flexiform = flexiform_load($argument);
+
+  try {
+    $contexts = $flexiform->getAccessController()->prepareContexts();
+  }
+  catch (Exception $e) {
+    return array();
+  }
+
+  return array($flexiform->getAccessController()->getCtoolsSettings(), $contexts);
+}
+
+/**
+ * Implements hook_ctools_access_set().
+ */
+function flexiform_ctools_access_set($argument, $access) {
+  $flexiform = flexiform_load($argument);
+  $flexiform->getAccessController()->setCtoolsSettings($access);
 }

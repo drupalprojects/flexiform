@@ -20,7 +20,8 @@ abstract class FlexiformDisplayPageBase extends FlexiformDisplayBase {
       'title arguments' => $this->getMenuArguments(),
       'page callback' => 'flexiform_page_wrapper',
       'page arguments' => $this->getMenuArguments(),
-      'access callback' => TRUE,
+      'access callback' => 'flexiform_page_access',
+      'access arguments' => $this->getMenuArguments(),
       'file' => 'flexiform.pages.inc',
       'weight' => isset($this->configuration['weight']) ? $this->configuration['weight'] : 0,
     );
@@ -132,7 +133,7 @@ abstract class FlexiformDisplayPageBase extends FlexiformDisplayBase {
       '#type' => 'fieldset',
       '#title' => t('Access'),
       '#tree' => TRUE,
-      '#description' => t('Alter settings for who can access this page.'),
+      '#description' => t('Alter settings for who can access this page. These settings will override the main flexiform access settings.'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
@@ -140,7 +141,7 @@ abstract class FlexiformDisplayPageBase extends FlexiformDisplayBase {
     $form['access']['permission'] = array(
       '#type' => 'select',
       '#title' => t('Required Permission'),
-      '#description' => t('Only users with the following permission will be able to access this form.'),
+      '#description' => t('Only users with the following permission will be able to access this form. <strong>N.B. It is recommended that you use the access controls below. This option should only be used if different permissions are required for different displays.</strong>'),
       '#options' => $this->getPermissionOptions(),
       '#empty_option' => t(' - None - '),
       '#default_value' => isset($this->configuration['access']['permission']) ? $this->configuration['access']['permission'] : '',

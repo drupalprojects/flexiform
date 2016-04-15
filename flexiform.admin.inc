@@ -601,6 +601,28 @@ function flexiform_form($form, &$form_state, $flexiform, $op = 'edit') {
     $form['displays'][$display] = $controller->configForm($displayForm, $form_state);
   }
 
+  $form['access'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Access Control'),
+    '#description' => t('Configure access control for this flexiform.'),
+  );
+
+  if ($flexiform->is_new) {
+    $form['access']['message'] = t('You must save the flexiform before configuring access control');
+  }
+  else {
+    ctools_include('context');
+    ctools_include('context-access-admin');
+
+    $form_state['contexts'] = $flexiform->getAccessController()->prepareContexts();
+    $form_state['access'] = $flexiform->getAccessController()->getCtoolsSettings();
+    $form_state['no buttons'] = TRUE;
+    $form_state['module'] = 'flexiform';
+    $form_state['callback argument'] = $flexiform->form;
+
+    $form['access'] += ctools_access_admin_form($form['access'], $form_state);
+  }
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -672,6 +694,13 @@ function flexiform_form_builder_selector($form, $form_state) {
  */
 function flexiform_form_submit(&$form, &$form_state) {
   $flexiform = entity_ui_form_submit_build_entity($form, $form_state);
+
+  // Make sure access plugins don't get overridden.
+  $db_flexiform = entity_load_unchanged('flexiform', $flexiform->form);
+  $flexiform->access = $db_flexiform->access;
+
+  // Set access logic.
+  $flexiform->access['settings']['logic'] = $form_state['values']['logic'];
 
   // Sort out tags.
   $flexiform->tags = drupal_explode_tags($form_state['values']['tags']);

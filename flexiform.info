@@ -11,6 +11,7 @@ files[] = flexiform_submission.entity.inc
 files[] = flexiform.admin.inc
 files[] = flexiform.entity.inc
 files[] = includes/flexiform.flexiform.inc
+files[] = includes/flexiform.access.inc
 
 ; Displays
 files[] = includes/flexiform.display.inc
