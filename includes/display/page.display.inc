@@ -113,7 +113,7 @@ abstract class FlexiformDisplayPageBase extends FlexiformDisplayBase {
       '#title' => t('Menu'),
       '#type' => 'select',
       '#description' => t('Select the menu the item should be put in.'),
-      '#options' => menu_get_menus(),
+      '#options' => module_exists('menu') ? menu_get_menus() : menu_list_system_menus(),
       '#default_value' => isset($this->configuration['menu_name']) ? $this->configuration['menu_name'] : NULL,
       '#states' => array(
         'visible' => array(':input[name="displays[flexiform_create_entity_page][type]"]' => array('!value' => MENU_CALLBACK)),
