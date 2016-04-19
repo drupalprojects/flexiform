@@ -59,7 +59,7 @@ class FlexiformAccess {
 
   public function getCtoolsSettings() {
     return array(
-      'logic' => $this->settings['logic'],
+      'logic' => !empty($this->settings['logic']) ? $this->settings['logic'] : 'and',
       'plugins' => $this->conditions,
     );
   }
