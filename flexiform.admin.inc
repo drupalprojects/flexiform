@@ -610,7 +610,7 @@ function flexiform_form($form, &$form_state, $flexiform, $op = 'edit') {
   );
 
   if ($flexiform->is_new) {
-    $form['access']['message'] = t('You must save the flexiform before configuring access control');
+    $form['access']['message']['#markup'] = t('You must save the flexiform before configuring access control');
   }
   else {
     ctools_include('context');
