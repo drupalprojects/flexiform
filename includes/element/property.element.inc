@@ -212,7 +212,9 @@ class FlexiformElementEntityProperty extends FlexiformElement {
   public function configureFormSubmit($form, &$form_state, $flexiform) {
     $this->settings['default_value']['default_value'] = $form_state['values']['default_value']['default_value'];
     $this->settings['default_value']['use_tokens'] = $form_state['values']['default_value']['use_tokens'];
-    $this->settings['options']['widget'] = $form_state['values']['options']['widget'];
+    if (!empty($form_state['values']['options'])) {
+      $this->settings['options']['widget'] = $form_state['values']['options']['widget'];
+    }
 
     parent::configureFormSubmit($form, $form_state, $flexiform);
   }
