@@ -493,7 +493,11 @@ function flexiform_flexiform_element_info() {
     $exposed_types = variable_get('flexiform_exposed_ctools_content', array('views_panes', 'entity_view'));
     foreach ($exposed_types as $name) {
       $type = ctools_get_content_type($name);
-      foreach (ctools_content_get_subtypes($type) as $sub => $info) {
+      $sub_types = ctools_content_get_subtypes($type);
+      if (empty($sub_types)) {
+        continue;
+      }
+      foreach ($sub_types as $sub => $info) {
         if (!empty($info['required context']) && (!is_array($info['required context']) || count($info['required context']) === 1)) {
           $context = $info['required context'];
           if (is_array($context)) {
