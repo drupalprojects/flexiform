@@ -609,7 +609,7 @@ function flexiform_form($form, &$form_state, $flexiform, $op = 'edit') {
     '#description' => t('Configure access control for this flexiform.'),
   );
 
-  if ($flexiform->is_new) {
+  if (!empty($flexiform->is_new)) {
     $form['access']['message']['#markup'] = t('You must save the flexiform before configuring access control');
   }
   else {
@@ -698,11 +698,13 @@ function flexiform_form_submit(&$form, &$form_state) {
   $flexiform = entity_ui_form_submit_build_entity($form, $form_state);
 
   // Make sure access plugins don't get overridden.
-  $db_flexiform = entity_load_unchanged('flexiform', $flexiform->form);
-  $flexiform->access = $db_flexiform->access;
+  if (empty($flexiform->is_new)) {
+    $db_flexiform = entity_load_unchanged('flexiform', $flexiform->id);
+    $flexiform->access = $db_flexiform->access;
 
-  // Set access logic.
-  $flexiform->access['settings']['logic'] = $form_state['values']['logic'];
+    // Set access logic.
+    $flexiform->access['settings']['logic'] = $form_state['values']['logic'];
+  }
 
   // Sort out tags.
   $flexiform->tags = drupal_explode_tags($form_state['values']['tags']);
