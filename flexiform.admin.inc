@@ -976,6 +976,26 @@ function flexiform_manage_form_fields_form($form, &$form_state, $flexiform) {
     '#tree' => TRUE,
   );
 
+  $redirect_settings = !empty($flexiform->settings['redirect']) ? $flexiform->settings['redirect'] : array();
+  $form['additional_settings']['redirect'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Redirect'),
+    '#description' => t('Configure redirect options for this form. For ajax forms and modals see the ajax section.'),
+  );
+  $form['additional_settings']['redirect']['path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Redirect Path'),
+    '#description' => t('Where to redirect to when the form is submitted.'),
+    '#default_value' => !empty($redirect_settings['path']) ? $redirect_settings['path'] : '',
+  );
+  $form['additional_settings']['redirect']['contexts'] = array(
+    '#title' => t('Substitutions'),
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['additional_settings']['redirect']['contexts']['contexts'] = $flexiform->getBuilder()->getCtoolsSubstitutionsList();
+
   $buttons_settings = !empty($flexiform->settings['buttons']) ? $flexiform->settings['buttons'] : array();
   $form['additional_settings']['buttons'] = array(
     '#type' => 'fieldset',
@@ -1101,6 +1121,7 @@ function flexiform_manage_form_fields_form_submit($form, &$form_state) {
   }
 
   // Sort out additional settings.
+  $flexiform->settings['redirect'] = $form_state['values']['additional_settings']['redirect'];
   $flexiform->settings['buttons'] = $form_state['values']['additional_settings']['buttons'];
   $flexiform->settings['ajax'] = $form_state['values']['additional_settings']['ajax'];
   $flexiform->save();

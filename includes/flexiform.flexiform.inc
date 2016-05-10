@@ -129,6 +129,7 @@ function flexiform_validate($form, &$form_state) {
  */
 function flexiform_submit($form, &$form_state) {
   $form['#flexiform_builder']->formSubmit($form, $form_state);
+  $form['#flexiform_builder']->formSubmitRedirect($form, $form_state);
 }
 
 /**
@@ -171,6 +172,7 @@ function flexiform_submit_ajax($form, $form_state) {
     case 'redirect':
       ctools_include('ajax');
       $redirect = !empty($flexiform->settings['ajax']['redirect']) ? $flexiform->settings['ajax']['redirect'] : '';
+      $redirect = $form['#flexiform_builder']->replaceCtoolsSubstitutions($redirect);
       $options = array();
       if (!empty($form_state['redirect'])) {
         if (is_array($form_state['redirect'])) {

@@ -85,6 +85,18 @@ class FlexiformBuilder implements FlexiformBuilderInterface {
   public function formSubmit($form, &$form_state) {}
 
   /**
+   * Submit the form and set up the redirect.
+   */
+  public function formSubmitRedirect($form, &$form_state) {
+    if (empty($this->flexiform->settings['redirect']['path'])) {
+      return;
+    }
+
+    $redirect = $this->flexiform->settings['redirect']['path'];
+    $form_state['redirect'] = $this->replaceCtoolsSubstitutions($redirect);
+  }
+
+  /**
    * Invoke hooks to alter the build of this form.
    */
   public function invoke(&$form, &$form_state, $hook = '') {
@@ -112,9 +124,108 @@ class FlexiformBuilder implements FlexiformBuilderInterface {
   }
 
   /**
+   * Get a form entity.
+   *
+   * @param $namespace
+   *  The namespace of the entity required.
+   *
+   * @return
+   *  The entity with that namespace.
+   */
+  public function getFormEntity($namespace, &$state = array()) {
+    return ($namespace == 'base_entity') ? $this->base_entity : FALSE;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function supportsComponent($component) {
     return FALSE;
+  }
+
+  /**
+   * Get an array of ctools context for the flexiform.
+   *
+   * @return ctools_context[]
+   *   An array of ctools contexts.
+   */
+  public function getCtoolsContexts() {
+    global $user;
+
+    ctools_include('context');
+    $contexts = array(
+      'current-user' => ctools_context_create('entity:user', $user),
+    );
+    $contexts['current-user']->keyword = 'current-user';
+    $contexts['current-user']->identifier = t('Logged-in user');
+    foreach ($this->flexiform->entities as $namespace => $info) {
+      // Attempt to get the entity. Ignore any exceptions.
+      try {
+        $entity = $this->getFormEntity($namespace);
+      }
+      catch(Exception $e) {}
+
+      // Create context.
+      $type = 'entity:' . $info['entity_type'];
+      if (!empty($entity)) {
+        $contexts[$namespace] = ctools_context_create($type, $entity);
+      }
+      else {
+        $contexts[$namespace] = ctools_context_create_empty($type);
+      }
+      $contexts[$namespace]->keyword = $namespace;
+      $contexts[$namespace]->identifier = $info['label'];
+    }
+
+    return $contexts;
+  }
+
+  /**
+   * Replace ctools substitutions with their values.
+   *
+   * @param string $string
+   *   The string we want to replace in.
+   * @param array $keywords
+   *   Optionally provide additional keywords to replace.
+   *
+   * @return string
+   *   $string with it's substitutions replaced.
+   */
+  public function replaceCtoolsSubstitutions($string, $keywords = array()) {
+    $contexts = $this->getCtoolsContexts();
+    return ctools_context_keyword_substitute($string, $keywords, $contexts);
+  }
+
+  /**
+   * Build a list of possible ctools substitutions.
+   *
+   * @param array $keywords
+   *   Optionally provide additional keywords to show.
+   *
+   * @return array
+   *   A render array of substitutions.
+   */
+  public function getCtoolsSubstitutionsList($keywords = array()) {
+    $content = array(
+      '#theme' => 'table',
+      '#header' => array(t('Keyword'), t('Value')),
+      '#rows' => array(),
+    );
+
+    foreach ($this->getCtoolsContexts() as $context) {
+      foreach (ctools_context_get_converters('%' . check_plain($context->keyword) . ':', $context) as $keyword => $title) {
+        $content['#rows'][] = array(
+          check_plain($keyword),
+          t('@identifier: @title', array('@title' => $title, '@identifier' => $context->identifier)),
+        );
+      }
+    }
+
+    if (count($content['#rows'])) {
+      return $content;
+    }
+    else {
+      return array();
+    }
   }
 }
