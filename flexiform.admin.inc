@@ -147,8 +147,10 @@ class FlexiformUIController extends EntityDefaultUIController {
     }
     else {
       $row[] = l(t('edit'), $this->path . '/manage/' . $id);
-      $row[] = l(t('manage form fields'), $this->path . '/manage/' . $id . '/form-fields');
-      $row[] = l(t('manage form entities'), $this->path . '/manage/' . $id . '/form-entities');
+
+      $base_path = $this->path . '/manage/' . $id . '/';
+      $row[] = drupal_valid_path($base_path.'form-fields') ? l(t('manage form fields'), $base_path.'form-fields') : '';
+      $row[] = drupal_valid_path($base_path.'form-entities') ? l(t('manage form entities'), $base_path.'form-entities') : '';
 
       if ($i18n) {
         $row[] = l(t('translate'), $this->path . '/manage/' . $id . '/translate');
