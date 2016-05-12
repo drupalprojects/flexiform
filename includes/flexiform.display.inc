@@ -119,6 +119,12 @@ class FlexiformDisplayBase implements FlexiformDisplayInterface {
       $base_entity->{$info['entity keys']['label']} = '';
     }
 
+    // Make sure the id key is always set to play nicely with ctools.
+    if (!empty($info['entity keys']['id'])
+      && !isset($base_entity->{$info['entity keys']['id']})) {
+      $base_entity->{$info['entity keys']['id']} = NULL;
+    }
+
     return $base_entity;
   }
 
