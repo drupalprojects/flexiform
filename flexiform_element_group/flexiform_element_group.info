@@ -1,6 +1,7 @@
 name = Flexiform Element Groups
 description = Allow grouping of flexiform elements
 core = 7.x
+package = Flexiform
 
 dependencies[] = flexiform
 dependencies[] = field_group

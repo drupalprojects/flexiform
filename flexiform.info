@@ -1,6 +1,7 @@
 name = "Flexible Forms"
 description = "Build forms based on multiple entities."
 core = 7.x
+package = Flexiform
 
 dependencies[] = ctools
 dependencies[] = entity

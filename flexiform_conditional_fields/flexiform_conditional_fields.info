@@ -1,6 +1,7 @@
 name = Flexiform Conditional Fields
 description = Conditional Fields integration with Flexiform
 core = 7.x
+package = Flexiform
 
 dependencies[] = flexiform
 dependencies[] = conditional_fields
