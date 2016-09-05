@@ -224,7 +224,11 @@ class FlexiformElement implements FlexiformElementInterface {
    * Submit the configure form for the element.
    */
   public function configureFormSubmit($form, &$form_state, $flexiform) {
-    $this->settings['label'] = $form_state['values']['label'];
+    if (isset($form_state['values']['label'])) {
+      $this->settings['label'] = $form_state['values']['label'];
+    } else {
+      $this->settings['label'] = $form_state['values']['instance']['label'];
+    }
     $this->settings['display_options']['css'] = $form_state['values']['display_options']['css_classes'];
     $this->settings['display_options']['hide_label'] = $form_state['values']['display_options']['hide_label'];
     $this->settings['display_options']['hide_element'] = $form_state['values']['display_options']['hide_element'];
