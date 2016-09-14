@@ -39,7 +39,7 @@ function flexiform_webform_entity_info() {
     // The entity class and controller class extend the classes provided by the
     // Entity API
     'entity class' => 'FlexiformWebformSubmission',
-    'controller class' => 'EntityApiController',
+    'controller class' => 'FlexiformWebformSubmissionController',
     'fc handler class' => 'FlexiformFCHandler',
     'base table' => 'flexiform_webform_submission',
     'fieldable' => TRUE,
