@@ -208,11 +208,11 @@ function flexiform_conditional_fields_form_after_build($form, &$form_state) {
 function flexiform_conditional_fields_required_element_validate($element, &$form_state, $form) {
   // Get the flexiform_element.
   $flexiform_element = FALSE;
+  $array_parents = $element['#array_parents'];
   if (!empty($element['#flexiform_element'])) {
     $flexiform_element = $element['#flexiform_element'];
   }
   else {
-    $array_parents = $element['#array_parents'];
     while (array_pop($array_parents) !== FALSE) {
       $el = drupal_array_get_nested_value($form, $array_parents);
       if (!empty($el['#flexiform_element'])) {
