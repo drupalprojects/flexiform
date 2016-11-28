@@ -8,7 +8,6 @@
  * Flexiform Checkout Pane Callback.
  */
 function flexiform_checkout_pane_checkout_form($form, &$form_state, $checkout_pane, $order) {
-dpm(func_get_args(), 'Args');
   $pane_form = array();
   $pane_form['#flexiform']
     = $flexiform
