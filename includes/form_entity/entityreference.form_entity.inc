@@ -28,7 +28,7 @@ class FlexiformFormEntityEntityReference extends FlexiformFormEntityBase {
 
     // Check we have enough information to load the entity.
     if (!$base_entity || empty($base_entity->{$this->getter['field_name']}[LANGUAGE_NONE][$delta]['target_id'])) {
-      return FALSE;
+      return empty($base_entity) ? FALSE : $this->createEntity();
     }
 
     // Load the entity;
@@ -40,6 +40,23 @@ class FlexiformFormEntityEntityReference extends FlexiformFormEntityBase {
     }
 
     return $this->checkBundle($target_entity) ? $target_entity : FALSE;
+  }
+
+  /**
+   * Create an entity if the settings allow it.
+   */
+  protected function createEntity() {
+    if (empty($this->settings['create'])) {
+      return FALSE;
+    }
+
+    $entity_info = entity_get_info($this->entity_type);
+    $values = array();
+    if (!empty($entity_info['entity keys']['bundle'])) {
+      $values[$entity_info['entity keys']['bundle']] = $this->settings['bundle'];
+    }
+
+    return entity_create($this->entity_type, $values);
   }
 
   /**
@@ -79,15 +96,15 @@ class FlexiformFormEntityEntityReference extends FlexiformFormEntityBase {
    */
   public function configForm($form, &$form_state) {
     $form = parent::configForm($form, $form_state);
+    $form['settings'] = array(
+      '#type' => 'container',
+      '#tree' => TRUE,
+    );
 
     $field = field_info_field($this->getter['field_name']);
 
     // Allow the selection of which one to use.
     if ($field['cardinality'] != 1) {
-      $form['settings'] = array(
-        '#type' => 'container',
-        '#tree' => TRUE,
-      );
 
       $options = array();
       $i = 0;
@@ -107,6 +124,13 @@ class FlexiformFormEntityEntityReference extends FlexiformFormEntityBase {
         '#default_value' => !empty($this->settings['delta']) ? $this->settings['delta'] : 0,
       );
     }
+
+    $form['settings']['create'] = array(
+      '#title' => t('Create if Empty'),
+      '#description' => t('When ticked, if the field is empty, a new entity will be created.'),
+      '#type' => 'checkbox',
+      '#default_value' => !empty($this->settings['create']),
+    );
 
     return $form;
   }

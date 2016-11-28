@@ -307,6 +307,13 @@ function flexiform_flexiform_display_info() {
     );
   }
 
+  if (module_exists('commerce_checkout')) {
+    $displays['FlexiformDisplayCheckoutPane'] = array(
+      'label' => t('Checkout Pane'),
+      'description' => t('Expose this form as a checkout pane. (Commerce Order must be the base entity)'),
+    );
+  }
+
   return $displays;
 }
 
