@@ -22,9 +22,12 @@ function flexiform_checkout_pane_checkout_form($form, &$form_state, $checkout_pa
 /**
  * Flexiform Checkout Pane Validate Callback.
  */
-function flexiform_checkout_pane_checkout_form_validate(&$form, &$form_state, $checkout_pane, $order) {
+function flexiform_checkout_pane_checkout_form_validate(&$form, &$form_state, $checkout_pane, &$order) {
   $builder = $form[$checkout_pane['pane_id']]['#flexiform_builder'];
   $builder->formValidate($form[$checkout_pane['pane_id']], $form_state);
+  // @todo: See if we can set the base entity on the builder rather than pulling
+  // it off afterwards.
+  $order = $builder->getFormEntity('base_entity');
 
   if (form_get_errors()) {
     return FALSE;
@@ -36,7 +39,10 @@ function flexiform_checkout_pane_checkout_form_validate(&$form, &$form_state, $c
 /**
  * Flexiform Checkout Pane Submit Callback.
  */
-function flexiform_checkout_pane_checkout_form_submit(&$form, &$form_state, $checkout_pane, $order) {
+function flexiform_checkout_pane_checkout_form_submit(&$form, &$form_state, $checkout_pane, &$order) {
   $builder = $form[$checkout_pane['pane_id']]['#flexiform_builder'];
   $builder->formSubmit($form[$checkout_pane['pane_id']], $form_state);
+  // @todo: See if we can set the base entity on the builder rather than pulling
+  // it off afterwards.
+  $order = $builder->getFormEntity('base_entity');
 }
