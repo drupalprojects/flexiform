@@ -90,7 +90,7 @@ class FlexiformElementEntityProperty extends FlexiformElement {
       '#type' => 'textfield',
       '#parents' => $parents,
       '#title' => $this->label(),
-      '#required' => TRUE,
+      '#required' => !empty($this->settings['required']),
       '#default_value' => $value,
       '#maxlength' => 255,
     );
@@ -104,6 +104,10 @@ class FlexiformElementEntityProperty extends FlexiformElement {
       }
 
       $form[$this->element_namespace]['#type'] = $widget;
+      if ($widget == 'select') {
+        $form[$this->element_namespace]['#empty_option'] = t('- Select -');
+      }
+
       $form[$this->element_namespace]['#options'] = $options;
       unset($form[$this->element_namespace]['#maxlength']);
 
@@ -153,6 +157,13 @@ class FlexiformElementEntityProperty extends FlexiformElement {
    */
   public function configureForm($form, &$form_state, $flexiform) {
     $form = parent::configureForm($form, $form_state, $flexiform);
+
+    $form['required'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Required'),
+      '#default_value' => !empty($this->settings['required']),
+      '#weight' => -6,
+    );
 
     $form['default_value'] = array(
       '#tree' => TRUE,
@@ -210,6 +221,7 @@ class FlexiformElementEntityProperty extends FlexiformElement {
    * {@inheritdoc}
    */
   public function configureFormSubmit($form, &$form_state, $flexiform) {
+    $this->settings['required'] = !empty($form_state['values']['required']);
     $this->settings['default_value']['default_value'] = $form_state['values']['default_value']['default_value'];
     $this->settings['default_value']['use_tokens'] = $form_state['values']['default_value']['use_tokens'];
     if (!empty($form_state['values']['options'])) {
