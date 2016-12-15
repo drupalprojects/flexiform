@@ -73,7 +73,7 @@ class Flexiform extends Entity {
 
     $class_name = $display_info['class'];
     if (!class_exists($class_name)) {
-      throw new Exception('Display class does not exist.');
+      throw new Exception(t('Display class @class does not exist.', array('@class' => $class_name)));
     }
 
     return new $class_name($this);

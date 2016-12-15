@@ -12,6 +12,31 @@ class FlexiformElementField_entityreference extends FlexiformElementField {
   /**
    * {@inheritdoc}
    */
+  public function form($form, &$form_state, $entity, $language = LANGUAGE_NONE) {
+    $form = parent::form($form, $form_state, $entity, $language);
+
+    if ($this->getWidgetType() != 'entityreference_autocomplete') {
+      return $form;
+    }
+
+    foreach (element_children($form[$this->element_namespace][$language]) as $delta) {
+      $element = &$form[$this->element_namespace][$language][$delta]['target_id'];
+      $element['#autocomplete_path'] = 'flexiform/entityreference/autocomplete/single/'.$this->flexiform->form.'/'.$this->element_namespace;
+
+      if ($entity_id = entity_id($this->entity_type, $entity)) {
+        $element['#autocomplete_path'] .= "/{$entity_id}";
+      }
+      else {
+        $element['#autocomplete_path'] .= "/NULL";
+      }
+    }
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function formSubmit($form, &$form_state, $entity, $language = LANGUAGE_NONE) {
     parent::formSubmit($form, $form_state, $entity, $language);
 

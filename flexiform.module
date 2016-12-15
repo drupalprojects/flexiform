@@ -43,6 +43,19 @@ function flexiform_menu() {
     }
   }
 
+  // Entityreference autocomplete flexiform.
+  if (module_exists('entityreference')) {
+    $items['flexiform/entityreference/autocomplete/single/%flexiform/%'] = array(
+      'title' => 'Flexiform Entity Reference Autocomplete',
+      'page callback' => 'flexiform_entityreference_autocomplete_callback',
+      'page arguments' => array(3,4,5),
+      'access callback' => 'flexiform_entityreference_autocomplete_access_callback',
+      'access arguments' => array(3,4,5),
+      'file' => 'flexiform.entityreference.inc',
+      'type' => MENU_CALLBACK,
+    );
+  }
+
   return $items;
 }
 
@@ -722,3 +735,23 @@ function flexiform_ctools_access_set($argument, $access) {
   $flexiform = flexiform_load($argument);
   $flexiform->getAccessController()->setCtoolsSettings($access);
 }
+
+/**
+ * Access callback for flexiform entityreference autocomplete.
+ */
+function flexiform_entityreference_autocomplete_access_callback($type, $flexiform, $element_namespace) {
+  try {
+    $element = FlexiformElement::getElement($flexiform, $element_namespace);
+    if ($element->getField()['type'] != 'entityreference') {
+      return FALSE;
+    }
+
+    // @todo: Check Flexiform Access.
+
+    return TRUE;
+  }
+  catch (Exception $e) {
+    return FALSE;
+  }
+}
+
