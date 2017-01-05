@@ -29,6 +29,12 @@ class FlexiformElementField_entityreference extends FlexiformElementField {
       else {
         $element['#autocomplete_path'] .= "/NULL";
       }
+
+      foreach ($element['#element_validate'] as &$callback) {
+        if ($callback == '_entityreference_autocomplete_validate') {
+          $callback = array($this, 'autocompleteValidate');
+        }
+      }
     }
 
     return $form;
@@ -49,4 +55,27 @@ class FlexiformElementField_entityreference extends FlexiformElementField {
     return $form;
   }
 
+  /**
+   * Validate any autocomplete input.
+   *
+   * @see _entityreference_autocomplete_validate
+   */
+  public function autocompleteValidate($element, &$form_state, $form) {
+    $value = '';
+    if (!empty($element['#value'])) {
+      // Take "label (entity id)", match the id from parenthesis
+      if (preg_match("/.+\((\d+)\)/", $element['#value'], $matches)) {
+        $value = $matches[1];
+      }
+      else {
+        // Try to get a match from the input string when the user didn't use the
+        // autocomplete but filled in a value manually.
+        $field = $this->getField();
+        $instance = $this->getInstance();
+        $handler = entityreference_get_selection_handler($field, $instance, $element['#entity_type'], $element['#entity']);
+        $value = $andler->validateAutocompleteInput($element['#value'], $element, $form_state, $form);
+      }
+    }
+    form_set_value($element, $value, $form_state);
+  }
 }

@@ -445,11 +445,113 @@ class FlexiformElementField extends FlexiformElement implements FlexiformElement
 
   /**
    * Validate this element.
+   *
+   * This is effectively the same as field_attach_form_validate passed with the
+   * field_name options, except that we have replaced _field_invoke and
+   * _field_invoke_default with our own methods to make sure the correct field
+   * settings get used.
+   *
+   * @see field_attach_validate()
+   * @see field_attach_form_validate()
    */
   public function formValidate($form, &$form_state, $entity, $language = LANGUAGE_NONE) {
     $entity = clone $entity;
     $form_elements = $this->extractFormElements($form);
-    field_attach_form_validate($this->getEntityType(), $entity, $form_elements, $form_state, array('field_name' => $this->field_name));
+
+    $this->fieldInvokeDefault('extract_form_values', $entity, $form_elements, $form_state);
+
+    try {
+      $errors = array();
+      $null = NULL;
+
+      $this->fieldInvokeDefault('validate', $entity, $errors, $null);
+      $this->fieldInvoke('validate', $entity, $errors, $null);
+
+      // Let other modules validate the entity.
+      foreach (module_implements('field_attach_validate') as $module) {
+        $function = $module . '_field_attach_validate';
+        $function($entity_type, $entity, $errors);
+      }
+
+      if ($errors) {
+        throw new FieldValidationException($errors);
+      }
+    }
+    catch (FieldValidationException $e) {
+      // Pass field-level validation errors back to widgets for accurate error
+      // flagging.
+      foreach ($e->errors as $field_name => $field_errors) {
+        foreach ($field_errors as $langcode => $errors) {
+          $field_state = field_form_get_state($form_elements['#parents'], $field_name, $langcode, $form_state);
+          $field_state['errors'] = $errors;
+          field_form_set_state($form_elements['#parents'], $field_name, $langcode, $form_state, $field_state);
+        }
+      }
+
+      $this->fieldInvokeDefault('form_errors', $entity, $form_elements, $form_state);
+    }
+  }
+
+  /**
+   * Invoke default field hooks on this element.
+   *
+   * @see _field_invoke_default()
+   */
+  protected function fieldInvokeDefault($op, $entity, &$a = NULL, &$b = NULL, $options = array()) {
+    $options['default'] = TRUE;
+    return $this->fieldInvoke($op, $entity, $a, $b, $options);
+  }
+
+  /**
+   * Invoke field hooks on a specific field.
+   *
+   * This method is the equivelant of _field_invoke. For a specific field in flexiform.
+   *
+   * @see _field_invoke()
+   */
+  protected function fieldInvoke($op, $entity, &$a = NULL, &$b = NULL, $options = array()) {
+    $entity_type = $this->getEntityType();
+    $bundle = $this->bundle;
+    $default_options = array(
+      'default' => FALSE,
+      'deleted' => FALSE,
+      'language' => NULL,
+    );
+    $options += $default_options;
+
+    $return = array();
+    $instance = $this->getInstance();
+    $field = $this->getField();
+    $field_name = $field['field_name'];
+    $function = $options['default'] ? 'field_default_' . $op : $field['module'] . '_field_' . $op;
+    if (function_exists($function)) {
+      // Determine the list of languages to iterate on.
+      $available_languages = field_available_languages($entity_type, $field);
+      $languages = _field_language_suggestion($available_languages, $options['language'], $field_name);
+
+      foreach ($languages as $langcode) {
+        $items = isset($entity->{$field_name}[$langcode]) ? $entity->{$field_name}[$langcode] : array();
+        $result = $function($entity_type, $entity, $field, $instance, $langcode, $items, $a, $b);
+        if (isset($result)) {
+          // For hooks with array results, we merge results together.
+          // For hooks with scalar results, we collect results in an array.
+          if (is_array($result)) {
+            $return = array_merge($return, $result);
+          }
+          else {
+            $return[] = $result;
+          }
+        }
+
+        // Populate $items back in the field values, but avoid replacing missing
+        // fields with an empty array (those are not equivalent on update).
+        if ($items !== array() || isset($entity->{$field_name}[$langcode])) {
+          $entity->{$field_name}[$langcode] = $items;
+        }
+      }
+    }
+
+    return $return;
   }
 
   /**
