@@ -129,7 +129,9 @@ class FlexiformElementEntityProperty extends FlexiformElement {
    */
   public function formValidate($form, &$form_state, $entity, $language = LANGUAGE_NONE) {
     $value = $this->formExtractValues($form, $form_state, $entity);
-    $this->wrapper($entity)->get($this->property)->validate($value);
+    if (!$this->wrapper($entity)->get($this->property)->validate($value)) {
+      form_error($form[$this->element_namespace], t('Invalid value given for !label', array('!label' => $this->label())));
+    }
   }
 
   /**

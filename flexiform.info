@@ -54,6 +54,7 @@ files[] = includes/element/user_roles.element.inc
 files[] = includes/element/fields/entityreference.inc
 files[] = includes/element/fields/field_collection.inc
 files[] = includes/element/fields/taxonomy_term_reference.inc
+files[] = includes/element/property/date.property.element.inc
 
 ; Form Entities
 files[] = includes/flexiform.form_entity.inc

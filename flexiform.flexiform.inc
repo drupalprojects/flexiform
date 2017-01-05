@@ -359,7 +359,7 @@ function flexiform_flexiform_element_info() {
               if ($list = entity_property_list_extract_type($type)) {
                 $type = $list;
               }
-              $class = 'FlexiformElementEntityProperty__' . $type;
+              $class = 'FlexiformElementEntityProperty_' . $type;
             }
 
             $elements[$entity_type][$bundle]['property:' . $name] = array(
@@ -391,7 +391,7 @@ function flexiform_flexiform_element_info() {
         if (!empty($property['setter callback'])) {
           $class = 'FlexiformElementEntityProperty';
           if (!empty($property['type'])) {
-            $class = 'FlexiformElementEntityProperty__' . $property['type'];
+            $class = 'FlexiformElementEntityProperty_' . $property['type'];
           }
 
           $elements[$entity_type][$entity_type]['property:' . $name] = array(
