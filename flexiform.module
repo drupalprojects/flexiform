@@ -742,7 +742,8 @@ function flexiform_ctools_access_set($argument, $access) {
 function flexiform_entityreference_autocomplete_access_callback($type, $flexiform, $element_namespace) {
   try {
     $element = FlexiformElement::getElement($flexiform, $element_namespace);
-    if ($element->getField()['type'] != 'entityreference') {
+    $element_field = $element->getField();
+    if ($element_field['type'] != 'entityreference') {
       return FALSE;
     }
 
