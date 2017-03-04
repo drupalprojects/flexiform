@@ -10,8 +10,6 @@ namespace Drupal\flexiform\FormEntity;
 use Drupal\flexiform\FlexiformEntityFormDisplayInterface;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\FieldableEntityInterface;
-use Drupal\Core\Plugin\Context\Context;
-use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 class FlexiformFormEntityManager {
@@ -29,7 +27,7 @@ class FlexiformFormEntityManager {
   /**
    * The Form entity plugins.
    *
-   * @var \Drupal\flexiform\FlexiformFormEntityInterface[]
+   * @var \Drupal\flexiform\FormEntity\FlexiformFormEntityInterface[]
    */
   protected $formEntities = [];
 
@@ -38,7 +36,7 @@ class FlexiformFormEntityManager {
    *
    * @param \Drupal\flexiform\FlexiformEntityFormDisplayInterface $form_display
    *   The form display to manage the entities for.
-   * @param \Drupal\Core\Entity\FieldableEntityInterface $base_entity
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
    *   The base entity of the form.
    */
   public function __construct(FlexiformEntityFormDisplayInterface $form_display, FieldableEntityInterface $entity = NULL) {

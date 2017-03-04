@@ -179,7 +179,7 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
    * @return array
    *   A table row array.
    */
-  protected function buildFormEntityFieldRow(string $namespace, FlexiformFormEntityInterface $form_entity, FieldDefinitionInterface $field_definition, array $form, FormStateInterface $form_state) {
+  protected function buildFormEntityFieldRow($namespace, FlexiformFormEntityInterface $form_entity, FieldDefinitionInterface $field_definition, array $form, FormStateInterface $form_state) {
     $field_name = $namespace.':'.$field_definition->getName();
     $display_options = $this->entity->getComponent($field_name);
     $label = $field_definition->getLabel();

@@ -178,7 +178,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    *   The flexiform entity form display.
    */
   public static function addSaveFormEntitiesSubmit(array &$element, FlexiformEntityFormDisplayInterface $form_display) {
-    if ($element['#type'] == 'submit') {
+    if (isset($element['#type']) && $element['#type'] == 'submit') {
       if (!empty($element['#submit']) && in_array('::save', $element['#submit'])) {
         $new_submit = [];
         foreach ($element['#submit'] as $callback) {

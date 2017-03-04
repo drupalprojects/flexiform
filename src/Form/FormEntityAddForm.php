@@ -81,7 +81,7 @@ class FormEntityAddForm extends FormEntityBaseForm {
   }
 
   /**
-   * Ajax the plugin selection.
+   * {@inheritdoc}
    */
   public function ajaxSubmit(array $form, FormStateInterface $form_state) {
     $response = new AjaxResponse();
