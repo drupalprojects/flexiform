@@ -259,6 +259,21 @@ function flexiform_flexiform_entity_getter_info() {
       'class' => 'FlexiformFormEntityNewCommerceLineItem',
     );
   }
+
+  if (module_exists('commerce_order')) {
+    $getters['commerce_order_user'] = array(
+      'label' => t('User from Order'),
+      'description' => t('Get a user from the order.'),
+      'params' => array(
+        'base' => array(
+          'entity_type' => 'commerce_order',
+        ),
+      ),
+      'entity_types' => array('user'),
+      'class' => 'FlexiformFormEntityCommerceOrderUser',
+    );
+  }
+
   return $getters;
 }
 
