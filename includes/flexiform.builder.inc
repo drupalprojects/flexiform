@@ -154,8 +154,10 @@ class FlexiformBuilder implements FlexiformBuilderInterface {
 
     ctools_include('context');
     $contexts = array(
+      'global' => ctools_context_create('token'),
       'current-user' => ctools_context_create('entity:user', $user),
     );
+    $contexts['global']->keyword = 'global';
     $contexts['current-user']->keyword = 'current-user';
     $contexts['current-user']->identifier = t('Logged-in user');
     foreach ($this->flexiform->entities as $namespace => $info) {
