@@ -54,6 +54,15 @@ function flexiform_menu() {
       'file' => 'flexiform.entityreference.inc',
       'type' => MENU_CALLBACK,
     );
+    $items['flexiform/entityreference/autocomplete/tags/%flexiform/%'] = array(
+      'title' => 'Flexiform Entity Reference Autocomplete',
+      'page callback' => 'flexiform_entityreference_autocomplete_callback',
+      'page arguments' => array(3,4,5),
+      'access callback' => 'flexiform_entityreference_autocomplete_access_callback',
+      'access arguments' => array(3,4,5),
+      'file' => 'flexiform.entityreference.inc',
+      'type' => MENU_CALLBACK,
+    );
   }
 
   return $items;
