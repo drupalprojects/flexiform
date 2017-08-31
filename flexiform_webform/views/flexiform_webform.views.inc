@@ -210,7 +210,7 @@ function flexiform_webform_views_default_views() {
     t('Operations links'),
     t('Page'),
   );
-  $views[] = $view;
-  return $views;
+  $views['flexiform_webform_submissions'] = $view;
 
+  return $views;
 }
