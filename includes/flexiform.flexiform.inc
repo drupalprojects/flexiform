@@ -114,6 +114,13 @@ function flexiform($form, &$form_state, $flexiform, $base_entity) {
   // is used to add validate handlers earlier.
   $form['#validate'][] = 'flexiform_validate';
 
+  if (module_exists('honeypot')) {
+    if (!empty($flexiform->settings['honeypot'])) {
+      $protections = array_keys(array_filter($flexiform->settings['honeypot']));
+      honeypot_add_form_protection($form, $form_state, $protections);
+    }
+  }
+
   return $form;
 }
 

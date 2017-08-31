@@ -1052,6 +1052,25 @@ function flexiform_manage_form_fields_form($form, &$form_state, $flexiform) {
     ),
   );
 
+  if (module_exists('honeypot')) {
+    $honeypot_settings = !empty($flexiform->settings['honeypot']) ? $flexiform->settings['honeypot'] : array();
+    $form['additional_settings']['honeypot'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Honeypot'),
+      '#description' => t('Configure settings for honeypot form protection. There are two forms of protection; a honeypot text field and a time limit.'),
+    );
+    $form['additional_settings']['honeypot']['honeypot'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Protect with Honeypot Text Field'),
+      '#default_value' => !empty($honeypot_settings['honeypot']),
+    );
+    $form['additional_settings']['honeypot']['time_restriction'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Protext with Time Restriction'),
+      '#default_value' => !empty($honeypot_settings['time_restriction']),
+    );
+  }
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
 
@@ -1126,6 +1145,9 @@ function flexiform_manage_form_fields_form_submit($form, &$form_state) {
   $flexiform->settings['redirect'] = $form_state['values']['additional_settings']['redirect'];
   $flexiform->settings['buttons'] = $form_state['values']['additional_settings']['buttons'];
   $flexiform->settings['ajax'] = $form_state['values']['additional_settings']['ajax'];
+  if (module_exists('honeypot')) {
+    $flexiform->settings['honeypot'] = $form_state['values']['additional_settings']['honeypot'];
+  }
   $flexiform->save();
 
   drupal_set_message(t('Your settings have been saved'));
