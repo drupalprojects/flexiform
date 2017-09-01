@@ -10,22 +10,22 @@
 class flexiform_webform_submission_handler_delete_link_field extends flexiform_webform_submission_handler_link_field {
   function construct() {
     parent::construct();
-    $this->additional_fields['type'] = 'type';
+    $this->additional_fields['webform'] = 'webform';
   }
 
 
   function render($values) {
-    $type = $values->{$this->aliases['type']};
-    
+    $type = $values->{$this->aliases['webform']};
+
     //Creating a dummy flexiform_webform_submission to check access against
-    $dummy_flexiform_webform_submission = (object) array('type' => $type);
+    $dummy_flexiform_webform_submission = (object) array('webform' => $type);
     if (!flexiform_webform_submission_access('edit', $dummy_flexiform_webform_submission)) {
       return;
     }
-    
+
     $text = !empty($this->options['text']) ? $this->options['text'] : t('delete');
-    $flexiform_webform_submission_id = $values->{$this->aliases['flexiform_webform_submission_id']};
-    
+    $flexiform_webform_submission_id = $values->{$this->aliases['id']};
+
     return l($text, 'admin/content/flexiform_webform_submissions/flexiform_webform_submission/' . $flexiform_webform_submission_id . '/delete');
   }
 }

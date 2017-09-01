@@ -10,8 +10,8 @@ class flexiform_webform_submission_handler_link_field extends views_handler_fiel
   function construct() {
     parent::construct();
 
-    $this->additional_fields['flexiform_webform_submission_id'] = 'flexiform_webform_submission_id';
-    $this->additional_fields['form'] = 'form';
+    $this->additional_fields['id'] = 'id';
+    $this->additional_fields['webform'] = 'webform';
   }
 
   function option_definition() {
@@ -39,8 +39,10 @@ class flexiform_webform_submission_handler_link_field extends views_handler_fiel
 
   function render($values) {
     $text = !empty($this->options['text']) ? $this->options['text'] : t('view');
-    $flexiform_webform_submission_id = $values->{$this->aliases['flexiform_webform_submission_id']};
+    $id = $values->{$this->aliases['id']};
+    $submission = entity_load_single('flexiform_webform_submission', $id);
+    $uri = entity_uri('flexiform_webform_submission', $submission);
 
-    return l($text, 'flexiform_webform_submission/' . $flexiform_webform_submission_id);
+    return l($text, $uri['path'], $uri['options']);
   }
 }

@@ -8,7 +8,7 @@ class flexiform_webform_submission_handler_flexiform_webform_submission_operatio
   function construct() {
     parent::construct();
 
-    $this->additional_fields['flexiform_webform_submission_id'] = 'flexiform_webform_submission_id';
+    $this->additional_fields['id'] = 'id';
   }
 
   function query() {
@@ -17,9 +17,12 @@ class flexiform_webform_submission_handler_flexiform_webform_submission_operatio
   }
 
   function render($values) {
+    $links = menu_contextual_links(
+      'flexiform_webform_submission',
+      'admin/content/flexiform_webform_submissions/flexiform_webform_submission',
+      array($this->get_value($values, 'id'))
+    );
 
-    $links = menu_contextual_links('flexiform_webform_submission', 'admin/content/flexiform_webform_submissions/flexiform_webform_submission', array($this->get_value($values, 'flexiform_webform_submission_id')));
-    
     if (!empty($links)) {
       return theme('links', array('links' => $links, 'attributes' => array('class' => array('links', 'inline', 'operations'))));
     }

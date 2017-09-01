@@ -31,7 +31,7 @@ class FlexiformWebformSubmission extends Entity {
   }
 
   protected function defaultUri() {
-    return array('path' => 'flexiform_submission/' . $this->id);
+    return array('path' => 'flexiform_webform_submission/' . $this->id);
   }
 }
 
