@@ -55,7 +55,8 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $js = FALSE, $cur
   foreach ($form_info['forms'] as $step => $info) {
     $form_info['order'][$step] = $info['title'];
   }
-  $last_step = end(array_keys($form_info['order']));
+  $step_keys = array_keys($form_info['order']);
+  $last_step = end($step_keys);
   $form_info['forms'][$last_step]['submit'] = 'flexiform_multistep_step_form_submit_redirect';
 
   // Cache important objects to maintain state between steps.
