@@ -18,11 +18,11 @@ class FlexiformElementField_entityreference extends FlexiformElementField {
     if ($this->getWidgetType() == 'entityreference_autocomplete') {
       foreach (element_children($form[$this->element_namespace][$language]) as $delta) {
         $element = &$form[$this->element_namespace][$language][$delta]['target_id'];
-        $this->formAlterAutocompleteElement($element);
+        $this->formAlterAutocompleteElement($element, $entity);
       }
     }
     else if ($this->getWidgetType() == 'entityreference_autocomplete_tags') {
-      $this->formAlterAutocompleteElement($form[$this->element_namespace][$language]);
+      $this->formAlterAutocompleteElement($form[$this->element_namespace][$language], $entity);
     }
 
     return $form;
@@ -31,7 +31,7 @@ class FlexiformElementField_entityreference extends FlexiformElementField {
   /**
    * Alter the selection element.
    */
-  protected function formAlterAutocompleteElement(&$element) {
+  protected function formAlterAutocompleteElement(&$element, $entity) {
     $ac_path = ($this->getWidgetType() == 'entityreference_autocomplete') ? 'flexiform/entityreference/autocomplete/single' : 'flexiform/entityreference/autocomplete/tags';
     $element['#autocomplete_path'] =  $ac_path.'/'.$this->flexiform->form.'/'.$this->element_namespace;
 
