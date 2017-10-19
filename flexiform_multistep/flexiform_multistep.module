@@ -74,10 +74,11 @@ function flexiform_multistep_field_group_formatter_info() {
 /**
  *  Implements hook_flexiform_wrapper_alter().
  */
-function flexiform_multistep_flexiform_wrapper_alter(&$wrapper, FlexiformDisplayInterface $display, $context) {
+function flexiform_multistep_flexiform_wrapper_alter(&$wrapper, FlexiformDisplayInterface $display, &$context) {
   $flexiform = $display->getFlexiform();
   $settings = isset($flexiform->settings['flexiform_multistep']) ? $flexiform->settings['flexiform_multistep'] : array();
 
+  array_unshift($context['args'], !empty($context['js']));
   if (!empty($settings['enabled'])) {
     $wrapper = 'flexiform_multistep_wrapper';
     module_load_include('inc', 'flexiform_multistep', 'flexiform_multistep.pages');

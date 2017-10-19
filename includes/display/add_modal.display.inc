@@ -88,50 +88,16 @@ class FlexiformDisplayCreateModal extends FlexiformDisplayPageBase {
     }
 
     // Get the base entity ready.
+    module_load_include('inc', 'flexiform', 'includes/flexiform.flexiform');
     $base_entity = $this->getBaseEntity($context);
     module_invoke_all('flexiform_prepare_base_entity', $base_entity, $this->flexiform, $this);
 
-    ctools_include('ajax');
-    ctools_include('modal');
+    $wrapper = 'flexiform_modal_wrapper';
+    drupal_alter('flexiform_wrapper', $wrapper, $this, $context);
 
-    // Prepare form id and form args.
-    $form_id = "flexiform__{$this->flexiform->form}";
     $args = isset($context['args']) ? $context['args'] : array();
     array_unshift($args, $base_entity);
     array_unshift($args, $this->flexiform);
-
-    // Setup form state.
-    $form_state = array(
-      'ajax' => TRUE,
-      'build_info' => array(
-        'args' => $args,
-      ),
-    );
-
-    $commands = ctools_modal_form_wrapper($form_id, $form_state);
-
-    if (!empty($form_state['executed']) && empty($form_state['rebuild'])) {
-      // The form has been executed, so let's redirect to the destination page.
-      $commands = array();
-      if (!empty($_GET['destination'])) {
-        $commands[] = ctools_ajax_command_redirect($_GET['destination']);
-      }
-      elseif (!empty($form_state['redirect'])) {
-        $commands[] = ctools_ajax_command_redirect($form_state['redirect']);
-      }
-      elseif ($this->configuration['ajax_behavior'] == 'modal_dismiss') {
-        $commands[] = ctools_modal_command_dismiss();
-      }
-      else {
-        $commands[] = ctools_ajax_command_reload();
-      }
-    }
-
-    drupal_alter('flexiform_modal_submit_commands', $commands, $flexiform, $form_state);
-    ajax_deliver(array(
-      '#type' => 'ajax',
-      '#commands' => $commands,
-    ));
-    drupal_exit();
+    return call_user_func_array($wrapper, $args);
   }
 }

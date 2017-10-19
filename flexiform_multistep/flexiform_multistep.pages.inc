@@ -15,7 +15,7 @@
  * @return array
  *   The page array.
  */
-function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = NULL) {
+function flexiform_multistep_wrapper($flexiform, $base_entity, $js = FALSE, $current_step = NULL) {
   global $user;
 
   // Start setting up our ctools wizard multistep form info.
@@ -85,6 +85,8 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = N
         $object['base_entity'],
       ),
     ),
+    'ajax' => !empty($js),
+    'modal' => !empty($js),
     'last_step' => $last_step == $current_step,
   );
   form_load_include($form_state, 'inc', 'flexiform_multistep', 'flexiform_multistep.pages');
@@ -96,7 +98,15 @@ function flexiform_multistep_wrapper($flexiform, $base_entity, $current_step = N
     $form_state['flexiform_state'] = $object['flexiform_state'];
   }
 
-  return ctools_wizard_multistep_form($form_info, $current_step, $form_state);
+  $output = ctools_wizard_multistep_form($form_info, $current_step, $form_state);
+  if ($js) {
+    print $output;
+    ajax_footer();
+    drupal_exit();
+  }
+  else {
+    return $output;
+  }
 }
 
 /**
