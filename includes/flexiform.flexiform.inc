@@ -66,10 +66,10 @@ function flexiform_modal_wrapper($flexiform, $base_entity) {
   ctools_include('modal');
 
   // Prepare form id and form args.
-  $form_id = "flexiform__{$this->flexiform->form}";
+  $form_id = "flexiform__{$flexiform->form}";
   $args = isset($context['args']) ? $context['args'] : array();
   array_unshift($args, $base_entity);
-  array_unshift($args, $this->flexiform);
+  array_unshift($args, $flexiform);
 
   // Setup form state.
   $form_state = array(
