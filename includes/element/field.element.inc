@@ -470,7 +470,7 @@ class FlexiformElementField extends FlexiformElement implements FlexiformElement
       // Let other modules validate the entity.
       foreach (module_implements('field_attach_validate') as $module) {
         $function = $module . '_field_attach_validate';
-        $function($entity_type, $entity, $errors);
+        $function($this->getEntityType(), $entity, $errors);
       }
 
       if ($errors) {
