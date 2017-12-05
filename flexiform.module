@@ -765,3 +765,62 @@ function flexiform_entityreference_autocomplete_access_callback($type, $flexifor
   }
 }
 
+/**
+ * Implements hook_flexiform_build_alter().
+ */
+function flexiform_flexiform_build_alter(&$form, &$form_state, $flexiform) {
+  // Manually adding support for field_collection's
+  // "field_collection_field_attach_form" hook that the
+  // Flexiform builder doesn't invoke.
+  foreach($flexiform->elements as $element_namespace => $element_info) {
+    // If we're not dealing with a field (i.e.: potentially a property),
+    // then skip this element.
+    if (!isset($element_info['field_name'])) {
+      continue;
+    }
+
+    $field_name = $element_info['field_name'];
+    $field = field_info_field($field_name);
+    $element = &$form[$element_namespace];
+    $entity_info = $flexiform->entities[$element_info['entity_namespace']];
+    $entity_type = $entity_info['entity_type'];
+
+    if ($field['type'] == 'field_collection') {
+      $instance = field_info_instance($entity_type, $field_name, $entity_info['bundle']);
+
+      // Can access the field and is target widget type?
+      if(field_access('edit', $field, $entity_type)
+        && $instance['widget']['type'] == 'field_collection_embed') {
+
+        if (field_collection_hide_blank_items($field)) {
+          $element_langcode = $element['#language'];
+          if ($element[$element_langcode]['#max_delta'] > 0) {
+            $element[$element_langcode]['#max_delta']--;
+          }
+          // Remove blank form elements and force user to explicitly add a field
+          // collection if both 'hide_initial_item' and 'hide_blank_items' are TRUE.
+          if ($field['settings']['hide_initial_item']
+            && $field['settings']['hide_blank_items']
+            && field_collection_item_is_empty($element[$element_langcode][0]['#entity'])) {
+
+            _field_collection_process_children_attached($element[$element_langcode][0]);
+            unset($element[$element_langcode][0]);
+            unset($form_state['field']['#parents'][$field_name][$element_langcode][0]);
+          }
+        }
+
+        if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED
+          && empty($form_state['programmed'])) {
+
+          $element_langcode = $element['#language'];
+          $element_wrapper = $element[$element_langcode]['add_more']['#ajax']['wrapper'];
+          for ($i = 0; $i <= $element[$element_langcode]['#max_delta']; $i++) {
+            if (isset($element[$element_langcode][$i]['remove_button'])) {
+              $element[$element_langcode][$i]['remove_button']['#ajax']['wrapper'] = $element_wrapper;
+            }
+          }
+        }
+      }
+    }
+  }
+}
