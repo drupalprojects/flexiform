@@ -60,16 +60,20 @@ function flexiform_wrapper($flexiform, $base_entity) {
  *   The flexiform being wrapped.
  * @param $base_entity
  *   The base entity for this form.
+ * @param string $display
+ *   The active modal display.
  */
-function flexiform_modal_wrapper($flexiform, $base_entity) {
+function flexiform_modal_wrapper($flexiform, $base_entity, $display) {
   ctools_include('ajax');
   ctools_include('modal');
 
   // Prepare form id and form args.
   $form_id = "flexiform__{$flexiform->form}";
-  $args = isset($context['args']) ? $context['args'] : array();
-  array_unshift($args, $base_entity);
-  array_unshift($args, $flexiform);
+
+  $args = array(
+    $flexiform,
+    $base_entity
+  );
 
   // Setup form state.
   $form_state = array(
@@ -81,6 +85,8 @@ function flexiform_modal_wrapper($flexiform, $base_entity) {
   $commands = ctools_modal_form_wrapper($form_id, $form_state);
 
   if (!empty($form_state['executed']) && empty($form_state['rebuild'])) {
+    $configuration = $flexiform->getDisplay($display)->configuration;
+
     // The form has been executed, so let's redirect to the destination page.
     $commands = array();
     if (!empty($_GET['destination'])) {
@@ -89,7 +95,7 @@ function flexiform_modal_wrapper($flexiform, $base_entity) {
     elseif (!empty($form_state['redirect'])) {
       $commands[] = ctools_ajax_command_redirect($form_state['redirect']);
     }
-    elseif ($this->configuration['ajax_behavior'] == 'modal_dismiss') {
+    elseif ($configuration['ajax_behavior'] == 'modal_dismiss') {
       $commands[] = ctools_modal_command_dismiss();
     }
     else {

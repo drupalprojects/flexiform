@@ -96,6 +96,7 @@ class FlexiformDisplayCreateModal extends FlexiformDisplayPageBase {
     drupal_alter('flexiform_wrapper', $wrapper, $this, $context);
 
     $args = isset($context['args']) ? $context['args'] : array();
+    array_unshift($args, get_class($this));
     array_unshift($args, $base_entity);
     array_unshift($args, $this->flexiform);
     return call_user_func_array($wrapper, $args);
