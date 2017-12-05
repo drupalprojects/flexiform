@@ -75,7 +75,7 @@ class FlexiformElementEntityProperty extends FlexiformElement {
     // If there is no value work out the default.
     if (empty($value)) {
       $value = '';
-      if (!empty($this->settings['default_value']['default_value'])) {
+      if (isset($this->settings['default_value']['default_value'])) {
         $value = $this->settings['default_value']['default_value'];
       }
       if (!empty($this->settings['default_value']['use_tokens'])) {
@@ -177,7 +177,7 @@ class FlexiformElementEntityProperty extends FlexiformElement {
     $form['default_value']['default_value'] = array(
       '#type' => 'textfield',
       '#title' => $this->label() ? $this->label() : t('Default'),
-      '#default_value' => !empty($this->settings['default_value']['default_value']) ? $this->settings['default_value']['default_value'] : '',
+      '#default_value' => isset($this->settings['default_value']['default_value']) ? $this->settings['default_value']['default_value'] : '',
       '#maxlength' => 255,
     );
 
