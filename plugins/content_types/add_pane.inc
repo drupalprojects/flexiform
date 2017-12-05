@@ -87,7 +87,7 @@ function flexiform_add_pane_content_type_render($subtype, $conf, $panel_args, $c
     return;
   }
 
-  $content = $flexiform->getDisplay('FlexiformDisplayAddPane')->build();
+  $content = $flexiform->getDisplay('FlexiformDisplayAddPane')->build(array('args' => $panel_args));
   $title = $flexiform->getDisplay('FlexiformDisplayAddPane')->title();
 
   // Build the content type block.
