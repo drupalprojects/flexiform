@@ -790,7 +790,7 @@ function flexiform_flexiform_build_alter(&$form, &$form_state, $flexiform) {
 
       // Can access the field and is target widget type?
       if(field_access('edit', $field, $entity_type)
-        && $instance['widget']['type'] == 'field_collection_embed') {
+        && in_array($instance['widget']['type'], array('field_collection_embed', 'field_collection_table'))) {
 
         if (field_collection_hide_blank_items($field)) {
           $element_langcode = $element['#language'];
