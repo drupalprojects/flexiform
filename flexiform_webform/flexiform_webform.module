@@ -170,10 +170,10 @@ function flexiform_webform_permission() {
         'title' => t('View any %form_name Flexiform Webform Submissions', array('%form_name' => $webform->label)),
       ),
       "delete own $form_name flexiform webform submissions" => array(
-        'title' => t('View own %form_name Flexiform Webform Submissions', array('%form_name' => $webform->label)),
+        'title' => t('Delete own %form_name Flexiform Webform Submissions', array('%form_name' => $webform->label)),
       ),
       "delete any $form_name flexiform webform submission" => array(
-        'title' => t('View any %form_name Flexiform Webform Submissions', array('%form_name' => $webform->label)),
+        'title' => t('Delete any %form_name Flexiform Webform Submissions', array('%form_name' => $webform->label)),
       ),
     );
   }
@@ -231,20 +231,20 @@ function flexiform_webform_submission_access($op, $submission = NULL, $account =
   // access checks.
 
   // Special case for when adding new submissions.
+  $webform = $submission->webform;
   if ($op == 'submit') {
-    $webform = $submission;
     return user_access("submit a $webform flexiform webform", $account);
   }
-  elseif (isset($flexiform_submission) && $webform = $submission->webform) {
+  elseif (isset($submission) && $webform = $submission->webform) {
     // If we don't recognise the op, return FALSE.
     if (!in_array($op, array('view','edit','delete'))) {
       return FALSE;
     }
     // Check the user access for this op on this form.
-    elseif (user_access("$op any $webform flexiform submission", $account)) {
+    elseif (user_access("$op any $webform flexiform webform submission", $account)) {
       return TRUE;
     }
-    elseif ($submission->user == $account->uid && user_access("$op own $webform flexiform submissions", $account)) {
+    elseif ($submission->user == $account->uid && user_access("$op own $webform flexiform webform submissions", $account)) {
       return TRUE;
     }
   }
