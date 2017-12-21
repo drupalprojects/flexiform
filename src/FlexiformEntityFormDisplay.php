@@ -55,7 +55,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    * {@inheritdoc}
    */
   public function buildForm(FieldableEntityInterface $entity, array &$form, FormStateInterface $form_state) {
-    $this->getFormEntityManager($entity);
+    $this->getFormEntityManager($entity, $form_state->get('form_entity_provided'));
 
     // Set #parents to 'top-level' by default.
     $form += array('#parents' => array());
@@ -250,9 +250,9 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   /**
    * Get the form entity manager.
    */
-  public function getFormEntityManager(FieldableEntityInterface $entity = NULL) {
+  public function getFormEntityManager(FieldableEntityInterface $entity = NULL, array $provided = []) {
     if (empty($this->formEntityManager)) {
-      $this->formEntityManager = new FlexiformFormEntityManager($this, $entity);
+      $this->formEntityManager = new FlexiformFormEntityManager($this, $entity, $provided);
     }
 
     return $this->formEntityManager;

@@ -38,10 +38,12 @@ class FlexiformFormEntityManager {
    *   The form display to manage the entities for.
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
    *   The base entity of the form.
+   * @param \Drupal\Core\Entity\FieldableEntityInterface[] $provided
+   *   Array of provided entities keyed by namespace.
    */
-  public function __construct(FlexiformEntityFormDisplayInterface $form_display, FieldableEntityInterface $entity = NULL) {
+  public function __construct(FlexiformEntityFormDisplayInterface $form_display, FieldableEntityInterface $entity = NULL, array $provided = []) {
     $this->formDisplay = $form_display;
-    $this->initFormEntities($entity);
+    $this->initFormEntities($entity, $provided);
   }
 
   /**
@@ -54,7 +56,7 @@ class FlexiformFormEntityManager {
   /**
    * Initialize form entities.
    */
-  protected function initFormEntities(FieldableEntityInterface $entity = NULL) {
+  protected function initFormEntities(FieldableEntityInterface $entity = NULL, array $provided = []) {
     // Initialize the base entity.
     $this->formEntities[''] = $this->getPluginManager()->createInstance('provided', [
       'manager' => $this,
@@ -74,6 +76,9 @@ class FlexiformFormEntityManager {
 
     foreach ($this->formDisplay->getFormEntityConfig() as $namespace => $configuration) {
       $configuration['manager'] = $this;
+      if (isset($provided[$namespace])) {
+        $configuration['entity'] = $provided[$namespace];
+      }
       $this->formEntities[$namespace] = $this->getPluginManager()->createInstance($configuration['plugin'], $configuration);
     }
   }
