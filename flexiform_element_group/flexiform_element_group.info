@@ -1,6 +1,0 @@
-name = Flexiform Element Groups
-description = Allow grouping of flexiform elements
-core = 7.x
-
-dependencies[] = flexiform
-dependencies[] = flexiform_element_group
