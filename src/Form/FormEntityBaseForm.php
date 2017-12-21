@@ -6,13 +6,16 @@ use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Ajax\SetDialogTitleCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Ajax\RedirectCommand;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\flexiform\FlexiformEntityFormDisplayInterface;
 use Drupal\flexiform\FlexiformFormEntityPluginManager;
 use Drupal\flexiform\FormEntity\FlexiformFormEntityInterface;
 use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Routing\RouterInterface;
 
 abstract class FormEntityBaseForm extends FormBase {
 
@@ -32,10 +35,20 @@ abstract class FormEntityBaseForm extends FormBase {
   protected $pluginManager;
 
   /**
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * @var \Symfony\Component\Routing\RouterInterface
+
+  /**
    * Constructor.
    */
-  public function __construct(FlexiformFormEntityPluginManager $plugin_manager) {
+  public function __construct(FlexiformFormEntityPluginManager $plugin_manager, EntityTypeManagerInterface $entity_type_manager, RouterInterface $router) {
     $this->pluginManager = $plugin_manager;
+    $this->entityTypeManager = $entity_type_manager;
+    $this->router = $router;
   }
 
   /**
@@ -43,7 +56,9 @@ abstract class FormEntityBaseForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('plugin.manager.flexiform_form_entity')
+      $container->get('plugin.manager.flexiform_form_entity'),
+      $container->get('entity_type.manager'),
+      $container->get('router')
     );
   }
 
@@ -144,14 +159,58 @@ abstract class FormEntityBaseForm extends FormBase {
 
     $this->formDisplay->addFormEntityConfig($namespace, $configuration);
     $this->formDisplay->save();
+
+    $params = [
+      'form_mode_name' => $this->formDisplay->get('mode'),
+    ];
+    $entity_type_id = $this->formDisplay->get('targetEntityType');
+    $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
+    if ($route_name = $entity_type->get('field_ui_base_route')) {
+      $route = $this->router->getRouteCollection()->get($route_name);
+      $path = $route->getPath();
+
+      if (strpos($path, '{'.$entity_type->getBundleEntityType().'}') !== FALSE) {
+        $params[$entity_type->getBundleEntityType()] = $this->formDisplay->get('bundle');
+      }
+      else if (strpos($path, '{bundle}') !== FALSE) {
+        $params['bundles'] = $this->formDisplay->get('bundle');
+      }
+    }
+    $form_state->setRedirect(
+      "entity.entity_form_display.{$entity_type_id}.form_mode",
+      $params
+    );
   }
 
   /**
    * Ajax the plugin selection.
    */
   public function ajaxSubmit(array $form, FormStateInterface $form_state) {
+    // Prepare redirect parameters.
+    $params = [
+      'form_mode_name' => $this->formDisplay->get('mode'),
+    ];
+    $entity_type_id = $this->formDisplay->get('targetEntityType');
+    $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
+    if ($route_name = $entity_type->get('field_ui_base_route')) {
+      $route = $this->router->getCollection()->get($route_name);
+      $path = $route->getPath();
+
+      if (strpos($path, '{'.$entity_type->getBundleEntityType().'}') !== FALSE) {
+        $params[$entity_type->getBundleEntityType()] = $this->formDisplay->get('bundle');
+      }
+      else if (strpos($path, '{bundle}') !== FALSE) {
+        $params['bundles'] = $this->formDisplay->get('bundle');
+      }
+    }
+
     $response = new AjaxResponse();
     $response->addCommand(new CloseModalDialogCommand());
+    $response->addCommand(new RedirectCommand((new Url(
+        "entity.entity_form_display.{$entity_type_id}.form_mode",
+        $params
+      ))->toString()
+    ));
     return $response;
   }
 

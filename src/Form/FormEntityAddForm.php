@@ -35,8 +35,8 @@ class FormEntityAddForm extends FormEntityBaseForm {
     $form['#suffix'] = '</div>';
 
     if ($plugin_id = $form_state->get('selected_form_entity')) {
-      $plugin = $this->pluginManager->createInstance($plugin_id);
-      return $this->buildConfigurationForm($form, $form_state, $plugin, 'add');
+      $plugin = $this->pluginManager->createInstance($plugin_id, ['manager' => $this->formEntityManager()]);
+      return $this->buildConfigurationForm($form, $form_state, $plugin);
     }
     else {
       // Prepare selector form.

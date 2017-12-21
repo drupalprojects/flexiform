@@ -111,7 +111,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
     $this->renderer->addCacheableDependency($form, $this);
 
     // Add a process callback so we can assign weights and hide extra fields.
-    $form['#process'][] = array($this, 'processForm');
+    $form['#process'][] = [$this, 'processForm'];
   }
 
   /**
@@ -201,6 +201,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    * {@inheritdoc}
    */
   public function getFormEntityConfig() {
+    $this->initFormEntityConfig();
     return $this->formEntities;
   }
 
@@ -208,6 +209,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    * {@inheritdoc}
    */
   public function addFormEntityConfig($namespace, $configuration) {
+    $this->initFormEntityConfig();
     $this->formEntities[$namespace] = $configuration;
     return $this;
   }
@@ -216,6 +218,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    * {@inheritdoc}
    */
   public function removeFormEntityConfig($namespace) {
+    $this->initFormEntityConfig();
     unset($this->formEntities[$namespace]);
     return $this;
   }
@@ -224,7 +227,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    * {@inheritdoc}
    */
   public function initFormEntityConfig() {
-    if ($form_entities = $this->getThirdPartySetting('flexiform', 'form_entities')) {
+    if (empty($this->formEntities) && ($form_entities = $this->getThirdPartySetting('flexiform', 'form_entities'))) {
       $this->formEntities = $form_entities;
     }
   }

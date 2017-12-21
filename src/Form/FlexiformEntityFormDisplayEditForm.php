@@ -120,6 +120,7 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
             "entity.entity_form_display.{$target_entity_type}.form_mode.form_entity_edit",
             $operation_params
           ),
+          'attributes' => $this->getAjaxButtonAttributes(),
         ];
       }
 
@@ -133,6 +134,11 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
         'operations' => [
           '#type' => 'operations',
           '#links' => $operations,
+          '#attached' => [
+            'library' => [
+              'core/drupal.ajax',
+            ],
+          ],
         ],
       ];
     }
@@ -191,49 +197,61 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
     }
 
     $regions = array_keys($this->getRegions());
-    $field_row = array(
-      '#attributes' => array('class' => array('draggable', 'tabledrag-leaf')),
+    $field_row = [
+      '#attributes' => ['class' => ['draggable', 'tabledrag-leaf']],
       '#row_type' => 'field',
-      '#region_callback' => array($this, 'getRowRegion'),
-      '#js_settings' => array(
+      '#region_callback' => [$this, 'getRowRegion'],
+      '#js_settings' => [
         'rowHandler' => 'field',
         'defaultPlugin' => $this->getDefaultPlugin($field_definition->getType()),
-      ),
-      'human_name' => array(
+      ],
+      'human_name' => [
         '#plain_text' => $label.' ['.$form_entity->getFormEntityContextDefinition()->getLabel().']',
-      ),
-      'weight' => array(
+      ],
+      'weight' => [
         '#type' => 'textfield',
         '#title' => $this->t('Weight for @title', array('@title' => $label)),
         '#title_display' => 'invisible',
         '#default_value' => $display_options ? $display_options['weight'] : '0',
         '#size' => 3,
         '#attributes' => array('class' => array('field-weight')),
-      ),
-      'parent_wrapper' => array(
-        'parent' => array(
+      ],
+      'parent_wrapper' => [
+        'parent' => [
           '#type' => 'select',
           '#title' => $this->t('Label display for @title', array('@title' => $label)),
           '#title_display' => 'invisible',
           '#options' => array_combine($regions, $regions),
           '#empty_value' => '',
-          '#attributes' => array('class' => array('js-field-parent', 'field-parent')),
-          '#parents' => array('fields', $field_name, 'parent'),
-        ),
-        'hidden_name' => array(
+          '#attributes' => ['class' => ['js-field-parent', 'field-parent']],
+          '#parents' => ['fields', $field_name, 'parent'],
+        ],
+        'hidden_name' => [
           '#type' => 'hidden',
           '#default_value' => $field_name,
-          '#attributes' => array('class' => array('field-name')),
-        ),
-      ),
-    );
+          '#attributes' => ['class' => ['field-name']],
+        ],
+      ],
+      'region' => [
+        '#type' => 'select',
+        '#title' => $this->t('Region for @title', ['@title' => $label]),
+        '#title_display' => 'invisible',
+        '#options' => $this->getRegionOptions(),
+        '#default_value' => $display_options ? $display_options['region'] : 'hidden',
+        '#attributes' => [
+          'class' => [
+            'field-region',
+          ],
+        ],
+      ],
+    ];
 
     $field_row['plugin'] = array(
       'type' => array(
         '#type' => 'select',
         '#title' => $this->t('Plugin for @title', array('@title' => $label)),
         '#title_display' => 'invisible',
-        '#options' => $this->getPluginOptions($field_definition),
+        '#options' => $this->getApplicablePluginOptions($field_definition),
         '#default_value' => $display_options ? $display_options['type'] : 'hidden',
         '#parents' => array('fields', $field_name, 'type'),
         '#attributes' => array('class' => array('field-plugin-type')),
@@ -356,7 +374,7 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
       foreach ($definitions as $field_name => $field_definition) {
         $name = $namespace.':'.$field_name;
         $values = $form_values['fields'][$name];
-        if ($values['type'] == 'hidden') {
+        if ($values['region'] == 'hidden') {
           $entity->removeComponent($name);
         }
         else {
@@ -372,6 +390,7 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
           }
 
           $options['type'] = $values['type'];
+          $options['region'] = $values['region'];
           $options['weight'] = $values['weight'];
           // Only formatters have configurable label visibility.
           if (isset($values['label'])) {
@@ -389,7 +408,6 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
    * @return Drupal\flexiform\FormEntity\FlexiformFormEntityManager
    */
   public function getFormEntityManager() {
-    //return new FlexiformFormEntityManager($this->entity);
     if (empty($this->formEntityManager)) {
       $this->initFormEntityManager();
     }
@@ -401,7 +419,7 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
    * Initialize the form entity manager.
    */
   protected function initFormEntityManager() {
-    $this->formEntityManager = new FlexiformFormEntityManager($this->entity);
+    $this->formEntityManager = $this->entity->getFormEntityManager();
   }
 
   /**

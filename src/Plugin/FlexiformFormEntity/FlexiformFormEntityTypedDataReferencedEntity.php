@@ -75,7 +75,9 @@ class FlexiformFormEntityTypedDataReferencedEntity extends FlexiformFormEntityBa
         return $entity;
       }
       else if (!empty($this->configuration['create'])) {
-        return $this->createEntity();
+        $entity = $this->createEntity();
+        $base->{$property}->entity = $entity;
+        return $entity;
       }
     }
     catch (\Exception $e) {

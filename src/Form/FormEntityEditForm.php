@@ -26,7 +26,7 @@ class FormEntityEditForm extends FormEntityBaseForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, FlexiformEntityFormDisplayInterface $form_display = NULL, $entity_namespace = '') {
-    $form = parent::buildForm($form, $form_State, $form_display);
+    $form = parent::buildForm($form, $form_state, $form_display);
     $form_entity = $this->formEntityManager()->getFormEntity($entity_namespace);
 
     return $this->buildConfigurationForm($form, $form_state, $form_entity, $entity_namespace);
