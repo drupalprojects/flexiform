@@ -65,6 +65,15 @@ abstract class FlexiformFormEntityBase extends ContextAwarePluginBase implements
   }
 
   /**
+   * Check whether a given entity matches bundle required.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   */
+  protected function checkBundle(EntityInterface $entity) {
+    return !$entity->getEntityType()->hasKey('bundle') || ($entity->bundle() == $this->getBundle());
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getLabel() {
