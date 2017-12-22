@@ -66,7 +66,7 @@ class FlexiformFormEntityTypedDataReferencedEntity extends FlexiformFormEntityBa
   /**
    * {@inheritdoc}
    */
-  protected function getEntity() {
+  public function getEntity() {
     $base = $this->getContextValue('base');
     $property = $this->pluginDefinition['property_name'];
 

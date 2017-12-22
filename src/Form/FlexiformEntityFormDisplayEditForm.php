@@ -11,6 +11,7 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\OpenModalDialogCommand;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\PluginSettingsInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Url;
@@ -442,5 +443,34 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
       );
     }
     return $definitions;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * Add flexiform useful tools.
+   */
+  protected function thirdPartySettingsForm(PluginSettingsInterface $plugin, FieldDefinitionInterface $field_definition, array $form, FormStateInterface $form_state) {
+    $settings_form = parent::thirdPartySettingsForm($plugin, $field_definition, $form, $form_state);
+    $field_def = $plugin->getThirdPartySetting('flexiform', 'field_definition');
+    $settings_form['flexiform']['field_definition']['label'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Label Override'),
+      '#default_value' => !empty($field_def['label']) ? $field_def['label'] : '',
+    ];
+    return $settings_form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function alterSettingsSummary(array &$summary, PluginSettingsInterface $plugin , FieldDefinitionInterface $field_definition) {
+    parent::alterSettingsSummary($summary, $plugin, $field_definition);
+
+    if ($field_def = $plugin->getThirdPartySetting('flexiform', 'field_definition')) {
+      if (!empty($field_def['label'])) {
+        $summary[] = $this->t('Label override: @label', ['@label' => $field_def['label']]);
+      }
+    }
   }
 }

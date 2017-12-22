@@ -7,6 +7,7 @@
 
 namespace Drupal\flexiform;
 
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\FieldableEntityInterface;
@@ -32,6 +33,14 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    * @var \Drupal\flexiform\FormEntity\FlexiformFormEntityManager
    */
   protected $formEntityManager;
+
+  /**
+   * What entities the form entity manager has been provided with. If more
+   * entities are supplied build a new entity manager.
+   *
+   * @var string[]
+   */
+  protected $formEntityManagerSuppliedNamespaces;
 
   /**
    * {@inheritdoc}
@@ -236,24 +245,44 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   /**
    * {@inheritdoc}
    */
-  public function getFieldDefinition($field_name) {
-    if ($definition = parent::getFieldDefinition($field_name)) {
-      return $definition;
+  public function getFieldDefinitions() {
+    if (!isset($this->fieldDefinitions)) {
+      $this->fieldDefinitions = parent::getFieldDefinitions() + $this->getFormEntityFieldDefinitions(TRUE);
+
+      // Apply definition overrides.
+      foreach ($this->fieldDefinitions as $name => $definition) {
+        $component = $this->getComponent($name);
+        if (!empty($component['third_party_settings']['flexiform']['field_definition'])) {
+          $def_overrides = $component['third_party_settings']['flexiform']['field_definition'];
+          if (!empty($def_overrides['label'])) {
+            $definition->setLabel($def_overrides['label']);
+          }
+          if (!empty($def_overrides['settings'])) {
+            $settings = $definition->getSettings();
+            $settings = NestedArray::mergeDeep($settings, $def_overrides['settings']);
+            $definition->setSettings($settings);
+          }
+        }
+      }
     }
 
-    // Find our own.
-    if (strpos($field_name, ':')) {
-      list($namespace, $form_entity_field_name) = explode(':', $field_name, 2);
-      return $this->getFormEntityFieldDefinition($namespace, $form_entity_field_name);
-    }
+    return $this->fieldDefinitions;
   }
 
   /**
    * Get the form entity manager.
    */
   public function getFormEntityManager(FieldableEntityInterface $entity = NULL, array $provided = array()) {
-    if (empty($this->formEntityManager)) {
+    $supplied_namespaces = array_keys($provided);
+    if (!empty($entity)) {
+      $supplied_namespaces[] = 'entity';
+    }
+
+    // If entities are being supplied that have not been supplied before then
+    // rebuild the forrm entity manager.
+    if (empty($this->formEntityManager) || count(array_diff($supplied_namespaces, $this->formEntityManagerSuppliedNamespaces))) {
       $this->formEntityManager = new FlexiformFormEntityManager($this, $entity, $provided);
+      $this->formEntityManagerSuppliedNamespaces = $supplied_namespaces;
     }
 
     return $this->formEntityManager;
@@ -262,7 +291,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   /**
    * Get the form entity field definitions.
    */
-  public function getFormEntityFieldDefinitions() {
+  public function getFormEntityFieldDefinitions($flattened = FALSE) {
     $definitions = [];
     foreach ($this->getFormEntityManager()->getFormEntities() as $namespace => $form_entity) {
       // Ignore the base entity.
@@ -271,13 +300,26 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
       }
 
       $display_context = $this->displayContext;
-      $definitions[$namespace] = array_filter(
-        $this->entityManager()->getFieldDefinitions($form_entity->getEntityType(), $form_entity->getBundle()),
-        function (FieldDefinitionInterface $field_definition) use ($display_context) {
-          return $field_definition->isDisplayConfigurable($display_context);
+      foreach ($this->entityManager()->getFieldDefinitions($form_entity->getEntityType(), $form_entity->getBundle()) as $field_name => $field_definition) {
+        if ($field_definition->isDisplayConfigurable($display_context)) {
+          // Give field definitions a clone for form entities so that overrides
+          // don't copy accross two different fields.
+          $definitions[$namespace][$field_name] = clone $field_definition;
         }
-      );
+      }
     }
+
+    // If a flattened list was asked for squash into 1D array.
+    if ($flattened) {
+      $flattened_definitions = [];
+      foreach ($definitions as $namespace => $defs) {
+        foreach ($defs as $field_name => $def) {
+          $flattened_definitions["{$namespace}:{$field_name}"] = $def;
+        }
+      }
+      return $flattened_definitions;
+    }
+
     return $definitions;
   }
 

@@ -74,7 +74,7 @@ class FlexiformFormEntityProvided extends FlexiformFormEntityBase implements Con
   /**
    * {@inheritdoc}
    */
-  protected function getEntity() {
+  public function getEntity() {
     if (isset($this->configuration['entity'])
         && ($this->configuration['entity'] instanceof EntityInterface)) {
       return $this->configuration['entity'];

@@ -60,8 +60,8 @@ abstract class FlexiformFormEntityBase extends ContextAwarePluginBase implements
       }
     }
 
-    // Initialise the form entity context object.
-    $this->initFormEntityContext();
+    $this->formEntityContext = FormEntityContext::createFromFlexiformFormEntity($this);
+
   }
 
   /**
@@ -100,7 +100,6 @@ abstract class FlexiformFormEntityBase extends ContextAwarePluginBase implements
    * @return \Drupal\flexiform\FormEntity\FormEntityContext
    */
   public function getFormEntityContext() {
-    $this->prepareFormEntityContext();
     return $this->formEntityContext;
   }
 
@@ -112,46 +111,9 @@ abstract class FlexiformFormEntityBase extends ContextAwarePluginBase implements
   }
 
   /**
-   * Initialize a context object for the formEntity.
-   *
-   * If the 'entity' key is set in the configuration then set the value
-   * immediately and set this form entity as executed.
-   */
-  protected function initFormEntityContext() {
-    $context_definition = new ContextDefinition('entity:'.$this->getEntityType(), $this->getLabel());
-    $context_definition->addConstraint('Bundle', [$this->getBundle()]);
-    $this->formEntityContext = new FormEntityContext($context_definition);
-  }
-
-  /**
-   * Prepare the form entity context.
-   *
-   * Attempt to find a value for the form entity context.
-   */
-  protected function prepareFormEntityContext() {
-    if ($this->prepared) {
-      return;
-    }
-
-    // Check Required Contexts Exist.
-    foreach ($this->getContextDefinitions() as $key => $context_definition) {
-      $context = $this->getContext($key);
-      if ($context_definition->isRequired() && !$context->hasContextValue()) {
-        return;
-      }
-    }
-
-    if ($entity = $this->getEntity()) {
-      $this->formEntityContext = FormEntityContext::createFromContext($this->formEntityContext, $entity);
-    }
-
-    $this->prepared = TRUE;
-  }
-
-  /**
    * Get the Entity.
    */
-  abstract protected function getEntity();
+  abstract public function getEntity();
 
   /**
    * Save the entity.

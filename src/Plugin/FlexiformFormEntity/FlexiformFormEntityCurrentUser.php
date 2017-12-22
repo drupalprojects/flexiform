@@ -28,7 +28,7 @@ class FlexiformFormEntityCurrentUser extends FlexiformFormEntityBase {
   /**
    * {@inheritdoc}
    */
-  protected function getEntity() {
+  public function getEntity() {
     $uid = \Drupal::currentUser()->id();
     return entity_load('user', $uid);
   }

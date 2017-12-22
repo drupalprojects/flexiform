@@ -27,7 +27,7 @@ class FlexiformFormEntityLoad extends FlexiformFormEntityProvided {
   /**
    * {@inheritdoc}
    */
-  protected function getEntity() {
+  public function getEntity() {
     if (isset($this->configuration['id'])) {
       $entity = $this->entityTypeManager->getStorage($this->getEntityType())->load($this->configuration['id']);
       return $this->checkBundle($entity) ? $entity : NULL;
