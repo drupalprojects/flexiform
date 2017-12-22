@@ -9,6 +9,9 @@ use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
+use Drupal\Core\DependencyInjection\ClassResolverInterface;
+use Drupal\Core\StringTranslation\TranslationInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -36,6 +39,27 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
   protected $formBuilder;
 
   /**
+   * The class resolver.
+   *
+   * @var \Drupal\Core\DependencyInjection\ClassResolverInterface
+   */
+  protected $classResolver;
+
+  /**
+   * The translation service.
+   *
+   * @var \Drupal\Core\StringTranslation\TranslationInterface
+   */
+  protected $stringTranslation;
+
+  /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * Constructs a new EntityForm.
    *
    * @param array $configuration
@@ -49,11 +73,17 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
     $plugin_id,
     $plugin_definition,
     EntityTypeManagerInterface $entity_manager,
-    FormBuilderInterface $form_builder
+    FormBuilderInterface $form_builder,
+    ClassResolverInterface $class_resolver,
+    TranslationInterface $translation,
+    ModuleHandlerInterface $module_handler
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_manager;
     $this->formBuilder = $form_builder;
+    $this->classResolver = $class_resolver;
+    $this->stringTranslation = $translation;
+    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -65,7 +95,10 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
       $plugin_id,
       $plugin_definition,
       $container->get('entity_type.manager'),
-      $container->get('form_builder')
+      $container->get('form_builder'),
+      $container->get('class_resolver'),
+      $container->get('string_translation'),
+      $container->get('module_handler')
     );
   }
 
@@ -80,8 +113,24 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
       return;
     }
 
-    $form_object = $this->entityTypeManager->getFormObject($definition['entity_type'], $definition['form_mode']);
-    $form_object->setEntity($entity);
+    // @todo: Consider how best to behaver here. Do we fall back to default?
+    // Or ContentEntityForm?
+    $class = $entity->getEntityType()->getFormClass($definition['form_mode']);
+    if (!$class) {
+      $class = $entity->getEntityType()->getFormClass('default');
+    }
+    if (!$class) {
+      $class = '\Drupal\Core\Entity\ContentEntityForm';
+    }
+
+    $form_object = $this->classResolver->getInstanceFromDefinition($class);
+    $form_object
+      ->setStringTranslation($this->stringTranslation)
+      ->setModuleHandler($this->moduleHandler)
+      ->setEntityTypeManager($this->entityTypeManager)
+      ->setOperation($definition['form_mode'])
+      ->setEntityManager(\Drupal::entityManager())
+      ->setEntity($entity);
 
     $provided = [];
     $entity_form_display = EntityFormDisplay::collectRenderDisplay($entity, $definition['form_mode']);
