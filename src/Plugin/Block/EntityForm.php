@@ -4,7 +4,9 @@ namespace Drupal\flexiform\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Form\FormBuilderInterface;
+use Drupal\Core\Form\FormState;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -14,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @Block(
  *   id = "entity_form",
- *   deriver = "Drupal\flexiform\Plugin\Deriver\EntityFormDeriver",
+ *   deriver = "Drupal\flexiform\Plugin\Deriver\EntityFormBlockDeriver",
  * )
  */
 class EntityForm extends BlockBase implements ContextAwarePluginInterface, ContainerFactoryPluginInterface {
@@ -63,7 +65,7 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
       $plugin_id,
       $plugin_definition,
       $container->get('entity_type.manager'),
-      $container->get('entity.form_builder')
+      $container->get('form_builder')
     );
   }
 
@@ -74,18 +76,22 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
     /** @var $entity \Drupal\Core\Entity\EntityInterface **/
     $entity = $this->getContextValue('entity');
     $definition = $this->getPluginDefinition();
-    $form_object = $this->entityTypeManager->getFormObject($definition['entity_type_id'], $definition['operation']);
+    if ($entity->bundle() !== $definition['bundle']) {
+      return;
+    }
+
+    $form_object = $this->entityTypeManager->getFormObject($definition['entity_type'], $definition['form_mode']);
     $form_object->setEntity($entity);
 
-    $additions = [
-      'form_entity_provided' => [],
-    ];
-    foreach ($form_object->getFormDisplay()->getFormEntityConfig() as $namespace => $configuration) {
-      if ($configuration['plugin'] == 'provided' && ($provided = $this->getContextValue($namespace))) {
-        $additions['form_entity_provided'][$namespace] = $provided;
+    $provided = [];
+    $entity_form_display = EntityFormDisplay::collectRenderDisplay($entity, $definition['form_mode']);
+    foreach ($entity_form_display->getFormEntityConfig() as $namespace => $configuration) {
+      if ($configuration['plugin'] == 'provided' && ($provided_entity = $this->getContextValue($namespace))) {
+        $provided[$namespace] = $provided_entity;
       }
     }
-    $form_state = (new FormState())->setFormState($additions);
+    $form_state = new FormState();
+    $form_state->set('form_entity_provided', $additions['form_entity_provided']);
     return $this->formBuilder->buildForm($form_object, $form_state);
   }
 }
