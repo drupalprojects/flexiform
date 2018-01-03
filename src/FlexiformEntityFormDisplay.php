@@ -43,6 +43,13 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   protected $formEntityManagerSuppliedNamespaces;
 
   /**
+   * Component types.
+   *
+   * @var \Drupal\flexiform\FormComponent\FormComponentTypeInterface[]
+   */
+  protected $componentTypePlugins = [];
+
+  /**
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage, $update = TRUE) {
@@ -61,6 +68,21 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   }
 
   /**
+   * Get the component plugin.
+   */
+  public function getComponentPlugin($name, $options) {
+    $plugin_id = !empty($options['component_type']) ? $options['component_type'] : 'field_widget';
+
+    if (empty($this->componentTypePlugins[$plugin_id])) {
+      $this->componentTypePlugins[$plugin_id] = \Drupal::service('plugin.manager.flexiform.form_component_type')
+        ->createInstance($plugin_id)
+        ->setFormDisplay($this);
+    }
+
+    return $this->componentTypePlugins[$plugin_id]->getComponent($name, $options);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildForm(FieldableEntityInterface $entity, array &$form, FormStateInterface $form_state) {
@@ -73,45 +95,12 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
 
     // Let each widget generate the form elements.
     foreach ($this->getComponents() as $name => $options) {
+      $component = $this->getComponentPlugin($name, $options);
+
       // On each component reset the parents back to the original.
       $form['#parents'] = $original_parents;
 
-      if ($widget = $this->getRenderer($name)) {
-        if (strpos($name, ':')) {
-          list($namespace, $field_name) = explode(':', $name, 2);
-
-          // This is a form entity element so we need to tweak parents so that
-          // form state values are grouped by entity namespace.
-          $form['#parents'][] = $namespace;
-
-          // Get the items from the entity manager.
-          if ($form_entity = $this->getFormEntityManager($entity)->getEntity($namespace)) {
-            $items = $form_entity->get($field_name);
-          }
-          else {
-            // Skip this component if we can't get hold of an entity.
-            continue;
-          }
-        }
-        else {
-          $items = $entity->get($name);
-        }
-        $items->filterEmptyItems();
-
-        $form[$name] = $widget->form($items, $form, $form_state);
-        $form[$name]['#access'] = $items->access('edit');
-
-        // Assign the correct weight. This duplicates the reordering done in
-        // processForm(), but is needed for other forms calling this method
-        // directly.
-        $form[$name]['#weight'] = $options['weight'];
-
-        // Associate the cache tags for the field definition & field storage
-        // definition.
-        $field_definition = $this->getFieldDefinition($name);
-        $this->renderer->addCacheableDependency($form[$name], $field_definition);
-        $this->renderer->addCacheableDependency($form[$name], $field_definition->getFieldStorageDefinition());
-      }
+      $component->render($form, $form_state, $this->renderer);
     }
 
     // Set form parents back to the original
@@ -135,37 +124,21 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
 
   /**
    * {@inheritdoc}
+   *
+   * @todo: Work with component types.
    */
   public function extractFormValues(FieldableEntityInterface $entity, array &$form, FormStateInterface $form_state) {
     $extracted = parent::extractFormValues($entity, $form, $form_state);
 
-    $original_parents = $form['#parents'];
-    foreach ($this->getFormEntityManager()->getFormEntities() as $namespace => $form_entity) {
-      // Skip base entity.
-      if ($namespace == '') {
-        continue;
+    foreach ($this->getComponents() as $name => $options) {
+      // Don't extract things that have already been extracted.
+      if (isset($extracted[$name])) {
+        return;
       }
 
-      // Skip any entity that didn't have a value.
-      if (!$form_entity->getFormEntityContext()->hasContextValue()) {
-        continue;
-      }
-
-      // Tweak parents to make the field values detectable.
-      $form['#parents'] = $original_parents;
-      $form['#parents'][] = $namespace;
-
-      // Get the entity object.
-      $entity_object = $form_entity->getFormEntityContext()->getContextValue();
-      foreach ($entity_object as $field_name => $items) {
-        $element_name = $namespace.':'.$field_name;
-        if ($widget = $this->getRenderer($element_name)) {
-          $widget->extractFormValues($items, $form, $form_state);
-          $extracted[$element_name] = $element_name;
-        }
-      }
+      $this->getComponentPlugin($name, $options)->extractFormValues($form, $form_state);
+      $extracted[$name] = $name;
     }
-    $form['#parents'] = $original_parents;
 
     return $extracted;
   }
