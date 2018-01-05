@@ -61,7 +61,7 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
   /**
    * {@inheritdoc}
    */
-  public function setFormDisplay(FlexiformFormDisplay $form_display) {
+  public function setFormDisplay(FlexiformEntityFormDisplay $form_display) {
     $this->formDisplay = $form_display;
     return $this;
   }

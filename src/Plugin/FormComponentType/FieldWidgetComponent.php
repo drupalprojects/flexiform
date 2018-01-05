@@ -3,13 +3,15 @@
 namespace Drupal\flexiform\Plugin\FormComponentType;
 
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Field\WidgetPluginManager;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\field_ui\Form\EntityDisplayFormBase;
 use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 use Drupal\flexiform\FlexiformEntityFormDisplay;
-use Drupal\flexiform\FormComponent\FormComponentTypeBase;
+use Drupal\flexiform\FormComponent\FormComponentBase;
+use Drupal\flexiform\FormComponent\ContainerFactoryFormComponentInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -48,7 +50,7 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, $name, $options, FlexiformEntityFormDisplay $form_display) {
+  public static function create(ContainerInterface $container, $name, array $options, FlexiformEntityFormDisplay $form_display) {
     return new static(
       $name,
       $options,
@@ -102,7 +104,8 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
    */
   public function getFieldDefinition() {
     if (!isset($this->fieldDefinition)) {
-      $this->fieldDefinition = $this->getFormDisplay()->getFieldDefinition($this->name);
+      $field_definitions = $this->getFormDisplay()->getFieldDefinitions();
+      $this->fieldDefinition = $field_definitions[$this->name];
     }
 
     return $this->fieldDefinition;
@@ -132,23 +135,23 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
         }
       }
       else {
-        $items = $entity->get($this->name);
+        $items = $this->getFormEntityManager()->getEntity('')->get($this->name);
       }
       $items->filterEmptyItems();
 
-      $form[$name] = $widget->form($items, $form, $form_state);
-      $form[$name]['#access'] = $items->access('edit');
+      $form[$this->name] = $widget->form($items, $form, $form_state);
+      $form[$this->name]['#access'] = $items->access('edit');
 
       // Assign the correct weight. This duplicates the reordering done in
       // processForm(), but is needed for other forms calling this method
       // directly.
-      $form[$name]['#weight'] = $this->options['weight'];
+      $form[$this->name]['#weight'] = $this->options['weight'];
 
       // Associate the cache tags for the field definition & field storage
       // definition.
       $field_definition = $this->getFieldDefinition();
-      $renderer->addCacheableDependency($form[$name], $field_definition);
-      $renderer->addCacheableDependency($form[$name], $field_definition->getFieldStorageDefinition());
+      $renderer->addCacheableDependency($form[$this->name], $field_definition);
+      $renderer->addCacheableDependency($form[$this->name], $field_definition->getFieldStorageDefinition());
     }
   }
 
@@ -169,13 +172,12 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
     }
 
     // Get the entity object.
-    $entity_object = $this->getFormEntityManager()
-      ->getFormEntity($namespace)
-      ->getFormEntityContext()
-      ->getContextValue();
-    $items = $entity_object->{$field_name};
-    if ($widget = $this->getRenderer()) {
-      $widget->extractFormValues($items, $form, $form_state);
+    if ($form_entity = $this->getFormEntityManager()->getFormEntity($namespace)) {
+      $entity_object = $form_entity->getFormEntityContext()->getContextValue();
+      $items = $entity_object->{$field_name};
+      if ($widget = $this->getRenderer()) {
+        $widget->extractFormValues($items, $form, $form_state);
+      }
     }
 
     $form['#parents'] = $original_parents;

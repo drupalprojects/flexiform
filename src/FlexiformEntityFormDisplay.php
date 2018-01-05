@@ -130,10 +130,14 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   public function extractFormValues(FieldableEntityInterface $entity, array &$form, FormStateInterface $form_state) {
     $extracted = parent::extractFormValues($entity, $form, $form_state);
 
+    // Make sure the form entity manager is appropriately constructed.
+    $provided = $form_state->get('form_entity_provided') ?: [];
+    $this->getFormEntityManager($entity, $provided);
+
     foreach ($this->getComponents() as $name => $options) {
       // Don't extract things that have already been extracted.
       if (isset($extracted[$name])) {
-        return;
+        continue;
       }
 
       $this->getComponentPlugin($name, $options)->extractFormValues($form, $form_state);
