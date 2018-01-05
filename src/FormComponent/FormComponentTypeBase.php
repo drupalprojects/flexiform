@@ -214,12 +214,12 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
     if ($form_state->get('plugin_settings_edit') == $component_name) {
       // We are currently editing this field's plugin settings. Display the
       // settings form and submit buttons.
-      $field_row['plugin']['settings_edit_form'] = array();
+      $row['plugin']['settings_edit_form'] = array();
 
       // Generate the settings form and allow other modules to alter it.
       if ($settings_form = $component->settingsForm($form, $form_state)) {
-        $field_row['plugin']['#cell_attributes'] = ['colspan' => 3];
-        $field_row['plugin']['settings_edit_form'] = $settings_form + [
+        $row['plugin']['#cell_attributes'] = ['colspan' => 3];
+        $row['plugin']['settings_edit_form'] = $settings_form + [
           '#type' => 'container',
           '#attributes' => array('class' => array('field-plugin-settings-edit-form')),
           '#parents' => array('fields', $component_name, 'settings_edit_form'),
@@ -246,19 +246,19 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
             ),
           ),
         ];
-        $field_row['#attributes']['class'][] = 'field-plugin-settings-editing';
+        $row['#attributes']['class'][] = 'field-plugin-settings-editing';
       }
     }
     else {
-      $field_row['settings_summary'] = array();
-      $field_row['settings_edit'] = array();
+      $row['settings_summary'] = array();
+      $row['settings_edit'] = array();
 
       // Display a summary of the current plugin settings, and (if the
       // summary is not empty) a button to edit them.
       $summary = $component->settingsSummary();
 
       if (!empty($summary)) {
-        $field_row['settings_summary'] = array(
+        $row['settings_summary'] = array(
           '#type' => 'inline_template',
           '#template' => '<div class="field-plugin-summary">{{ summary|safe_join("<br />") }}</div>',
           '#context' => array('summary' => $summary),
@@ -269,7 +269,7 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
       // Check selected plugin settings to display edit link or not.
       $settings_form = $component->settingsForm($form, $form_state);
       if (!empty($settings_form)) {
-        $field_row['settings_edit'] = $base_button + array(
+        $row['settings_edit'] = $base_button + array(
           '#type' => 'image_button',
           '#name' => $component_name . '_settings_edit',
           '#src' => 'core/misc/icons/787878/cog.svg',
@@ -284,6 +284,6 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
       }
     }
 
-    return $field_row;
+    return $row;
   }
 }
