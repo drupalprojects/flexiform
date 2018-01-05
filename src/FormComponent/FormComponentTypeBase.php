@@ -5,6 +5,7 @@ namespace Drupal\flexiform\FormComponent;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Component\Plugin\Exception\PluginException;
+use Drupal\field_ui\Form\EntityDisplayFormBase;
 use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 use Drupal\flexiform\FlexiformEntityFormDisplay;
 
@@ -34,10 +35,14 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
   /**
    * {@inheritdoc}
    */
-  public function getComponent($name, $options) {
+  public function getComponent($name, $options = []) {
     $class = $this->getPluginDefinition()['component_class'];
     if (!class_exists($class)) {
       throw new \Exception("No Component class for Form Component Type ".$this->getPluginId());
+    }
+
+    if (empty($options)) {
+      $options = [];
     }
 
     if (is_subclass_of($class, 'Drupal\\flexiform\\FormComponent\\ContainerFactoryFormComponentInterface')) {
@@ -124,10 +129,10 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
     $display_options = $form_display->getComponent($component_name);
 
     // Disable fields without any applicable plugins.
-    if (empty($this->getApplicableRendererPluginOptions($component_name))) {
-      $form_display->removeComponent($component_name)->save();
-      $display_options = $form_display->getComponent($component_name);
-    }
+    //if (empty($this->getApplicableRendererPluginOptions($component_name))) {
+    //  $form_display->removeComponent($component_name)->save();
+    //  $display_options = $form_display->getComponent($component_name);
+    //}
 
     $component = $this->getComponent($component_name, $display_options);
     $label = $component->getAdminLabel();
@@ -164,7 +169,7 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
         ],
         'hidden_name' => [
           '#type' => 'hidden',
-          '#default_value' => $compoenent_name,
+          '#default_value' => $component_name,
           '#attributes' => ['class' => ['field-name']],
         ],
       ],
@@ -187,7 +192,7 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
         '#type' => 'select',
         '#title' => t('Plugin for @title', array('@title' => $label)),
         '#title_display' => 'invisible',
-        '#options' => $this->getApplicableRendererPluginOptions(),
+        '#options' => $this->getApplicableRendererPluginOptions($component_name),
         '#default_value' => $display_options ? $display_options['type'] : 'hidden',
         '#parents' => array('fields', $component_name, 'type'),
         '#attributes' => array('class' => array('field-plugin-type')),

@@ -219,19 +219,21 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
    * {@inheritdoc}
    */
   public function settingsSummary() {
-    $plugin = $this->getRenderer();
-    $summary = $plugin->settingsSummary();
+    $summary = [];
+    if ($plugin = $this->getRenderer()) {
+      $summary = $plugin->settingsSummary();
+    }
 
     $context = [
       'widget' => $plugin,
-      'field_definition' => $this->getFieldDefintion(),
+      'field_definition' => $this->getFieldDefinition(),
       'form_mode' => $this->getFormDisplay()->getMode(),
     ];
     $this->moduleHandler->alter('field_widget_settings_summary', $summary, $context);
 
-    if ($field_def = $plugin->getThirdPartySetting('flexiform', 'field_definition')) {
+    if ($plugin && $field_def = $plugin->getThirdPartySetting('flexiform', 'field_definition')) {
       if (!empty($field_def['label'])) {
-        $summary[] = $this->t('Label override: @label', ['@label' => $field_def['label']]);
+        $summary[] = t('Label override: @label', ['@label' => $field_def['label']]);
       }
     }
     return $summary;
@@ -241,6 +243,7 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
    * {@inheritdoc}
    */
   protected function thirdPartySettingsForm(array $form, FormStateInterface $form_state) {
+    $plugin = $this->getRenderer();
     $settings_form = [];
     foreach ($this->moduleHandler->getImplementations('field_widget_third_party_settings_form') as $module) {
       $settings_form[$module] = $this->moduleHandler->invoke($module, 'field_widget_third_party_settings_form', [
@@ -255,7 +258,7 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
     $field_def = $plugin->getThirdPartySetting('flexiform', 'field_definition');
     $settings_form['flexiform']['field_definition']['label'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Label Override'),
+      '#title' => t('Label Override'),
       '#default_value' => !empty($field_def['label']) ? $field_def['label'] : '',
     ];
     return $settings_form;

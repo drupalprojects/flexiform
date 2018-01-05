@@ -67,11 +67,13 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
 
     $component_type_manager = \Drupal::service('plugin.manager.flexiform.form_component_type');
     foreach ($component_type_manager->getDefinitions() as $component_type => $definition) {
+      dpm($form['fields'], $component_type);
       $form['fields'] += $component_type_manager
         ->createInstance($component_type)
         ->setFormDisplay($this->entity)
-        ->componentRows($form, $form_state);
+        ->componentRows($this, $form, $form_state);
     }
+    dpm($form['fields']);
 
     $form['entities_section'] = [
       '#type' => 'container',

@@ -39,6 +39,13 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
   protected $fieldTypes;
 
   /**
+   * Field defintiions.
+   *
+   * @var array
+   */
+  protected $fieldDefinitions;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
@@ -68,16 +75,36 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
   }
 
   /**
+   * Get the field definitions.
+   */
+  protected function getFieldDefinitions() {
+    if (empty($this->fieldDefinitions)) {
+      $this->fieldDefinitions = $this->getFormDisplay()->getFormEntityFieldDefinitions(TRUE);
+    }
+
+    return $this->fieldDefinitions;
+  }
+
+  /**
+   * Get a field definition.
+   */
+  protected function getFieldDefinition($component_name) {
+    $defs = $this->getFieldDefinitions();
+    return $defs[$component_name];
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function componentRows(EntityDisplayFormBase $form_object, array $form, FormStateInterface $form_state) {
     $rows = [];
-    foreach ($form_display->getFormEntityFieldDefinitions() as $namespace => $definitions)  {
+    foreach ($this->getFormDisplay()->getFormEntityFieldDefinitions() as $namespace => $definitions)  {
       foreach ($definitions as $field_name => $field_definition) {
         $component_name = $namespace.':'.$field_name;
         $rows[$component_name] = $this->buildComponentRow($form_object, $component_name, $form, $form_state);
       }
     }
+    dpm($rows);
 
     return $rows;
   }
@@ -86,13 +113,16 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
    * {@inheritdoc}
    */
   protected function getApplicableRendererPluginOptions($component_name) {
-    $field_definition = $this->getFormDisplay()->getFieldDefinition($component_name);
+    $field_definition = $this->getFieldDefinition($component_name);
+    if (!$field_definition) {
+      print "NAME: ".$component_name;
+    }
     $options = $this->pluginManager->getOptions($field_definition->getType());
     $applicable_options = [];
 
-    foreach ($options as $options => $label) {
+    foreach ($options as $option => $label) {
       $plugin_class = DefaultFactory::getPluginClass($option, $this->pluginManager->getDefinition($option));
-      if ($plugin_class::isApplicable($field_Definition)) {
+      if ($plugin_class::isApplicable($field_definition)) {
         $applicable_options[$option] = $label;
       }
     }
@@ -103,13 +133,13 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
    * {@inheritdoc}
    */
   protected function getDefaultRendererPlugin($component_name) {
-    $type = $this->getFormDisplay()->getFieldDefinition($component_name)->getType();
-    return isset($this->fieldTypes[$type]['default_widget']) ? $this->fieldTypes[$field_type]['default_widget'] : NULL;
+    $type = $this->getFieldDefinition($component_name)->getType();
+    return isset($this->fieldTypes[$type]['default_widget']) ? $this->fieldTypes[$type]['default_widget'] : NULL;
   }
 
   /**
    * Build a component row.
-   */
+   *
   protected function buildComponentRow(EntityDisplayFormBase $form_object, $component_name, array $form, FormStateInterface $form_state) {
     if (strpos($component_name, ':')) {
       list($namespace, $field_name) = explode(':', $component_name, 2);
@@ -121,12 +151,12 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
 
     $form_display = $this->getFormDisplay();
     $display_options = $form_display->getComponent($component_name);
-    $field_definition = $form_display->getFieldDefinition($component_name);
+    $field_definition = $this->getFieldDefinition($component_name);
     $form_entity = $form_display->getFormEntityManager()->getFormEntity($namespace);
     $label = $field_definition->getLabel();
 
     // Disable fields without any applicable plugins.
-    if (empty($form_object->getApplicablePluginOptions($field_definition))) {
+    if (empty($this->getApplicableRendererPluginOptions($component_name))) {
       $form_display->removeComponent($component_name)->save();
       $display_options = $form_display->getComponent($component_name);
     }
@@ -138,7 +168,7 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
       '#region_callback' => [$form_object, 'getRowRegion'],
       '#js_settings' => [
         'rowHandler' => 'field',
-        'defaultPlugin' => $form_object->getDefaultPlugin($field_definition->getType()),
+        'defaultPlugin' => $this->getDefaultRendererPlugin($component_name),
       ],
       'human_name' => [
         '#plain_text' => $label.' ['.$form_entity->getFormEntityContextDefinition()->getLabel().']',
@@ -186,7 +216,7 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
         '#type' => 'select',
         '#title' => t('Plugin for @title', array('@title' => $label)),
         '#title_display' => 'invisible',
-        '#options' => $form_object->getApplicablePluginOptions($field_definition),
+        '#options' => $this->getApplicableRendererPluginOptions($
         '#default_value' => $display_options ? $display_options['type'] : 'hidden',
         '#parents' => array('fields', $compoenent_name, 'type'),
         '#attributes' => array('class' => array('field-plugin-type')),
@@ -296,6 +326,6 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
     }
 
     return $field_row;
-  }
+  }*/
 
 }
