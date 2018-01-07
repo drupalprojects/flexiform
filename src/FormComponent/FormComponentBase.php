@@ -74,12 +74,12 @@ abstract class FormComponentBase implements FormComponentInterface {
    * Get the entity namespace from the component name.
    */
   protected function getEntityNamespace() {
-    if (strpos(':', $this->name)) {
+    if (strpos($this->name, ':')) {
       list($namespace, $component_id) = explode(':', $this->name, 2);
       return $namespace;
     }
 
-    return NULL;
+    return '';
   }
 
   /**
@@ -110,5 +110,16 @@ abstract class FormComponentBase implements FormComponentInterface {
    * {@inheritdoc}
    */
   public function settingsSummary() {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function settingsFormSubmit($values, array $form, FormStateInterface $form_state) {
+    return [
+      'settings' => [
+        'label' => $values['settings']['label'],
+      ],
+    ];
   }
 }

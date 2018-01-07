@@ -3,6 +3,7 @@
 namespace Drupal\flexiform\Plugin\FormComponentType;
 
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\WidgetPluginManager;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -71,6 +72,13 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
   }
 
   /**
+   * Set the field definition.
+   */
+  public function setFieldDefinition(FieldDefinitionInterface $field_definition) {
+    $this->fieldDefinition = $field_definition;
+  }
+
+  /**
    * Get the renderer.
    *
    * @return \Drupal\Core\Field\PluginSettingsInterface
@@ -103,11 +111,6 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
    * @return \Drupal\Core\Field\FieldDefinitionInterface
    */
   public function getFieldDefinition() {
-    if (!isset($this->fieldDefinition)) {
-      $field_definitions = $this->getFormDisplay()->getFieldDefinitions();
-      $this->fieldDefinition = $field_definitions[$this->name];
-    }
-
     return $this->fieldDefinition;
   }
 
@@ -187,7 +190,8 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
    * {@inheritdoc}
    */
   public function getAdminLabel() {
-    if ($namespace = $this->getEntityNamespace()) {
+    if (count($this->getFormEntityManager()->getFormEntities()) > 1) {
+      $namespace = $this->getEntityNamespace();
       return $this->getFieldDefinition()->getLabel().' ['.$this->getFormEntityManager()->getFormEntity($namespace)->getFormEntityContextDefinition()->getLabel().']';
     }
     return $this->getFieldDefinition()->getLabel();
@@ -237,6 +241,16 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
       }
     }
     return $summary;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function settingsFormSubmit($values, array $form, FormStateInterface $form_state) {
+    $default_settings = $this->pluginManager->getDefaultSettings($this->options['type']);
+    $options['settings'] = isset($values['settings']) ? array_intersect_key($values['settings'], $default_settings) : [];
+    $options['third_party_settings'] = isset($values['third_party_settings']) ? $values['third_party_settings'] : [];
+    return $options;
   }
 
   /**

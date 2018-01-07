@@ -72,14 +72,20 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    */
   public function getComponentPlugin($name, $options) {
     $plugin_id = !empty($options['component_type']) ? $options['component_type'] : 'field_widget';
+    return $this->getComponentTypePlugin($plugin_id)->getComponent($name, $options);
+  }
 
+  /**
+   * Get a compoenet type plugin.
+   */
+  public function getComponentTypePlugin($plugin_id = 'field_widget') {
     if (empty($this->componentTypePlugins[$plugin_id])) {
       $this->componentTypePlugins[$plugin_id] = \Drupal::service('plugin.manager.flexiform.form_component_type')
         ->createInstance($plugin_id)
         ->setFormDisplay($this);
     }
 
-    return $this->componentTypePlugins[$plugin_id]->getComponent($name, $options);
+    return $this->componentTypePlugins[$plugin_id];
   }
 
   /**
@@ -221,7 +227,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
 
   /**
    * {@inheritdoc}
-   */
+   *
   public function getFieldDefinitions() {
     if (!isset($this->fieldDefinitions)) {
       $this->fieldDefinitions = parent::getFieldDefinitions() + $this->getFormEntityFieldDefinitions(TRUE);
@@ -267,7 +273,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
 
   /**
    * Get the form entity field definitions.
-   */
+   *
   public function getFormEntityFieldDefinitions($flattened = FALSE) {
     $definitions = [];
     foreach ($this->getFormEntityManager()->getFormEntities() as $namespace => $form_entity) {
@@ -302,11 +308,12 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
 
   /**
    * Get a specific form entity field definition.
-   */
+   *
   public function getFormEntityFieldDefinition($namespace, $field_name) {
     $definitions = $this->getFormEntityFieldDefinitions();
     if (isset($definitions[$namespace][$field_name])) {
       return $definitions[$namespace][$field_name];
     }
   }
+  /**/
 }

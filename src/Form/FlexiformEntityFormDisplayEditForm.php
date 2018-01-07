@@ -10,6 +10,7 @@ namespace Drupal\flexiform\Form;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\OpenModalDialogCommand;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\PluginSettingsInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -34,19 +35,6 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
   /**
    * {@inheritdoc}
    */
-  protected function buildFieldRow(FieldDefinitionInterface $field_definition, array $form, FormStateInterface $form_state) {
-    $field_row = parent::buildFieldRow($field_definition, $form, $form_state);
-
-    if (count($this->getFormEntityManager()->getFormEntities()) > 1) {
-      $field_row['human_name']['#plain_text'] .= ' ['.$this->getFormEntityManager()->getFormEntity()->getFormEntityContextDefinition()->getLabel().']';
-    }
-
-    return $field_row;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   protected function buildExtraFieldRow($field_id, $extra_field) {
     $extra_field_row = parent::buildExtraFieldRow($field_id, $extra_field);
 
@@ -66,14 +54,14 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
     $form['#attached']['library'][] = 'core/drupal.ajax';
 
     $component_type_manager = \Drupal::service('plugin.manager.flexiform.form_component_type');
+    $component_rows = [];
     foreach ($component_type_manager->getDefinitions() as $component_type => $definition) {
-      dpm($form['fields'], $component_type);
-      $form['fields'] += $component_type_manager
+      $component_rows += $component_type_manager
         ->createInstance($component_type)
         ->setFormDisplay($this->entity)
         ->componentRows($this, $form, $form_state);
     }
-    dpm($form['fields']);
+    $form['fields'] = $component_rows + $form['fields'];
 
     $form['entities_section'] = [
       '#type' => 'container',
@@ -173,38 +161,40 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
    * {@inheritdoc}
    */
   protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state) {
-    parent::copyFormValuesToEntity($entity, $form, $form_state);
     $form_values = $form_state->getValues();
+    if ($this->entity instanceof EntityWithPluginCollectionInterface) {
+      // Do not manually update values represented by plugin collections.
+      $form_values = array_diff_key($form_values, $this->entity->getPluginCollections());
+    }
 
-    // Add field rows from other entities.
-    foreach ($this->getFormEntityFieldDefinitions() as $namespace => $definitions) {
-      foreach ($definitions as $field_name => $field_definition) {
-        $name = $namespace.':'.$field_name;
-        $values = $form_values['fields'][$name];
-        if ($values['region'] == 'hidden') {
-          $entity->removeComponent($name);
-        }
-        else {
-          $options = $entity->getComponent($name);
+    // Collect component options.
+    foreach ($form_values['fields'] as $component_name => $values) {
+      // Do not handle extra fields here.
+      // @todo: Make extra fields a component type.
+      if (!empty($form['#extra'][$component_name])) {
+        continue;
+      }
 
-          // Update field settings only if the submit handler told us to.
-          if ($form_state->get('plugin_settings_update') === $name) {
-            // Only store settings actually used by the selected plugin.
-            $default_settings = $this->pluginManager->getDefaultSettings($options['type']);
-            $options['settings'] = isset($values['settings_edit_form']['settings']) ? array_intersect_key($values['settings_edit_form']['settings'], $default_settings) : [];
-            $options['third_party_settings'] = isset($values['settings_edit_form']['third_party_settings']) ? $values['settings_edit_form']['third_party_settings'] : [];
-            $form_state->set('plugin_settings_update', NULL);
-          }
+      if ($values['region'] == 'hidden') {
+        $entity->removeComponent($component_name);
+      }
+      else {
+        $options = $entity->getComponent($component_name);
+        $options = $entity->getComponentTypePlugin(!empty($options['component_type']) ? $options['component_type'] : 'field_widget')->submitComponentRow($component_name, $values, $form, $form_state);
+        $entity->setComponent($component_name, $options);
+      }
+    }
 
-          $options['type'] = $values['type'];
-          $options['region'] = $values['region'];
-          $options['weight'] = $values['weight'];
-          // Only formatters have configurable label visibility.
-          if (isset($values['label'])) {
-            $options['label'] = $values['label'];
-          }
-          $entity->setComponent($name, $options);
-        }
+    // Collect options for extra field components.
+    foreach ($form['#extra'] as $name) {
+      if ($form_values['fields'][$name]['region'] == 'hidden') {
+        $entity->removeComponent($name);
+      }
+      else {
+        $entity->setComponent($name, [
+          'weight' => $form_values['fields'][$name]['weight'],
+          'region' => $form_values['fields'][$name]['region'],
+        ]);
       }
     }
   }

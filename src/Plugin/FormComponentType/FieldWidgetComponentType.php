@@ -3,6 +3,7 @@
 namespace Drupal\flexiform\Plugin\FormComponentType;
 
 use Drupal\Component\Plugin\Factory\DefaultFactory;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Field\WidgetPluginManager;
 use Drupal\Core\Form\FormStateInterface;
@@ -46,6 +47,13 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
   protected $fieldDefinitions;
 
   /**
+   * The entity field manager.
+   *
+   * @var array
+   */
+  protected $entityFieldManager;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
@@ -54,7 +62,8 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
       $plugin_id,
       $plugin_definition,
       $container->get('plugin.manager.field.widget'),
-      $container->get('plugin.manager.field.field_type')
+      $container->get('plugin.manager.field.field_type'),
+      $container->get('entity_field.manager')
     );
   }
 
@@ -66,12 +75,14 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
    * @param $plugin_definitions
    * @param \Drupal\Core\Field\WidgetPluginManager $plugin_manager
    * @param \Drupal\Core\Field\FieldTypePluginManagerInterface $field_type_manager
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, WidgetPluginManager $plugin_manager, FieldTypePluginManagerInterface $field_type_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, WidgetPluginManager $plugin_manager, FieldTypePluginManagerInterface $field_type_manager, EntityFieldManagerInterface $entity_field_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->fieldTypes = $field_type_manager->getDefinitions();
     $this->pluginManager = $plugin_manager;
+    $this->entityFieldManager = $entity_field_manager;
   }
 
   /**
@@ -79,7 +90,30 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
    */
   protected function getFieldDefinitions() {
     if (empty($this->fieldDefinitions)) {
-      $this->fieldDefinitions = $this->getFormDisplay()->getFormEntityFieldDefinitions(TRUE);
+      foreach ($this->getFormEntityManager()->getFormEntities() as $namespace => $form_entity) {
+        foreach ($this->entityFieldManager->getFieldDefinitions($form_entity->getEntityType(), $form_entity->getBundle()) as $field_name => $field_definition) {
+          if ($field_definition->isDisplayConfigurable('form')) {
+            // Give field definitions a clone for form entities so that overrides
+            // don't copy accross two different fields.
+            $component_name = !empty($namespace) ? "{$namespace}:{$field_name}" : $field_name;
+            $this->fieldDefinitions[$component_name] = clone $field_definition;
+
+            // Apply overrides.
+            $component_options = $this->getFormDisplay()->getComponent($component_name);
+            if (!empty($component_options['third_party_settings']['flexiform']['field_definition'])) {
+              $def_overrides = $component_options['third_party_settings']['flexiform']['field_definition'];
+              if (!empty($def_overrides['label'])) {
+                $this->fieldDefinitions[$component_name]->setLabel($def_overrides['label']);
+              }
+              if (!empty($def_overrides['settings'])) {
+                $settings = $this->fieldDefinitions[$component_name]->getSettings();
+                $settings = NestedArray::mergeDeep($settings, $def_overrides['settings']);
+                $this->fieldDefinitions[$component_name]->setSettings($settings);
+              }
+            }
+          }
+        }
+      }
     }
 
     return $this->fieldDefinitions;
@@ -96,15 +130,25 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
   /**
    * {@inheritdoc}
    */
+  public function getComponent($name, $options = []) {
+    $component = parent::getComponent($name, $options);
+    if ($field_definition = $this->getFieldDefinition($name)) {
+      $component->setFieldDefinition($this->getFieldDefinition($name));
+    }
+    else {
+      dpm($name);
+    }
+    return $component;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function componentRows(EntityDisplayFormBase $form_object, array $form, FormStateInterface $form_state) {
     $rows = [];
-    foreach ($this->getFormDisplay()->getFormEntityFieldDefinitions() as $namespace => $definitions)  {
-      foreach ($definitions as $field_name => $field_definition) {
-        $component_name = $namespace.':'.$field_name;
-        $rows[$component_name] = $this->buildComponentRow($form_object, $component_name, $form, $form_state);
-      }
+    foreach ($this->getFieldDefinitions() as $component_name => $field_definition) {
+      $rows[$component_name] = $this->buildComponentRow($form_object, $component_name, $form, $form_state);
     }
-    dpm($rows);
 
     return $rows;
   }
@@ -136,196 +180,5 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
     $type = $this->getFieldDefinition($component_name)->getType();
     return isset($this->fieldTypes[$type]['default_widget']) ? $this->fieldTypes[$type]['default_widget'] : NULL;
   }
-
-  /**
-   * Build a component row.
-   *
-  protected function buildComponentRow(EntityDisplayFormBase $form_object, $component_name, array $form, FormStateInterface $form_state) {
-    if (strpos($component_name, ':')) {
-      list($namespace, $field_name) = explode(':', $component_name, 2);
-    }
-    else {
-      $namespace = '';
-      $field_name = $component_name;
-    }
-
-    $form_display = $this->getFormDisplay();
-    $display_options = $form_display->getComponent($component_name);
-    $field_definition = $this->getFieldDefinition($component_name);
-    $form_entity = $form_display->getFormEntityManager()->getFormEntity($namespace);
-    $label = $field_definition->getLabel();
-
-    // Disable fields without any applicable plugins.
-    if (empty($this->getApplicableRendererPluginOptions($component_name))) {
-      $form_display->removeComponent($component_name)->save();
-      $display_options = $form_display->getComponent($component_name);
-    }
-
-    $regions = array_keys($form_object->getRegions());
-    $row = [
-      '#attributes' => ['class' => ['draggable', 'tabledrag-leaf']],
-      '#row_type' => 'field',
-      '#region_callback' => [$form_object, 'getRowRegion'],
-      '#js_settings' => [
-        'rowHandler' => 'field',
-        'defaultPlugin' => $this->getDefaultRendererPlugin($component_name),
-      ],
-      'human_name' => [
-        '#plain_text' => $label.' ['.$form_entity->getFormEntityContextDefinition()->getLabel().']',
-      ],
-      'weight' => [
-        '#type' => 'textfield',
-        '#title' => t('Weight for @title', array('@title' => $label)),
-        '#title_display' => 'invisible',
-        '#default_value' => $display_options ? $display_options['weight'] : '0',
-        '#size' => 3,
-        '#attributes' => array('class' => array('field-weight')),
-      ],
-      'parent_wrapper' => [
-        'parent' => [
-          '#type' => 'select',
-          '#title' => t('Label display for @title', array('@title' => $label)),
-          '#title_display' => 'invisible',
-          '#options' => array_combine($regions, $regions),
-          '#empty_value' => '',
-          '#attributes' => ['class' => ['js-field-parent', 'field-parent']],
-          '#parents' => ['fields', $component_name, 'parent'],
-        ],
-        'hidden_name' => [
-          '#type' => 'hidden',
-          '#default_value' => $compoenent_name,
-          '#attributes' => ['class' => ['field-name']],
-        ],
-      ],
-      'region' => [
-        '#type' => 'select',
-        '#title' => t('Region for @title', ['@title' => $label]),
-        '#title_display' => 'invisible',
-        '#options' => $form_object->getRegionOptions(),
-        '#default_value' => $display_options ? $display_options['region'] : 'hidden',
-        '#attributes' => [
-          'class' => [
-            'field-region',
-          ],
-        ],
-      ],
-    ];
-
-    $row['plugin'] = array(
-      'type' => array(
-        '#type' => 'select',
-        '#title' => t('Plugin for @title', array('@title' => $label)),
-        '#title_display' => 'invisible',
-        '#options' => $this->getApplicableRendererPluginOptions($
-        '#default_value' => $display_options ? $display_options['type'] : 'hidden',
-        '#parents' => array('fields', $compoenent_name, 'type'),
-        '#attributes' => array('class' => array('field-plugin-type')),
-      ),
-      'settings_edit_form' => array(),
-    );
-
-    // Get the corresponding plugin object.
-    $plugin = $form_display->getRenderer($component_name);
-
-    // Base button element for the various plugin settings actions.
-    $base_button = array(
-      '#submit' => array('::multistepSubmit'),
-      '#ajax' => array(
-        'callback' => '::multistepAjax',
-        'wrapper' => 'field-display-overview-wrapper',
-        'effect' => 'fade',
-      ),
-      '#field_name' => $component_name,
-    );
-
-    if ($form_state->get('plugin_settings_edit') == $component_name) {
-      // We are currently editing this field's plugin settings. Display the
-      // settings form and submit buttons.
-      $field_row['plugin']['settings_edit_form'] = array();
-
-      if ($plugin) {
-        // Generate the settings form and allow other modules to alter it.
-        $settings_form = $plugin->settingsForm($form, $form_state);
-        $third_party_settings_form = static::thirdPartySettingsForm($plugin, $field_definition, $form, $form_state);
-
-        if ($settings_form || $third_party_settings_form) {
-          $field_row['plugin']['#cell_attributes'] = array('colspan' => 3);
-          $field_row['plugin']['settings_edit_form'] = array(
-            '#type' => 'container',
-            '#attributes' => array('class' => array('field-plugin-settings-edit-form')),
-            '#parents' => array('fields', $field_name, 'settings_edit_form'),
-            'label' => array(
-              '#markup' => $this->t('Plugin settings'),
-            ),
-            'settings' => $settings_form,
-            'third_party_settings' => $third_party_settings_form,
-            'actions' => array(
-              '#type' => 'actions',
-              'save_settings' => $base_button + array(
-                '#type' => 'submit',
-                '#button_type' => 'primary',
-                '#name' => $field_name . '_plugin_settings_update',
-                '#value' => $this->t('Update'),
-                '#op' => 'update',
-              ),
-              'cancel_settings' => $base_button + array(
-                '#type' => 'submit',
-                '#name' => $field_name . '_plugin_settings_cancel',
-                '#value' => $this->t('Cancel'),
-                '#op' => 'cancel',
-                // Do not check errors for the 'Cancel' button, but make sure we
-                // get the value of the 'plugin type' select.
-                '#limit_validation_errors' => array(array('fields', $field_name, 'type')),
-              ),
-            ),
-          );
-          $field_row['#attributes']['class'][] = 'field-plugin-settings-editing';
-        }
-      }
-    }
-    else {
-      $field_row['settings_summary'] = array();
-      $field_row['settings_edit'] = array();
-
-      if ($plugin) {
-        // Display a summary of the current plugin settings, and (if the
-        // summary is not empty) a button to edit them.
-        $summary = $plugin->settingsSummary();
-
-        // Allow other modules to alter the summary.
-        $this->alterSettingsSummary($summary, $plugin, $field_definition);
-
-        if (!empty($summary)) {
-          $field_row['settings_summary'] = array(
-            '#type' => 'inline_template',
-            '#template' => '<div class="field-plugin-summary">{{ summary|safe_join("<br />") }}</div>',
-            '#context' => array('summary' => $summary),
-            '#cell_attributes' => array('class' => array('field-plugin-summary-cell')),
-          );
-        }
-
-        // Check selected plugin settings to display edit link or not.
-        // Check selected plugin settings to display edit link or not.
-        $settings_form = $plugin->settingsForm($form, $form_state);
-        $third_party_settings_form = $this->thirdPartySettingsForm($plugin, $field_definition, $form, $form_state);
-        if (!empty($settings_form) || !empty($third_party_settings_form)) {
-          $field_row['settings_edit'] = $base_button + array(
-            '#type' => 'image_button',
-            '#name' => $field_name . '_settings_edit',
-            '#src' => 'core/misc/icons/787878/cog.svg',
-            '#attributes' => array('class' => array('field-plugin-settings-edit'), 'alt' => $this->t('Edit')),
-            '#op' => 'edit',
-            // Do not check errors for the 'Edit' button, but make sure we get
-            // the value of the 'plugin type' select.
-            '#limit_validation_errors' => array(array('fields', $field_name, 'type')),
-            '#prefix' => '<div class="field-plugin-settings-edit-wrapper">',
-            '#suffix' => '</div>',
-          );
-        }
-      }
-    }
-
-    return $field_row;
-  }*/
 
 }

@@ -93,6 +93,24 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function submitComponentRow($component_name, $values, array $form, FormStateInterface $form_state) {
+    $options = $this->getFormDisplay()->getComponent($component_name);
+
+    // Update settings only if the submid handler told us to.
+    if ($form_state->get('plugin_settings_update') == $component_name) {
+      $options = $this->getComponent($component_name, $options)->settingsFormSubmit($values['settings_edit_form'], $form, $form_state) + $options;
+      $form_state->set('plugin_settings_update', NULL);
+    }
+    $options['type'] = $values['type'];
+    $options['weight'] = $values['weight'];
+    $options['region'] = $values['region'];
+
+    return $options;
+  }
+
+  /**
    * Get applicable renderer plugin options.
    *
    * By default return array with 'default' as the only key.
