@@ -43,6 +43,13 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   protected $formEntityManagerSuppliedNamespaces;
 
   /**
+   * Component types.
+   *
+   * @var \Drupal\flexiform\FormComponent\FormComponentTypeInterface[]
+   */
+  protected $componentTypePlugins = [];
+
+  /**
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage, $update = TRUE) {
@@ -61,6 +68,27 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   }
 
   /**
+   * Get the component plugin.
+   */
+  public function getComponentPlugin($name, $options) {
+    $plugin_id = !empty($options['component_type']) ? $options['component_type'] : (empty($options['type']) ? 'extra_field' : 'field_widget');
+    return $this->getComponentTypePlugin($plugin_id)->getComponent($name, $options);
+  }
+
+  /**
+   * Get a compoenet type plugin.
+   */
+  public function getComponentTypePlugin($plugin_id = 'field_widget') {
+    if (empty($this->componentTypePlugins[$plugin_id])) {
+      $this->componentTypePlugins[$plugin_id] = \Drupal::service('plugin.manager.flexiform.form_component_type')
+        ->createInstance($plugin_id)
+        ->setFormDisplay($this);
+    }
+
+    return $this->componentTypePlugins[$plugin_id];
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildForm(FieldableEntityInterface $entity, array &$form, FormStateInterface $form_state) {
@@ -73,45 +101,12 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
 
     // Let each widget generate the form elements.
     foreach ($this->getComponents() as $name => $options) {
+      $component = $this->getComponentPlugin($name, $options);
+
       // On each component reset the parents back to the original.
       $form['#parents'] = $original_parents;
 
-      if ($widget = $this->getRenderer($name)) {
-        if (strpos($name, ':')) {
-          list($namespace, $field_name) = explode(':', $name, 2);
-
-          // This is a form entity element so we need to tweak parents so that
-          // form state values are grouped by entity namespace.
-          $form['#parents'][] = $namespace;
-
-          // Get the items from the entity manager.
-          if ($form_entity = $this->getFormEntityManager($entity)->getEntity($namespace)) {
-            $items = $form_entity->get($field_name);
-          }
-          else {
-            // Skip this component if we can't get hold of an entity.
-            continue;
-          }
-        }
-        else {
-          $items = $entity->get($name);
-        }
-        $items->filterEmptyItems();
-
-        $form[$name] = $widget->form($items, $form, $form_state);
-        $form[$name]['#access'] = $items->access('edit');
-
-        // Assign the correct weight. This duplicates the reordering done in
-        // processForm(), but is needed for other forms calling this method
-        // directly.
-        $form[$name]['#weight'] = $options['weight'];
-
-        // Associate the cache tags for the field definition & field storage
-        // definition.
-        $field_definition = $this->getFieldDefinition($name);
-        $this->renderer->addCacheableDependency($form[$name], $field_definition);
-        $this->renderer->addCacheableDependency($form[$name], $field_definition->getFieldStorageDefinition());
-      }
+      $component->render($form, $form_state, $this->renderer);
     }
 
     // Set form parents back to the original
@@ -135,37 +130,21 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
 
   /**
    * {@inheritdoc}
+   *
+   * @todo: Work with component types.
    */
   public function extractFormValues(FieldableEntityInterface $entity, array &$form, FormStateInterface $form_state) {
-    $extracted = parent::extractFormValues($entity, $form, $form_state);
+    // Make sure the form entity manager is appropriately constructed.
+    $extracted = [];
+    $provided = $form_state->get('form_entity_provided') ?: [];
+    $this->getFormEntityManager($entity, $provided);
 
-    $original_parents = $form['#parents'];
-    foreach ($this->getFormEntityManager()->getFormEntities() as $namespace => $form_entity) {
-      // Skip base entity.
-      if ($namespace == '') {
-        continue;
-      }
-
-      // Skip any entity that didn't have a value.
-      if (!$form_entity->getFormEntityContext()->hasContextValue()) {
-        continue;
-      }
-
-      // Tweak parents to make the field values detectable.
-      $form['#parents'] = $original_parents;
-      $form['#parents'][] = $namespace;
-
-      // Get the entity object.
-      $entity_object = $form_entity->getFormEntityContext()->getContextValue();
-      foreach ($entity_object as $field_name => $items) {
-        $element_name = $namespace.':'.$field_name;
-        if ($widget = $this->getRenderer($element_name)) {
-          $widget->extractFormValues($items, $form, $form_state);
-          $extracted[$element_name] = $element_name;
-        }
+    foreach ($this->getComponents() as $name => $options) {
+      if ($component = $this->getComponentPlugin($name, $options)) {
+        $component->extractFormValues($form, $form_state);
+        $extracted[$name] = $name;
       }
     }
-    $form['#parents'] = $original_parents;
 
     return $extracted;
   }
@@ -243,33 +222,6 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function getFieldDefinitions() {
-    if (!isset($this->fieldDefinitions)) {
-      $this->fieldDefinitions = parent::getFieldDefinitions() + $this->getFormEntityFieldDefinitions(TRUE);
-
-      // Apply definition overrides.
-      foreach ($this->fieldDefinitions as $name => $definition) {
-        $component = $this->getComponent($name);
-        if (!empty($component['third_party_settings']['flexiform']['field_definition'])) {
-          $def_overrides = $component['third_party_settings']['flexiform']['field_definition'];
-          if (!empty($def_overrides['label'])) {
-            $definition->setLabel($def_overrides['label']);
-          }
-          if (!empty($def_overrides['settings'])) {
-            $settings = $definition->getSettings();
-            $settings = NestedArray::mergeDeep($settings, $def_overrides['settings']);
-            $definition->setSettings($settings);
-          }
-        }
-      }
-    }
-
-    return $this->fieldDefinitions;
-  }
-
-  /**
    * Get the form entity manager.
    */
   public function getFormEntityManager(FieldableEntityInterface $entity = NULL, array $provided = array()) {
@@ -288,48 +240,4 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
     return $this->formEntityManager;
   }
 
-  /**
-   * Get the form entity field definitions.
-   */
-  public function getFormEntityFieldDefinitions($flattened = FALSE) {
-    $definitions = [];
-    foreach ($this->getFormEntityManager()->getFormEntities() as $namespace => $form_entity) {
-      // Ignore the base entity.
-      if ($namespace == '') {
-        continue;
-      }
-
-      $display_context = $this->displayContext;
-      foreach ($this->entityManager()->getFieldDefinitions($form_entity->getEntityType(), $form_entity->getBundle()) as $field_name => $field_definition) {
-        if ($field_definition->isDisplayConfigurable($display_context)) {
-          // Give field definitions a clone for form entities so that overrides
-          // don't copy accross two different fields.
-          $definitions[$namespace][$field_name] = clone $field_definition;
-        }
-      }
-    }
-
-    // If a flattened list was asked for squash into 1D array.
-    if ($flattened) {
-      $flattened_definitions = [];
-      foreach ($definitions as $namespace => $defs) {
-        foreach ($defs as $field_name => $def) {
-          $flattened_definitions["{$namespace}:{$field_name}"] = $def;
-        }
-      }
-      return $flattened_definitions;
-    }
-
-    return $definitions;
-  }
-
-  /**
-   * Get a specific form entity field definition.
-   */
-  public function getFormEntityFieldDefinition($namespace, $field_name) {
-    $definitions = $this->getFormEntityFieldDefinitions();
-    if (isset($definitions[$namespace][$field_name])) {
-      return $definitions[$namespace][$field_name];
-    }
-  }
 }

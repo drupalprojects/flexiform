@@ -12,3 +12,6 @@ services:
   plugin.manager.flexiform_form_entity:
     class: Drupal\flexiform\FlexiformFormEntityPluginManager
     parent: default_plugin_manager
+  plugin.manager.flexiform.form_component_type:
+    class: Drupal\flexiform\FormComponentTypePluginManager
+    parent: default_plugin_manager
