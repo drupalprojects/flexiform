@@ -35,19 +35,6 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
   /**
    * {@inheritdoc}
    */
-  protected function buildExtraFieldRow($field_id, $extra_field) {
-    $extra_field_row = parent::buildExtraFieldRow($field_id, $extra_field);
-
-    if (count($this->getFormEntityManager()->getFormEntities()) > 1) {
-      $extra_field_row['human_name']['#markup'] .= ' ['.$this->getFormEntityManager()->getFormEntity()->getFormEntityContextDefinition()->getLabel().']';
-    }
-
-    return $extra_field_row;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
     $form['#attached']['library'][] = 'core/drupal.dialog.ajax';
@@ -217,27 +204,5 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
    */
   protected function initFormEntityManager() {
     $this->formEntityManager = $this->entity->getFormEntityManager();
-  }
-
-  /**
-   * Collects the field definitions of configurable fields on the form entities.
-   */
-  protected function getFormEntityFieldDefinitions() {
-    $definitions = [];
-    foreach ($this->getFormEntityManager()->getFormEntities() as $namespace => $form_entity) {
-      // Ignore the base entity.
-      if ($namespace == '') {
-        continue;
-      }
-
-      $display_context = $this->displayContext;
-      $definitions[$namespace] = array_filter(
-        $this->entityManager->getFieldDefinitions($form_entity->getEntityType(), $form_entity->getBundle()),
-        function (FieldDefinitionInterface $field_definition) use ($display_context) {
-          return $field_definition->isDisplayConfigurable($display_context);
-        }
-      );
-    }
-    return $definitions;
   }
 }

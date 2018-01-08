@@ -3,6 +3,7 @@
 namespace Drupal\flexiform\Plugin\FormComponentType;
 
 use Drupal\Component\Plugin\Factory\DefaultFactory;
+use Drupal\Core\Entity\EntityDisplayBase;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Field\WidgetPluginManager;
@@ -92,7 +93,7 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
     if (empty($this->fieldDefinitions)) {
       foreach ($this->getFormEntityManager()->getFormEntities() as $namespace => $form_entity) {
         foreach ($this->entityFieldManager->getFieldDefinitions($form_entity->getEntityType(), $form_entity->getBundle()) as $field_name => $field_definition) {
-          if ($field_definition->isDisplayConfigurable('form')) {
+          if (($this->getFormDisplay()->getMode() === EntityDisplayBase::CUSTOM_MODE) || ($field_definition->getDisplayOptions('form'))) {
             // Give field definitions a clone for form entities so that overrides
             // don't copy accross two different fields.
             $component_name = !empty($namespace) ? "{$namespace}:{$field_name}" : $field_name;
@@ -135,9 +136,6 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
     if ($field_definition = $this->getFieldDefinition($name)) {
       $component->setFieldDefinition($this->getFieldDefinition($name));
     }
-    else {
-      dpm($name);
-    }
     return $component;
   }
 
@@ -147,7 +145,9 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
   public function componentRows(EntityDisplayFormBase $form_object, array $form, FormStateInterface $form_state) {
     $rows = [];
     foreach ($this->getFieldDefinitions() as $component_name => $field_definition) {
-      $rows[$component_name] = $this->buildComponentRow($form_object, $component_name, $form, $form_state);
+      if ($field_definition->isDisplayConfigurable('form')) {
+        $rows[$component_name] = $this->buildComponentRow($form_object, $component_name, $form, $form_state);
+      }
     }
 
     return $rows;
