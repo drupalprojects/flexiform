@@ -1,0 +1,43 @@
+<?php
+
+namespace Drupal\flexiform_wizard\FormEntity;
+
+use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
+
+class TempstoreAwareFlexiformFormEntityManager extends FlexiformFormEntityManager {
+
+  /**
+   * Tempstore Factory for keeping track of entities.
+   *
+   * @var \Drupal\user\SharedTempStore|\Drupal\user\PrivateTempStore
+   */
+  protected $tempstore;
+
+  /**
+   * Set the tempstore
+   *
+   * @param $tempstore
+   *   Either Drupal\user\PrivateTempStore or Drupal\user\SharedTempStore
+   */
+  protected function setTempstore($tempstore) {
+    $this->tempstore = $tempstore;
+  }
+
+  /**
+   * Get the tempstore
+   *
+   * @return Drupal\user\PrivateTempStore|Drupal\user\SharedTempStore
+   */
+  protected function getTempstore() {
+    return $this->tempstore;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function initFormEntities(array $provided = []) {
+    $stored_entities = $this->tempstore->get('form_entities');
+    $provided = $stored_entities + $provided;
+    parent::initFormEntities($provided);
+  }
+}
