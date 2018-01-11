@@ -4,6 +4,9 @@ services:
     arguments: ['@entity.manager']
     tags:
      - { name: event_subscriber }
+  flexiform.token:
+    class: Drupal\flexiform\Utility\Token
+    parent: token
   flexiform.route_enhancer:
     class: Drupal\flexiform\Routing\FlexiformRouteEnhancer
     arguments: ['@entity.manager']

@@ -45,23 +45,31 @@ abstract class FlexiformFormEntityBase extends ContextAwarePluginBase implements
 
     // Set the form entity manager.
     $this->formEntityManager = $configuration['manager'];
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $namespace = !empty($configuration['namespace']) ? $configuration['namespace'] : NULL;
+    $entity = !empty($configuration['entity']) ? $configuration['entity'] : NULL;
 
+    // Unset these values so they can't be accessed like normal configuration.
+    unset($configuration['manager']);
+    unset($configuration['namespace']);
+
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     // Load in the required contexts for this plugin.
     if (!empty($configuration['context_mapping'])) {
-      foreach ($configuration['context_mapping'] as $key => $namespace) {
-        $formEntity = $this->formEntityManager->getFormEntity($namespace);
+      foreach ($configuration['context_mapping'] as $key => $context_namespace) {
+        $formEntity = $this->formEntityManager->getFormEntity($context_namespace);
         if (!$formEntity) {
-          throw new \Exception('No Form Entity with namespace '.$namespace);
+          throw new \Exception('No Form Entity with namespace '.$context_namespace);
         }
 
         $this->context[$key] = $formEntity->getFormEntityContext();
       }
     }
 
-    $this->formEntityContext = FormEntityContext::createFromFlexiformFormEntity($this);
-
+    $this->formEntityContext = FormEntityContext::createFromFlexiformFormEntity($this, $entity);
+    if (!empty($namespace)) {
+      $this->formEntityContext->setEntityNamespace($namespace);
+    }
   }
 
   /**

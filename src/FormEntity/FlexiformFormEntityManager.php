@@ -36,14 +36,12 @@ class FlexiformFormEntityManager {
    *
    * @param \Drupal\flexiform\FlexiformEntityFormDisplayInterface $form_display
    *   The form display to manage the entities for.
-   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
-   *   The base entity of the form.
    * @param \Drupal\Core\Entity\FieldableEntityInterface[] $provided
    *   Array of provided entities keyed by namespace.
    */
-  public function __construct(FlexiformEntityFormDisplayInterface $form_display, FieldableEntityInterface $entity = NULL, array $provided = []) {
+  public function __construct(FlexiformEntityFormDisplayInterface $form_display, array $provided = []) {
     $this->formDisplay = $form_display;
-    $this->initFormEntities($entity, $provided);
+    $this->initFormEntities($provided);
   }
 
   /**
@@ -56,25 +54,9 @@ class FlexiformFormEntityManager {
   /**
    * Initialize form entities.
    */
-  protected function initFormEntities(FieldableEntityInterface $entity = NULL, array $provided = []) {
-    // Initialize the base entity.
-    $this->formEntities[''] = $this->getPluginManager()->createInstance('provided', [
-      'manager' => $this,
-      'map' => [],
-      'entity_type' => $this->formDisplay->getTargetEntityTypeId(),
-      'bundle' => $this->formDisplay->getTargetBundle(),
-      'label' => $this->t(
-        'Base :entity_type',
-        [
-          ':entity_type' => \Drupal::service('entity_type.manager')
-            ->getDefinition($this->formDisplay->getTargetEntityTypeId())->getLabel(),
-        ]
-      ),
-      'entity' => $entity,
-    ]);
-    $this->formEntities['']->getFormEntityContext();
-
+  protected function initFormEntities(array $provided = []) {
     foreach ($this->formDisplay->getFormEntityConfig() as $namespace => $configuration) {
+      $configuration['namespace'] = $namespace;
       $configuration['manager'] = $this;
       if (isset($provided[$namespace])) {
         $configuration['entity'] = $provided[$namespace];

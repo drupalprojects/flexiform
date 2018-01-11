@@ -23,6 +23,13 @@ use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformEntityFormDisplayInterface {
 
   /**
+   * The base entity namespace.
+   *
+   * @var string.
+   */
+  protected $baseEntityNamespace = '';
+
+  /**
    * The form entity configuration.
    */
   protected $formEntities = [];
@@ -216,8 +223,27 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    * {@inheritdoc}
    */
   public function initFormEntityConfig() {
-    if (empty($this->formEntities) && ($form_entities = $this->getThirdPartySetting('flexiform', 'form_entities'))) {
-      $this->formEntities = $form_entities;
+    if (empty($this->formEntities)) {
+      $this->formEntities = [];
+
+      $form_entities = $this->getThirdPartySetting('flexiform', 'form_entities');
+
+      // If there is a base entity add it to the configuration.
+      if ($this->getTargetEntityTypeId() && empty($form_entities[$this->baseEntityNamespace])) {
+        $this->formEntities[$this->baseEntityNamespace] = [
+          'entity_type' => $this->getTargetEntityTypeId(),
+          'bundle' => $this->getTargetBundle(),
+          'plugin' => 'provided',
+          'label' => t(
+            'Base :entity_type',
+            [
+              ':entity_Type' => \Drupal::service('entity_type.manager')->getDefinition($this->getTargetEntityTypeId())->getLabel(),
+            ]
+          ),
+        ];
+      }
+
+      $this->formEntities += $form_entities;
     }
   }
 
@@ -228,12 +254,13 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
     $supplied_namespaces = array_keys($provided);
     if (!empty($entity)) {
       $supplied_namespaces[] = 'entity';
+      $provided[$this->baseEntityNamespace] = $entity;
     }
 
     // If entities are being supplied that have not been supplied before then
-    // rebuild the forrm entity manager.
+    // rebuild the form entity manager.
     if (empty($this->formEntityManager) || count(array_diff($supplied_namespaces, $this->formEntityManagerSuppliedNamespaces))) {
-      $this->formEntityManager = new FlexiformFormEntityManager($this, $entity, $provided);
+      $this->formEntityManager = new FlexiformFormEntityManager($this, $provided);
       $this->formEntityManagerSuppliedNamespaces = $supplied_namespaces;
     }
 
