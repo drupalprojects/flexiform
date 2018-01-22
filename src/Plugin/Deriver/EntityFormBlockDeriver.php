@@ -11,6 +11,7 @@ use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
+use Drupal\flexiform\FlexiformEntityFormDisplay;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class EntityFormBlockDeriver extends DeriverBase implements ContainerDeriverInterface {
@@ -93,7 +94,8 @@ class EntityFormBlockDeriver extends DeriverBase implements ContainerDeriverInte
         $entity = $this->entityTypeManager->getStorage($entity_type_id)->create($values);
 
         foreach ($this->entityDisplayRepository->getFormModeOptions($entity_type_id) as $mode_name => $mode_label) {
-          $entity_form_display = EntityFormDisplay::collectRenderDisplay($entity, $mode_name);
+          /* @var \Drupal\flexiform\FlexiformEntityFormDisplayInterface $entity_form_display */
+          $entity_form_display = FlexiformEntityFormDisplay::collectRenderDisplay($entity, $mode_name);
           $plugin_id = "{$entity_type_id}.{$bundle}.{$mode_name}";
           $this->derivatives[$plugin_id] = [
             'admin_label' => $this->t(

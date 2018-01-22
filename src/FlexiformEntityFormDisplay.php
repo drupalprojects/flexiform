@@ -226,7 +226,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
     if (empty($this->formEntities)) {
       $this->formEntities = [];
 
-      $form_entities = $this->getThirdPartySetting('flexiform', 'form_entities');
+      $form_entities = $this->getThirdPartySetting('flexiform', 'form_entities', []);
 
       // If there is a base entity add it to the configuration.
       if ($this->getTargetEntityTypeId() && empty($form_entities[$this->baseEntityNamespace])) {
@@ -237,7 +237,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
           'label' => t(
             'Base :entity_type',
             [
-              ':entity_Type' => \Drupal::service('entity_type.manager')->getDefinition($this->getTargetEntityTypeId())->getLabel(),
+              ':entity_type' => \Drupal::service('entity_type.manager')->getDefinition($this->getTargetEntityTypeId())->getLabel(),
             ]
           ),
         ];

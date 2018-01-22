@@ -2,6 +2,7 @@
 
 namespace Drupal\flexiform;
 
+use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Utility\Token as CoreToken;
 
 class Token extends CoreToken {

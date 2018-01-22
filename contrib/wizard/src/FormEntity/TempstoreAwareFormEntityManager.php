@@ -16,7 +16,7 @@ class TempstoreAwareFlexiformFormEntityManager extends FlexiformFormEntityManage
   /**
    * Set the tempstore
    *
-   * @param $tempstore
+   * @param \Drupal\user\PrivateTempStore|\Drupal\user\SharedTempStore $tempstore
    *   Either Drupal\user\PrivateTempStore or Drupal\user\SharedTempStore
    */
   protected function setTempstore($tempstore) {
@@ -26,7 +26,7 @@ class TempstoreAwareFlexiformFormEntityManager extends FlexiformFormEntityManage
   /**
    * Get the tempstore
    *
-   * @return Drupal\user\PrivateTempStore|Drupal\user\SharedTempStore
+   * @return \Drupal\user\PrivateTempStore|\Drupal\user\SharedTempStore
    */
   protected function getTempstore() {
     return $this->tempstore;

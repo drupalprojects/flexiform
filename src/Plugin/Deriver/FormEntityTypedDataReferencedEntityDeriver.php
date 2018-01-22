@@ -53,6 +53,7 @@ class FormEntityTypedDataReferencedEntityDeriver extends TypedDataPropertyDerive
       return;
     }
 
+    /* @var \Drupal\Core\Field\FieldDefinitionInterface $property_definition */
     $bundle_info = $base_definition->getConstraint('Bundle');
     // Identify base definitions that appear on bundle-able entities.
     if ($bundle_info && array_filter($bundle_info) && $base_definition->getConstraint('EntityType')) {

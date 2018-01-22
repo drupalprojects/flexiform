@@ -1,16 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\Plugin\FlexiformFormEntity\FlexiformFormEntityProvided.
- */
-
 namespace Drupal\flexiform\Plugin\FlexiformFormEntity;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\flexiform\Annotation\FlexiformFormEntity;
-use Drupal\flexiform\FormEntity\FlexiformFormEntityBase;
 
 /**
  * Form Entity plugin for entities that are passed in through the configuration
@@ -49,4 +41,5 @@ class FlexiformFormEntityLoad extends FlexiformFormEntityProvided {
 
     return $form;
   }
+
 }

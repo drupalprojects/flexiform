@@ -2,6 +2,7 @@
 
 namespace Drupal\flexiform\FormEntity;
 
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 

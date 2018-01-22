@@ -140,7 +140,7 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
       }
     }
     $form_state = new FormState();
-    $form_state->set('form_entity_provided', $additions['form_entity_provided']);
+    $form_state->set('form_entity_provided', $provided['form_entity_provided']);
     return $this->formBuilder->buildForm($form_object, $form_state);
   }
 }

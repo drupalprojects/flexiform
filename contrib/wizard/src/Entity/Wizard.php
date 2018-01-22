@@ -2,7 +2,10 @@
 
 namespace Drupal\flexiform_wizard\Entity;
 
+use Drupal\Component\Plugin\Context\ContextInterface;
+use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 
 /**
@@ -102,6 +105,13 @@ class Wizard extends ConfigEntityBase implements EntityWithPluginCollectionInter
    * @var array[]
    */
   protected $parameters = [];
+
+  /**
+   * Context configuration.
+   *
+   * @var array[]
+   */
+  protected $contexts = [];
 
   /**
    * {@inheritdoc}

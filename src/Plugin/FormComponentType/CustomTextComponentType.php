@@ -23,7 +23,7 @@ class CustomTextComponentType extends FormComponentTypeBase {
   public function componentRows(EntityDisplayFormBase $form_object, array $form, FormStateInterface $form_state) {
     $rows = [];
     foreach ($this->getFormDisplay()->getComponents() as $component_name => $options) {
-      if ($options['component_type'] == $this->getPluginId()) {
+      if (isset($options['component_type']) && $options['component_type'] == $this->getPluginId()) {
         $rows[$component_name] = $this->buildComponentRow($form_object, $component_name, $form, $form_state);
       }
     }

@@ -1,14 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\Plugin\FlexiformFormEntity\FlexiformFormEntityCurrentUser.
- */
-
 namespace Drupal\flexiform\Plugin\FlexiformFormEntity;
 
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\flexiform\Annotation\FlexiformFormEntity;
 use Drupal\flexiform\FormEntity\FlexiformFormEntityBase;
 
 /**
@@ -32,4 +25,5 @@ class FlexiformFormEntityCurrentUser extends FlexiformFormEntityBase {
     $uid = \Drupal::currentUser()->id();
     return entity_load('user', $uid);
   }
+
 }
