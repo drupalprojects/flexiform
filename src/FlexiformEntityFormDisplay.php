@@ -96,11 +96,42 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   }
 
   /**
+   * Get the array of provided entities.
+   */
+  protected function getProvidedEntities(FormStateInterface $form_state, FieldableEntityInterface $base_entity = NULL) {
+    $provided = [];
+    if ($base_entity) {
+      $provided[$this->baseEntityNamespace] = $base_entity;
+    }
+    $provided += $form_state->get('form_entity_provided') ?: [];
+
+    return $provided;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildForm(FieldableEntityInterface $entity, array &$form, FormStateInterface $form_state) {
-    $provided = $form_state->get('form_entity_provided') ?: [];
-    $this->getFormEntityManager($entity, $provided);
+    $this->buildAdvancedForm(
+      $this->getProvidedEntities($form_state, $entity),
+      $form,
+      $form_state
+    );
+  }
+
+  /**
+   * Build standalone form. A standalone form does not have a single base
+   * this allows the passing of a single array of provided entities.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface[] $entities
+   *   An array of provided entities keyed by namespace.
+   * @param array $form
+   *   The form array.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function buildAdvancedForm(array $provided, array &$form, FormStateInterface $form_state) {
+    $this->getFormEntityManager($provided);
 
     // Set #parents to 'top-level' by default.
     $form += array('#parents' => array());
@@ -143,8 +174,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   public function extractFormValues(FieldableEntityInterface $entity, array &$form, FormStateInterface $form_state) {
     // Make sure the form entity manager is appropriately constructed.
     $extracted = [];
-    $provided = $form_state->get('form_entity_provided') ?: [];
-    $this->getFormEntityManager($entity, $provided);
+    $this->getFormEntityManager($this->getProvidedEntities($form_state, $entity));
 
     foreach ($this->getComponents() as $name => $options) {
       if ($component = $this->getComponentPlugin($name, $options)) {
@@ -250,12 +280,8 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   /**
    * Get the form entity manager.
    */
-  public function getFormEntityManager(FieldableEntityInterface $entity = NULL, array $provided = array()) {
+  public function getFormEntityManager(array $provided = array()) {
     $supplied_namespaces = array_keys($provided);
-    if (!empty($entity)) {
-      $supplied_namespaces[] = 'entity';
-      $provided[$this->baseEntityNamespace] = $entity;
-    }
 
     // If entities are being supplied that have not been supplied before then
     // rebuild the form entity manager.

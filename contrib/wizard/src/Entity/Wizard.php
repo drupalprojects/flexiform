@@ -16,8 +16,21 @@ use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
  *   label = @Translation("Wizard"),
  *   handlers = {
  *     "access" = "Drupal\flexiform_wizard\Entity\WizardAccess",
+ *     "form" = {
+ *       "add" = "Drupal\flexiform_wizard\Form\WizardForm",
+ *       "edit" = "Drupal\flexiform_wizard\Form\WizardEditForm",
+ *     },
+ *     "list_builder" = "Drupal\flexiform_wizard\WizardListBuilder",
+ *     "route_provider" = {
+ *       "html" = "Drupal\flexiform_wizard\Routing\WizardHtmlRouteProvider",
+ *     },
  *   },
  *   admin_permission = "administer flexiform wizards",
+ *   links = {
+ *     "add-form" = "/admin/structure/wizards/add",
+ *     "edit-form" = "/admin/structure/wizards/manager/{flexiform_wizard}",
+ *     "collection" = "/admin/structure/wizards",
+ *   },
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label",
@@ -31,7 +44,8 @@ use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
  *     "path",
  *     "access_logic",
  *     "access_conditions",
- *     "parameters,
+ *     "parameters",
+ *     "pages",
  *   },
  * )
  */
@@ -112,6 +126,13 @@ class Wizard extends ConfigEntityBase implements EntityWithPluginCollectionInter
    * @var array[]
    */
   protected $contexts = [];
+
+  /**
+   * Page configuration.
+   *
+   * @var array[]
+   */
+  protected $pages = [];
 
   /**
    * {@inheritdoc}
@@ -309,6 +330,13 @@ class Wizard extends ConfigEntityBase implements EntityWithPluginCollectionInter
    */
   public function getContexts() {
     return $this->contexts;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPages() {
+    return $this->pages;
   }
 
   /**
