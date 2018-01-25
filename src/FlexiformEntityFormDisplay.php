@@ -118,11 +118,12 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage, $update = TRUE) {
-    $form_entities = $this->formEntities;
-    if ($this->getTargetEntityTypeId() && !empty($form_entities[$this->baseEntityNamespace])) {
-      unset($form_entities[$this->baseEntityNamespace]);
+    if ($form_entities = $this->formEntities) {
+      if ($this->getTargetEntityTypeId() && !empty($form_entities[$this->baseEntityNamespace])) {
+        unset($form_entities[$this->baseEntityNamespace]);
+      }
+      $this->setThirdPartySetting('flexiform', 'form_entities', $form_entities);
     }
-    $this->setThirdPartySetting('flexiform', 'form_entities', $form_entities);
     parent::preSave($storage, $update);
   }
 
