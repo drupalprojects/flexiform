@@ -65,6 +65,7 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
           '#title' => $enhancer->getPluginDefinition()['label'],
           '#parents' => ['enhancer', $enhancer_name],
           '#group' => 'enhancer',
+          '#tree' => TRUE,
         ];
         $form['enhancer_'.$enhancer_name] += $enhancer->configurationForm($form['enhancer_'.$enhancer_name], $form_state);
       }

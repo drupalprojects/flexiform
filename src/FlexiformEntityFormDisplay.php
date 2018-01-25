@@ -14,6 +14,7 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Form\FormState;
 use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 use Drupal\flexiform\FormEnhancer\ConfigurableFormEnhancerInterface;
 
@@ -232,6 +233,11 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    */
   public function processForm($element, FormStateInterface $form_state, $form) {
     $element = parent::processForm($element, $form_state, $form);
+
+    foreach ($this->getFormEnhancers('process_form') as $enhancer) {
+      $element = $enhancer->processForm($element, $form_state, $form);
+    }
+
     static::addSaveFormEntitiesSubmit($element, $this);
     return $element;
   }
@@ -391,6 +397,39 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
     }
 
     return isset($this->formEnhancers[$enhancer_name]) ? $this->formEnhancers[$enhancer_name] : NULL;
+  }
+
+  /**
+   * Get the entity form builder.
+   *
+   * This is designed to be helpful for enhancers that want to inspect the
+   * resultant form before providing configuration options.
+   *
+   * @return array
+   *   An array with two keys:
+   *   - form_object: \Drupal\Core\Form\FormBase
+   *   - form_state: \Drupal\Core\Form\FormStateInterface
+   *   - form: array
+   */
+  public function getFormInformation() {
+    $operation = $this->get('originalMode') ?: $this->get('mode');
+    $form_object = $this->entityTypeManager()->getFormObject($this->getTargetEntityTypeId(), $operation);
+
+    $default_values = [];
+    if ($bundle_key = $this->entityTypeManager()->getDefinition($this->getTargetEntityTypeId())->getKey('bundle')) {
+      $default_values[$bundle_key] = $this->getTargetBundle();
+    }
+    $form_object->setEntity($this->entityTypeManager()
+      ->getStorage($this->getTargetEntityTypeId())
+      ->create($default_values)
+    );
+    $form_state = new FormState();
+
+    return [
+      'form_object' => $form_object,
+      'form_state' => $form_state,
+      'form' => \Drupal::service('form_builder')->buildForm($form_object, $form_state),
+    ];
   }
 
 }
