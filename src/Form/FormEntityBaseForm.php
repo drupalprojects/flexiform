@@ -157,7 +157,7 @@ abstract class FormEntityBaseForm extends FormBase {
       $configuration += $plugin_conf;
     }
 
-    $this->formDisplay->addFormEntityConfig($namespace, $configuration);
+    $this->formDisplay->getFormEnhancer('multiple_entities')->addFormEntityConfig($namespace, $configuration);
     $this->formDisplay->save();
 
     $params = [

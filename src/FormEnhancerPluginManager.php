@@ -2,26 +2,22 @@
 
 /**
  * @file
- * Contains \Drupal\flexiform\FlexiformFormEntityPluginManager
+ * Contains \Drupal\flexiform\FormEnhancerPluginManager
  */
 
 namespace Drupal\flexiform;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\Plugin\Context\ContextAwarePluginManagerInterface;
-use Drupal\Core\Plugin\Context\ContextAwarePluginManagerTrait;
 use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
- * Provides a Flexiform form Entity Plugin Manager.
+ * Provides a Form Enhancer Plugin Manager.
  */
-class FlexiformFormEntityPluginManager extends DefaultPluginManager implements ContextAwarePluginManagerInterface  {
-
-  use ContextAwarePluginManagerTrait;
+class FormEnhancerPluginManager extends DefaultPluginManager {
 
   /**
-   * Constructs a FlexiformFormEntityPluginManager object.
+   * Constructs a FormEnhancerPluginManager object.
    *
    * @param \Traversable $namespaces
    *   An object that implements \Traversable which contains the root paths
@@ -32,8 +28,9 @@ class FlexiformFormEntityPluginManager extends DefaultPluginManager implements C
    *   The module handler to invoke the alter hook with.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/FlexiformFormEntity', $namespaces, $module_handler, 'Drupal\flexiform\FormEntity\FlexiformFormEntityInterface', 'Drupal\flexiform\Annotation\FlexiformFormEntity');
-    $this->alterInfo('flexiform_form_entity');
-    $this->setCacheBackend($cache_backend, 'flexiform_form_entity_plugins');
+    parent::__construct('Plugin/FormEnhancer', $namespaces, $module_handler, 'Drupal\flexiform\FormEnhancer\FormEnhancerInterface', 'Drupal\flexiform\Annotation\FormEnhancer');
+    $this->alterInfo('flexiform_form_enhancer');
+    $this->setCacheBackend($cache_backend, 'flexiform_form_enhancer');
   }
 }
+

@@ -20,6 +20,7 @@ use Drupal\ctools\Form\AjaxFormTrait;
 use Drupal\field_ui\Form\EntityFormDisplayEditForm;
 use Drupal\flexiform\FormEntity\FlexiformFormEntityInterface;
 use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
+use Drupal\flexiform\FormEnhancer\ConfigurableFormEnhancerInterface;
 
 class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
 
@@ -42,6 +43,7 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
 
     $form['fields']['#header'][0] = $this->t('Component');
 
+    // Components.
     $component_type_manager = \Drupal::service('plugin.manager.flexiform.form_component_type');
     $component_rows = [];
     foreach ($component_type_manager->getDefinitions() as $component_type => $definition) {
@@ -52,98 +54,25 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
     }
     $form['fields'] = $component_rows + $form['fields'];
 
-    $form['entities_section'] = [
-      '#type' => 'container',
-      '#tree' => TRUE,
+    // Enhancers.
+    $form['enhancer'] = [
+      '#type' => 'vertical_tabs',
     ];
-
-    // Prepare a link to add an entity to this form.
-    $target_entity_type = $this->entity->get('targetEntityType');
-    $target_entity_def = \Drupal::service('entity_type.manager')->getDefinition($target_entity_type);
-    $url_params = [
-      'form_mode_name' => $this->entity->get('mode'),
-    ];
-    if ($target_entity_def->get('bundle_entity_type')) {
-      $url_params[$target_entity_def->get('bundle_entity_type')] = $this->entity->get('bundle');
-    }
-    $form['entities_section']['add'] = [
-      '#type' => 'link',
-      '#title' => $this->t('Add Entity'),
-      '#url' => Url::fromRoute("entity.entity_form_display.{$target_entity_type}.form_mode.form_entity_add", $url_params),
-      '#attributes' => $this->getAjaxButtonAttributes(),
-      '#attached' => [
-        'library' => [
-          'core/drupal.ajax',
-        ],
-      ],
-    ];
-    $form['entities_section']['entities'] = [
-      '#type' => 'table',
-      '#header' => [
-        $this->t('Entity'),
-        $this->t('Plugin'),
-        $this->t('Operations'),
-      ],
-      '#title' => t('Entities'),
-      '#empty' => t('This form display has no entities yet.'),
-    ];
-
-    foreach ($this->getFormEntityManager()->getFormEntities() as $namespace => $form_entity) {
-      $operations = [];
-      if (!empty($namespace)) {
-        $operation_params = $url_params;
-        $operation_params['entity_namespace'] = $namespace;
-
-        $operations['edit'] = [
-          'title' => $this->t('Edit'),
-          'weight' => 10,
-          'url' => Url::fromRoute(
-            "entity.entity_form_display.{$target_entity_type}.form_mode.form_entity_edit",
-            $operation_params
-          ),
-          'attributes' => $this->getAjaxButtonAttributes(),
+    foreach ($this->entity->getFormEnhancers() as $enhancer_name => $enhancer) {
+      if ($enhancer instanceof ConfigurableFormEnhancerInterface) {
+        $form['enhancer_'.$enhancer_name] = [
+          '#type' => 'details',
+          '#title' => $enhancer->getPluginDefinition()['label'],
+          '#parents' => ['enhancer', $enhancer_name],
+          '#group' => 'enhancer',
         ];
+        $form['enhancer_'.$enhancer_name] += $enhancer->configurationForm($form['enhancer_'.$enhancer_name], $form_state);
       }
-
-      $form['entities_section']['entities'][$namespace] = [
-        'human_name' => [
-          '#plain_text' => $form_entity->getFormEntityContextDefinition()->getLabel(),
-        ],
-        'plugin' => [
-          '#plain_text' => $form_entity->getLabel(),
-        ],
-        'operations' => [
-          '#type' => 'operations',
-          '#links' => $operations,
-          '#attached' => [
-            'library' => [
-              'core/drupal.ajax',
-            ],
-          ],
-        ],
-      ];
     }
+
+    $form['modes']['#weight'] = 90;
 
     return $form;
-  }
-
-  /**
-   * Return an AJAX response to open the modal popup to add a form entity.
-   */
-  public function addFormEntity(array &$form, FormStateInterface $form_state) {
-    $content = \Drupal::formBuilder()->getForm('Drupal\flexiform\Form\FormEntityAddForm', $this->entity);
-    $content['#attached']['library'][] = 'core/drupal.dialog.ajax';
-    $content['#attached']['library'][] = 'core/drupal.ajax';
-
-    $response = new AjaxResponse();
-    $response->addCommand(new OpenModalDialogCommand($this->t('Add form entity'), $content, ['width' => 700]));
-    return $response;
-  }
-
-  /**
-   * Submit handler for adding a form entity.
-   */
-  public function addFormEntitySubmitForm(array $form, FormStateInterface $form_state) {
   }
 
   /**
@@ -186,6 +115,14 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
         ]);
       }
     }
+
+    // Loop over the enhancers and let them set their configuration internally
+    // this then gets saved in the presave of the FormDisplay entity.
+    foreach ($this->entity->getFormEnhancers() as $enhancer_name => $enhancer) {
+      if ($enhancer instanceof ConfigurableFormEnhancerInterface) {
+        $enhancer->configurationFormSubmit($form['enhancer_'.$enhancer_name], $form_state);
+      }
+    }
   }
 
   /**
@@ -195,16 +132,9 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
    */
   public function getFormEntityManager() {
     if (empty($this->formEntityManager)) {
-      $this->initFormEntityManager();
+      $this->formEntityManager = $this->entity->getFormEntityManager();
     }
 
     return $this->formEntityManager;
-  }
-
-  /**
-   * Initialize the form entity manager.
-   */
-  protected function initFormEntityManager() {
-    $this->formEntityManager = $this->entity->getFormEntityManager();
   }
 }

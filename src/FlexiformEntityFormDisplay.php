@@ -15,6 +15,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
+use Drupal\flexiform\FormEnhancer\ConfigurableFormEnhancerInterface;
 
 /**
  * Defines a class to extend EntityFormDisplays to work with multiple entity
@@ -33,6 +34,11 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    * The form entity configuration.
    */
   protected $formEntities = [];
+
+  /**
+   * The form enhancers.
+   */
+  protected $formEnhancers = [];
 
   /**
    * The flexiform form Entity Manager.
@@ -118,12 +124,13 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage, $update = TRUE) {
-    if ($form_entities = $this->formEntities) {
-      if ($this->getTargetEntityTypeId() && !empty($form_entities[$this->baseEntityNamespace])) {
-        unset($form_entities[$this->baseEntityNamespace]);
+    $enhancer_settings = $this->getThirdPartySetting('flexiform', 'enhancer', []);
+    foreach ($this->formEnhancers as $enhancer_name => $enhancer) {
+      if ($enhancer instanceof ConfigurableFormEnhancerInterface) {
+        $enhancer_settings[$enhancer_name] = $enhancer->getConfiguration();
       }
-      $this->setThirdPartySetting('flexiform', 'form_entities', $form_entities);
     }
+    $this->setThirdPartySetting('flexiform', 'enhancer', $enhancer_settings);
     parent::preSave($storage, $update);
   }
 
@@ -265,6 +272,8 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    *   element then continue to search the children.
    * @param \Drupal\flexiform\FlexiformEntityFormDisplayInterface $form_display
    *   The flexiform entity form display.
+   *
+   * @todo: Move onto the multiple_entities enhancer plugin.
    */
   public static function addSaveFormEntitiesSubmit(array &$element, FlexiformEntityFormDisplayInterface $form_display) {
     if (isset($element['#type']) && $element['#type'] == 'submit') {
@@ -297,29 +306,14 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   /**
    * {@inheritdoc}
    */
-  public function addFormEntityConfig($namespace, $configuration) {
-    $this->initFormEntityConfig();
-    $this->formEntities[$namespace] = $configuration;
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function removeFormEntityConfig($namespace) {
-    $this->initFormEntityConfig();
-    unset($this->formEntities[$namespace]);
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function initFormEntityConfig() {
     if (empty($this->formEntities)) {
       $this->formEntities = [];
 
-      $form_entities = $this->getThirdPartySetting('flexiform', 'form_entities', []);
+      $form_entities = [];
+      foreach ($this->getFormEnhancers('init_form_entity_config') as $enhancer) {
+        $form_entities += $enhancer->initFormEntityConfig();
+      }
 
       // If there is a base entity add it to the configuration.
       if ($this->getTargetEntityTypeId() && empty($form_entities[$this->baseEntityNamespace])) {
@@ -354,6 +348,49 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
     }
 
     return $this->formEntityManager;
+  }
+
+  /**
+   * Get the enhancers for this form display.
+   */
+  public function getFormEnhancers($event = NULL) {
+    if (empty($this->formEnhancers)) {
+      $enhancer_settings = $this->getThirdPartySetting('flexiform', 'enhancer', []);
+      $enhancer_definitions = \Drupal::service('plugin.manager.flexiform.form_enhancer')->getDefinitions();
+      foreach ($enhancer_definitions as $plugin_id => $definition) {
+        $this->formEnhancers[$plugin_id] = \Drupal::service('plugin.manager.flexiform.form_enhancer')
+          ->createInstance(
+            $plugin_id,
+            isset($enhancer_settings[$plugin_id]) ? $enhancer_settings[$plugin_id] : []
+          )
+          ->setFormDisplay($this);
+      }
+    }
+
+    if (is_null($event)) {
+      return $this->formEnhancers;
+    }
+
+    $applicable_enhancers = [];
+    foreach ($this->formEnhancers as $plugin_id => $enhancer) {
+      if ($enhancer->applies($event)) {
+        $applicable_enhancers[$plugin_id] = $enhancer;
+      }
+    }
+    return $applicable_enhancers;
+  }
+
+  /**
+   * Get a particular form enhancer.
+   *
+   * @return \Drupal\flexiform\FormEnhancer\FormEnhancerInterface
+   */
+  public function getFormEnhancer($enhancer_name) {
+    if (empty($this->formEnhancers)) {
+      $this->getFormEnhancers();
+    }
+
+    return isset($this->formEnhancers[$enhancer_name]) ? $this->formEnhancers[$enhancer_name] : NULL;
   }
 
 }
