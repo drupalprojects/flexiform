@@ -1,7 +1,7 @@
 services:
   flexiform.subscriber:
     class: Drupal\flexiform\Routing\RouteSubscriber
-    arguments: ['@entity.manager']
+    arguments: ['@entity_type.manager', '@plugin.manager.flexiform.form_component_type']
     tags:
      - { name: event_subscriber }
   flexiform.token:

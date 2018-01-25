@@ -57,7 +57,11 @@ class CustomTextComponent extends FormComponentBase implements ContainerFactoryF
     $token_info = $this->token->getInfo();
     foreach ($this->getFormEntityManager()->getFormEntities() as $namespace => $form_entity) {
       $entity = $form_entity->getFormEntityContext()->getContextValue();
-      $token_type = $entity->getEntityType()->get('token_type') ?: (!empty($token_info['types'][$entity->getEntityTypeId()]) ? $token_info['types'][$entity->getEntityTypeId()] : FALSE);
+      if ($namespace == '') {
+        $namespace = 'base_entity';
+      }
+
+      $token_type = $entity->getEntityType()->get('token_type') ?: (!empty($token_info['types'][$entity->getEntityTypeId()]) ? $entity->getEntityTypeId() : FALSE);
       if ($token_type) {
         $token_data[$namespace] = $form_entity->getFormEntityContext()->getContextValue();
         $token_options['alias'][$namespace] = $token_type;

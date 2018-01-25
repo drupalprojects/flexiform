@@ -40,6 +40,8 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
     $form['#attached']['library'][] = 'core/drupal.dialog.ajax';
     $form['#attached']['library'][] = 'core/drupal.ajax';
 
+    $form['fields']['#header'][0] = $this->t('Component');
+
     $component_type_manager = \Drupal::service('plugin.manager.flexiform.form_component_type');
     $component_rows = [];
     foreach ($component_type_manager->getDefinitions() as $component_type => $definition) {

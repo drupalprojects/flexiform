@@ -33,17 +33,5 @@ class FormComponentTypePluginManager extends DefaultPluginManager {
     $this->alterInfo('flexiform_form_compoent_type');
     $this->setCacheBackend($cache_backend, 'flexiform_form_component_type_plugins');
   }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function createInstance($plugin_id, array $configuration = array(), FlexiformEntityFormDisplay $form_display = NULL, $name = '') {
-    $configuration['name'] = $name;
-    $instance = parent::createInstance($plugin_id, $configuration);
-    if ($form_display) {
-      $instance->setFormDisplay($form_display);
-    }
-    return $instance;
-  }
 }
 

@@ -4,7 +4,7 @@ namespace Drupal\flexiform\Plugin\FormComponentType;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\field_ui\Form\EntityDisplayFormBase;
-use Drupal\flexiform\FormComponent\FormComponentTypeBase;
+use Drupal\flexiform\FormComponent\FormComponentTypeCreateableBase;
 
 /**
  * Plugin for field widget component types.
@@ -15,7 +15,7 @@ use Drupal\flexiform\FormComponent\FormComponentTypeBase;
  *   component_class = "Drupal\flexiform\Plugin\FormComponentType\CustomTextComponent",
  * )
  */
-class CustomTextComponentType extends FormComponentTypeBase {
+class CustomTextComponentType extends FormComponentTypeCreateableBase {
 
   /**
    * {@inheritdoc}
@@ -29,6 +29,34 @@ class CustomTextComponentType extends FormComponentTypeBase {
     }
 
     return $rows;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addComponentForm(array $form, FormStateInterface $form_state) {
+    $form['admin_label'] = [
+      '#title' => t('Admin Label'),
+      '#description' => t('Only shown on administrative pages'),
+      '#type' => 'textfield',
+      '#required' => TRUE,
+    ];
+    $form['content'] = [
+      '#title' => t('Content'),
+      '#type' => 'text_format',
+      '#required' => TRUE,
+    ];
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addComponentFormSubmit(array $form, FormStateInterface $form_state) {
+    $options = $form_state->getValue($form['#parents']);
+    $options['format'] = $options['content']['format'];
+    $options['content'] = $options['content']['value'];
+    $form_state->setValue($form['#parents'], $options);
   }
 
 }

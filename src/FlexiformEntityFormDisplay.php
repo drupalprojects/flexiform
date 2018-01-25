@@ -57,10 +57,72 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   protected $componentTypePlugins = [];
 
   /**
+   * Get the regions needed to create the overview form.
+   *
+   * I don't understand why in core these two methods are on the form_object
+   * rather than the EntityFormDisplay object itself. I have put them here
+   * so that it's easier to get access to the correct regions.
+   *
+   * @see \Drupal\field_ui\Form\EntityDisplayFormBase::getRegions()
+   *
+   * @return array
+   *   Example usage:
+   *   @code
+   *     return array(
+   *       'content' => array(
+   *         // label for the region.
+   *         'title' => $this->t('Content'),
+   *         // Indicates if the region is visible in the UI.
+   *         'invisible' => TRUE,
+   *         // A message to indicate that there is nothing to be displayed in
+   *         // the region.
+   *         'message' => $this->t('No field is displayed.'),
+   *       ),
+   *     );
+   *   @endcode
+   */
+  public function getRegions() {
+    return [
+      'content' => [
+        'title' => t('Content'),
+        'invisible' => TRUE,
+        'message' => t('No component is displayed.'),
+      ],
+      'hidden' => [
+        'title' => t('Disabled', [],
+        [
+          'context' => 'Plural',
+        ]),
+        'message' => t('No component is hidden.'),
+      ],
+    ];
+  }
+
+  /**
+   * Returns an associative array of all regions.
+   *
+   * @return array
+   *   An array containing the region options.
+   *
+   * @see \Drupal\field_ui\Form\EntityDisplayFormBase::getRegionOptions()
+   */
+  public function getRegionOptions() {
+    $options = [];
+    foreach ($this->getRegions() as $region => $data) {
+      $options[$region] = $data['title'];
+    }
+    return $options;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage, $update = TRUE) {
-    $this->setThirdPartySetting('flexiform', 'form_entities', $this->formEntities);
+    $form_entities = $this->formEntities;
+    if ($this->getTargetEntityTypeId() && !empty($form_entities[$this->baseEntityNamespace])) {
+      unset($form_entities[$this->baseEntityNamespace]);
+    }
+    $this->setThirdPartySetting('flexiform', 'form_entities', $form_entities);
     parent::preSave($storage, $update);
   }
 
@@ -265,9 +327,9 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
           'bundle' => $this->getTargetBundle(),
           'plugin' => 'provided',
           'label' => t(
-            'Base :entity_type',
+            'Base @entity_type',
             [
-              ':entity_type' => \Drupal::service('entity_type.manager')->getDefinition($this->getTargetEntityTypeId())->getLabel(),
+              '@entity_type' => \Drupal::service('entity_type.manager')->getDefinition($this->getTargetEntityTypeId())->getLabel(),
             ]
           ),
         ];

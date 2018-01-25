@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\flexiform;
+namespace Drupal\flexiform\Utility;
 
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Utility\Token as CoreToken;
