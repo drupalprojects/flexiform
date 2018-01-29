@@ -413,7 +413,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    */
   public function getFormInformation() {
     $operation = $this->get('originalMode') ?: $this->get('mode');
-    $form_object = $this->entityTypeManager()->getFormObject($this->getTargetEntityTypeId(), $operation);
+    $form_object = \Drupal::service('flexiform.manager')->getFormObject($this);
 
     $default_values = [];
     if ($bundle_key = $this->entityTypeManager()->getDefinition($this->getTargetEntityTypeId())->getKey('bundle')) {
@@ -432,4 +432,12 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
     ];
   }
 
+  /**
+   * Get the base entity namespace.
+   *
+   * @return string
+   */
+  public function getBaseEntityNamespace() {
+    return $this->baseEntityNamespace;
+  }
 }

@@ -12,6 +12,7 @@ use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\DependencyInjection\ClassResolverInterface;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\flexiform\FlexiformManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -60,6 +61,13 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
   protected $moduleHandler;
 
   /**
+   * The flexiform manager.
+   *
+   * @var \Drupal\flexiform\FlexiformManager
+   */
+  protected $flexiformManager;
+
+  /**
    * Constructs a new EntityForm.
    *
    * @param array $configuration
@@ -76,7 +84,8 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
     FormBuilderInterface $form_builder,
     ClassResolverInterface $class_resolver,
     TranslationInterface $translation,
-    ModuleHandlerInterface $module_handler
+    ModuleHandlerInterface $module_handler,
+    FlexiformManager $flexiform_manager
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_manager;
@@ -84,6 +93,7 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
     $this->classResolver = $class_resolver;
     $this->stringTranslation = $translation;
     $this->moduleHandler = $module_handler;
+    $this->flexiformManager = $flexiform_manager;
   }
 
   /**
@@ -98,7 +108,8 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
       $container->get('form_builder'),
       $container->get('class_resolver'),
       $container->get('string_translation'),
-      $container->get('module_handler')
+      $container->get('module_handler'),
+      $container->get('flexiform.manager')
     );
   }
 
@@ -113,27 +124,11 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
       return;
     }
 
-    // @todo: Consider how best to behaver here. Do we fall back to default?
-    // Or ContentEntityForm?
-    $class = $entity->getEntityType()->getFormClass($definition['form_mode']);
-    if (!$class) {
-      $class = $entity->getEntityType()->getFormClass('default');
-    }
-    if (!$class) {
-      $class = '\Drupal\Core\Entity\ContentEntityForm';
-    }
-
-    $form_object = $this->classResolver->getInstanceFromDefinition($class);
-    $form_object
-      ->setStringTranslation($this->stringTranslation)
-      ->setModuleHandler($this->moduleHandler)
-      ->setEntityTypeManager($this->entityTypeManager)
-      ->setOperation($definition['form_mode'])
-      ->setEntityManager(\Drupal::entityManager())
-      ->setEntity($entity);
-
-    $provided = [];
     $entity_form_display = EntityFormDisplay::collectRenderDisplay($entity, $definition['form_mode']);
+    $form_object = $this->flexiformManager->getFormObject($entity_form_display, [
+        $entity_form_display->getBaseEntityNamespace() => $entity,
+      ]);
+
     foreach ($entity_form_display->getFormEntityConfig() as $namespace => $configuration) {
       if ($configuration['plugin'] == 'provided' && ($provided_entity = $this->getContextValue($namespace))) {
         $provided[$namespace] = $provided_entity;

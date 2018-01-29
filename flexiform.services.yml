@@ -1,4 +1,7 @@
 services:
+  flexiform.manager:
+    class: Drupal\flexiform\FlexiformManager
+    arguments: ['@entity_type.manager', '@class_resolver', '@string_translation', '@module_handler']
   flexiform.subscriber:
     class: Drupal\flexiform\Routing\RouteSubscriber
     arguments: ['@entity_type.manager', '@plugin.manager.flexiform.form_component_type']
