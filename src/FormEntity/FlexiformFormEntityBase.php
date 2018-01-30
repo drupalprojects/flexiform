@@ -127,13 +127,21 @@ abstract class FlexiformFormEntityBase extends ContextAwarePluginBase implements
    * Save the entity.
    */
   public function saveEntity(EntityInterface $entity) {
-    $entity->save();
+    if (!isset($this->configuration['save_on_submit']) || $this->configuration['save_on_submit']) {
+      $entity->save();
+    }
   }
 
   /**
    * Prepare a configuration form.
    */
   public function configurationForm(array $form, FormStateInterface $form_state) {
+    $form['save_on_submit'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Save this Entity when the form is submitted.'),
+      '#default_value' => isset($this->configuration['save_on_submit']) ? $this->configuration['save_on_submit'] : TRUE,
+    ];
+
     $form['context_mapping'] = [
       '#type' => 'container',
       '#tree' => TRUE,
