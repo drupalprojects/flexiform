@@ -26,4 +26,4 @@ services:
     parent: default_plugin_manager
   plugin.manager.flexiform.form_element:
     class: Drupal\flexiform\FormElementPluginManager
-    parent: default_plugins_manager
+    parent: default_plugin_manager
