@@ -5,9 +5,12 @@ namespace Drupal\flexiform\Plugin\FormEnhancer;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Url;
 use Drupal\flexiform\FormEnhancer\ConfigurableFormEnhancerBase;
 use Drupal\flexiform\FormEnhancer\SubmitButtonFormEnhancerTrait;
+use Drupal\flexiform\Utility\Token;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * FormEnhancer for altering the redirects of submit buttons.
@@ -17,9 +20,16 @@ use Drupal\flexiform\FormEnhancer\SubmitButtonFormEnhancerTrait;
  *   label = @Translation("Button Redirects"),
  * );
  */
-class SubmitButtonRedirect extends ConfigurableFormEnhancerBase {
+class SubmitButtonRedirect extends ConfigurableFormEnhancerBase implements ContainerFactoryPluginInterface {
   use SubmitButtonFormEnhancerTrait;
   use StringTranslationTrait;
+
+  /**
+   * Token Service.
+   *
+   * @var \Drupal\flexiform\Utility\Token
+   */
+  protected $token;
 
   /**
    * {@inheritdoc}
@@ -27,6 +37,26 @@ class SubmitButtonRedirect extends ConfigurableFormEnhancerBase {
   protected $supportedEvents = [
     'process_form',
   ];
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('flexiform.token')
+    );
+  }
+
+  /**
+   * Construct a new SubmitButtonRedirect object.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, Token $token) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->token = $token;
+  }
 
   /**
    * {@inheritdoc}
@@ -77,6 +107,21 @@ class SubmitButtonRedirect extends ConfigurableFormEnhancerBase {
   public function formSubmitRedirect($form, FormStateInterface $form_state) {
     $element = $form_state->getTriggeringElement();
 
+    $token_data = $token_options = [];
+    $token_info = $this->token->getInfo();
+    foreach ($this->formDisplay->getFormEntityManager()->getFormEntities() as $namespace => $form_entity) {
+      $entity = $form_entity->getFormEntityContext()->getContextValue();
+      if ($namespace == '') {
+        $namespace = 'base_entity';
+      }
+
+      $token_type = $entity->getEntityType()->get('token_type') ?: (!empty($token_info['types'][$entity->getEntityTypeId()]) ? $entity->getEntityTypeId() : FALSE);
+      if ($token_type) {
+        $token_data[$namespace] = $form_entity->getFormEntityContext()->getContextValue();
+        $token_options['alias'][$namespace] = $token_type;
+      }
+    }
+
     if (!empty($element['#submit_redirect'])) {
       // @todo: Support tokens.
       // @todo: Support all the different schemes.
@@ -84,6 +129,7 @@ class SubmitButtonRedirect extends ConfigurableFormEnhancerBase {
       if (!in_array($path[0], ['/', '?', '#'])) {
         $path = '/'.$path;
       }
+      $path = $this->token->replace($path, $token_data, $token_options);
 
       $form_state->setRedirectUrl(Url::fromUserInput($path));
     }
