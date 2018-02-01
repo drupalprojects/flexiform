@@ -64,6 +64,7 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
           '#type' => 'details',
           '#title' => $enhancer->getPluginDefinition()['label'],
           '#parents' => ['enhancer', $enhancer_name],
+          '#array_parents' => ['enhancer_'.$enhancer_name],
           '#group' => 'enhancer',
           '#tree' => TRUE,
         ];
@@ -119,7 +120,7 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
 
     // Loop over the enhancers and let them set their configuration internally
     // this then gets saved in the presave of the FormDisplay entity.
-    foreach ($this->entity->getFormEnhancers() as $enhancer_name => $enhancer) {
+    foreach ($entity->getFormEnhancers() as $enhancer_name => $enhancer) {
       if ($enhancer instanceof ConfigurableFormEnhancerInterface) {
         $enhancer->configurationFormSubmit($form['enhancer_'.$enhancer_name], $form_state);
       }

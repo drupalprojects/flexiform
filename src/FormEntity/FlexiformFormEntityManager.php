@@ -71,7 +71,7 @@ class FlexiformFormEntityManager {
   public function getContextDefinitions() {
     $context_definitions = [];
     foreach ($this->formEntities as $namespace => $form_entity) {
-      $context_definitions[$namespace] = $form_entity->getContextDefinition();
+      $context_definitions[$namespace] = $form_entity->getFormEntityContextDefinition();
     }
     return $context_definitions;
   }

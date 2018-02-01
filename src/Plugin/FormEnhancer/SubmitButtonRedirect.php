@@ -92,7 +92,7 @@ class SubmitButtonRedirect extends ConfigurableFormEnhancerBase implements Conta
       $button = &NestedArray::getValue($element, $array_parents, $exists);
       if ($exists) {
         if (empty($button['#submit'])) {
-          $buttons['#submit'] = !empty($form['#submit']) ? $form['#submit'] : [];
+          $button['#submit'] = !empty($form['#submit']) ? $form['#submit'] : [];
         }
         $button['#submit'][] = [$this, 'formSubmitRedirect'];
         $button['#submit_redirect'] = $redirect;
