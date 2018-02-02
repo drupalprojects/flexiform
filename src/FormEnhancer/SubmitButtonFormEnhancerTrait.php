@@ -33,7 +33,7 @@ trait SubmitButtonFormEnhancerTrait {
         continue;
       }
 
-      if ($elements[$key]['#type'] == 'submit') {
+      if (isset($elements[$key]['#type']) && ($elements[$key]['#type'] == 'submit')) {
         $buttons[implode('][', $elements[$key]['#array_parents'])] = $elements[$key]['#value'];
       }
 

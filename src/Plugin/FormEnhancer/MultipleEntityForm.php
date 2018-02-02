@@ -107,7 +107,7 @@ class MultipleEntityForm extends ConfigurableFormEnhancerBase {
    * @return array
    */
   public function initFormEntityConfig() {
-    return $this->configuration['entities'] ?: [];
+    return !empty($this->configuration['entities']) ? $this->configuration['entities'] : [];
   }
 
   /**

@@ -125,7 +125,7 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
    */
   protected function getFieldDefinition($component_name) {
     $defs = $this->getFieldDefinitions();
-    return $defs[$component_name];
+    return !empty($defs[$component_name]) ? $defs[$component_name] : NULL;
   }
 
   /**

@@ -102,40 +102,42 @@ class SubmitButtonRules extends ConfigurableFormEnhancerBase implements Containe
       ];
 
       $max_weight = 0;
-      foreach ($this->configuration[$path]['rules'] as $rule_name => $info) {
-        $rule = $this->rulesStorage()->load($rule_name);
-        if (!$rule) {
-          continue;
-        }
+      if (!empty($this->configuration[$path]['rules'])) {
+        foreach ($this->configuration[$path]['rules'] as $rule_name => $info) {
+          $rule = $this->rulesStorage()->load($rule_name);
+          if (!$rule) {
+            continue;
+          }
 
-        $form[$path]['rules'][$rule_name] = [
-          '#attributes' => [
-            'class' => [ 'draggable' ],
-          ],
-          '#weight' => $info['weight'],
-          'rule' => $rule->toLink($rule->label(), 'edit-form')->toRenderable(),
-          'weight' => [
-            '#type' => 'weight',
-            '#title' => $this->t('Execution Order for @title', ['@title' => $rule->label()]),
-            '#title_display' => 'invisible',
-            '#default_value' => $info['weight'],
-            '#attributes' => [ 'class' => [ 'rule-weight' ] ],
-          ],
-          'operations' => [
-            '#type' => 'container',
-            'remove' => [
-              '#type' => 'submit',
-              '#value' => $this->t('Remove @title', ['@title' => $rule->label()]),
-              '#submit' => [
-                [$this, 'configurationFormSubmitRemoveRule'],
-              ],
-              '#submit_path' => $path,
-              '#rule_name' => $rule->id(),
+          $form[$path]['rules'][$rule_name] = [
+            '#attributes' => [
+              'class' => [ 'draggable' ],
             ],
-          ],
-        ];
+            '#weight' => $info['weight'],
+            'rule' => $rule->toLink($rule->label(), 'edit-form')->toRenderable(),
+            'weight' => [
+              '#type' => 'weight',
+              '#title' => $this->t('Execution Order for @title', ['@title' => $rule->label()]),
+              '#title_display' => 'invisible',
+              '#default_value' => $info['weight'],
+              '#attributes' => [ 'class' => [ 'rule-weight' ] ],
+            ],
+            'operations' => [
+              '#type' => 'container',
+              'remove' => [
+                '#type' => 'submit',
+                '#value' => $this->t('Remove @title', ['@title' => $rule->label()]),
+                '#submit' => [
+                  [$this, 'configurationFormSubmitRemoveRule'],
+                ],
+                '#submit_path' => $path,
+                '#rule_name' => $rule->id(),
+              ],
+            ],
+          ];
 
-        $max_weight = ($max_weight > $info['weight']) ? $max_weight : $info['weight'];
+          $max_weight = ($max_weight > $info['weight']) ? $max_weight : $info['weight'];
+        }
       }
 
       $parents = $form['#parents'];

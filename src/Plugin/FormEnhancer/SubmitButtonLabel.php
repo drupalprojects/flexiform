@@ -7,6 +7,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\flexiform\FormEnhancer\ConfigurableFormEnhancerBase;
+use Drupal\flexiform\FormEnhancer\SubmitButtonFormEnhancerTrait;
 
 /**
  * FormEnhancer for altering the labels of submit buttons.
@@ -17,6 +18,7 @@ use Drupal\flexiform\FormEnhancer\ConfigurableFormEnhancerBase;
  * );
  */
 class SubmitButtonLabel extends ConfigurableFormEnhancerBase {
+  use SubmitButtonFormEnhancerTrait;
   use StringTranslationTrait;
 
   /**
@@ -65,35 +67,6 @@ class SubmitButtonLabel extends ConfigurableFormEnhancerBase {
       }
     }
     return $element;
-  }
-
-  /**
-   * Locate any submit buttons in the form.
-   *
-   * @return array
-   */
-  protected function locateSubmitButtons() {
-    $form_info = $this->formDisplay->getFormInformation();
-    return $this->locateSubmitButtonsR($form_info['form']);
-  }
-
-  /**
-   * Locate the submit buttons recursively.
-   */
-  private function locateSubmitButtonsR($elements, $depth = 0) {
-    $buttons = [];
-    foreach (Element::children($elements) as $key) {
-      if (($depth == 0) && $this->formDisplay->getComponent($key)) {
-        continue;
-      }
-
-      if ($elements[$key]['#type'] == 'submit') {
-        $buttons[implode('][', $elements[$key]['#array_parents'])] = $elements[$key]['#value'];
-      }
-
-      $buttons += $this->locateSubmitButtonsR($elements[$key], $depth + 1);
-    }
-    return $buttons;
   }
 
 }
