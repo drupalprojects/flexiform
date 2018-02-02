@@ -5,6 +5,8 @@
  * Allow multiple entities to be used in an entity form display.
  */
 
+use Drupal\Core\Form\FormStateInterface;
+
 /**
  * Implements hook_hook_info().
  */
@@ -22,4 +24,51 @@ function flexiform_entity_type_build(array &$entity_types) {
   $entity_form_display_type = $entity_types['entity_form_display'];
   $entity_form_display_type->setClass('Drupal\flexiform\FlexiformEntityFormDisplay');
   $entity_form_display_type->setFormClass('edit', 'Drupal\flexiform\Form\FlexiformEntityFormDisplayEditForm');
+}
+
+/**
+ * Implements hook_element_info_alter()
+ */
+function flexiform_element_info_alter(array &$types) {
+  foreach ($types as &$type) {
+    $method = 'processAjaxForm';
+    $has_method = FALSE;
+
+    if (!empty($type['#process'])) {
+      foreach ($type['#process'] as $process) {
+        if ($process[1] == $method) {
+          $has_method = TRUE;
+          break;
+        }
+      }
+
+      if ($has_method) {
+        $type['#process'][] = 'flexiform_ajax_form_process';
+      }
+    }
+  }
+}
+
+/**
+ * Ajax element process to add our library to any element that accepts ajax
+ * commands.
+ */
+function flexiform_ajax_form_process(&$element, FormStateInterface $form_state, &$complete_form) {
+  if (isset($element['#flexiform_ajax_processed'])) {
+    return $element;
+  }
+
+  // Initialize #flexiform_ajax_processed, so we do not process this element again.
+  $element['#flexiform_ajax_processed'] = FALSE;
+
+  // Nothing to do if there are no Ajax settings.
+  if (empty($element['#ajax'])) {
+    return $element;
+  }
+
+  if (isset($element['#ajax']['event'])) {
+    $element['#attached']['library'][] = 'flexiform/flexiform.ajax';
+  }
+
+  return $element;
 }

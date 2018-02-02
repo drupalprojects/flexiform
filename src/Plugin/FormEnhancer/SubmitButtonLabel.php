@@ -57,9 +57,11 @@ class SubmitButtonLabel extends ConfigurableFormEnhancerBase {
   public function processForm($element, FormStateInterface $form_state, $form) {
     foreach (array_filter($this->configuration) as $key => $label) {
       $array_parents = explode('::', $key);
-      $button = &NestedArray::getValue($element, $array_parents, $exists);
+      $button = [];
+      $button = NestedArray::getValue($element, $array_parents, $exists);
       if ($exists) {
         $button['#value'] = $label;
+        NestedArray::setValue($element, $array_parents, $button);
       }
     }
     return $element;
