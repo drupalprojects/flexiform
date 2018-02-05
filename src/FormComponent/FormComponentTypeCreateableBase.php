@@ -15,6 +15,12 @@ abstract class FormComponentTypeCreateableBase extends FormComponentTypeBase imp
   /**
    * {@inheritdoc}
    */
+  public function addComponentForm(array $form, FormStateInterface $form_state) {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function addComponentFormValidate(array $form, FormStateInterface $form_state) {}
 
   /**

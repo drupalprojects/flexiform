@@ -211,7 +211,7 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
         '#title' => t('Plugin for @title', array('@title' => $label)),
         '#title_display' => 'invisible',
         '#options' => $this->getApplicableRendererPluginOptions($component_name),
-        '#default_value' => $display_options ? $display_options['type'] : 'hidden',
+        '#default_value' => $display_options ? (!empty($display_options['type']) ? $display_options['type'] : $this->getDefaultRendererPlugin($component_name)) : 'hidden',
         '#parents' => array('fields', $component_name, 'type'),
         '#attributes' => array('class' => array('field-plugin-type')),
       ),
@@ -229,13 +229,16 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
       '#field_name' => $component_name,
     );
 
+    $settings_form_base = [
+      '#parents' => ['fields', $component_name, 'settings_edit_form'],
+    ];
     if ($form_state->get('plugin_settings_edit') == $component_name) {
       // We are currently editing this field's plugin settings. Display the
       // settings form and submit buttons.
       $row['plugin']['settings_edit_form'] = array();
 
       // Generate the settings form and allow other modules to alter it.
-      if ($settings_form = $component->settingsForm($form, $form_state)) {
+      if ($settings_form = $component->settingsForm($settings_form_base, $form_state)) {
         $row['plugin']['#cell_attributes'] = ['colspan' => 3];
         $row['plugin']['settings_edit_form'] = $settings_form + [
           '#type' => 'container',
@@ -285,7 +288,7 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
       }
 
       // Check selected plugin settings to display edit link or not.
-      $settings_form = $component->settingsForm($form, $form_state);
+      $settings_form = $component->settingsForm($settings_form_base, $form_state);
       if (!empty($settings_form)) {
         $row['settings_edit'] = $base_button + array(
           '#type' => 'image_button',

@@ -35,12 +35,6 @@ class CustomTextComponentType extends FormComponentTypeCreateableBase {
    * {@inheritdoc}
    */
   public function addComponentForm(array $form, FormStateInterface $form_state) {
-    $form['admin_label'] = [
-      '#title' => t('Admin Label'),
-      '#description' => t('Only shown on administrative pages'),
-      '#type' => 'textfield',
-      '#required' => TRUE,
-    ];
     $form['content'] = [
       '#title' => t('Content'),
       '#type' => 'text_format',

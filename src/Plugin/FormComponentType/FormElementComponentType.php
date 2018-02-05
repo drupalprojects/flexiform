@@ -2,10 +2,15 @@
 
 namespace Drupal\flexiform\Plugin\FormComponentType;
 
-use Drupal\Component\Utitility\NestedArray;
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Plugin\ContextAwarePluginAssignmentTrait;
+use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\field_ui\Form\EntityDisplayFormBase;
 use Drupal\flexiform\FormComponent\FormComponentTypeCreateableBase;
+use Drupal\flexiform\FormElementPluginManager;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin for field widget component types.
@@ -16,7 +21,41 @@ use Drupal\flexiform\FormComponent\FormComponentTypeCreateableBase;
  *   component_class = "Drupal\flexiform\Plugin\FormComponentType\FormElementComponent",
  * )
  */
-class FormElementComponentType extends FormComponentTypeCreateableBase {
+class FormElementComponentType extends FormComponentTypeCreateableBase implements ContainerFactoryPluginInterface {
+  use ContextAwarePluginAssignmentTrait;
+
+  /**
+   * The form element plugin manager.
+   *
+   * @var \Drupal\flexiform\FormElementPluginManager
+   */
+  protected $pluginManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('plugin.manager.flexiform.form_element')
+    );
+  }
+
+  /**
+   * Construct a new form element component type object.
+   *
+   * @param array $configuration
+   * @param $plugin_id
+   * @param $plugin_definition
+   * @param \Drupal\flexiform\FormElementPluginManager $plugin_manager
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, FormElementPluginManager $plugin_manager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+
+    $this->pluginManager = $plugin_manager;
+  }
 
   /**
    * {@inheritdoc}
@@ -40,32 +79,39 @@ class FormElementComponentType extends FormComponentTypeCreateableBase {
     $parents = $form['#parents'];
     $parents[] = 'form_element';
 
+    $available_plugins = $this->pluginManager->getDefinitionsForContexts($this->getFormEntityManager()->getContexts());
+
+    $form['#prefix'] = '<div id="flexiform-form-element-add-wrapper">';
+    $form['#suffix'] = '</div>';
+
+    $plugin_options = [];
+    foreach ($available_plugins as $plugin_id => $plugin_definition) {
+      if (empty($plugin_definition['no_ui'])) {
+        $plugin_options[$plugin_id] = $plugin_definition['label'];
+      }
+    }
+    $form['form_element'] = [
+      '#type' => 'select',
+      '#required'=> TRUE,
+      '#options' => $plugin_options,
+      '#title' => $this->t('Form Element'),
+      '#ajax' => [
+        'callback' => [$this, 'ajaxFormElementSelect'],
+        'wrapper' => 'flexiform-form-element-add-wrapper',
+      ],
+    ];
+
     if ($plugin_id = NestedArray::getValue($form_state->getUserInput(), $parents)) {
       $plugin = $this->pluginManager->createInstance($plugin_id);
-      $form = $plugin->settingsForm($form, $form_state);
-    }
-    else {
-      $available_plugins = $this->pluginManager->getDefinitionsForContexts($this->getFormEntityManager()->getContexts());
 
-      $form['#prefix'] = '<div id="flexiform-form-element-add-wrapper">';
-      $form['#suffix'] = '</div>';
-
-      $plugin_options = [];
-      foreach ($available_plugins as $plugin_id => $plugin_definition) {
-        if (empty($plugin_definition['no_ui'])) {
-          $plugin_options[$plugin_id] = $plugin_definition['label'];
-        }
+      if ($plugin instanceof ContextAwarePluginInterface) {
+        $contexts = $this->getFormEntityManager()->getContexts();
+        $form['context_mapping'] = [
+          '#parents' => ['settings', 'context_mapping'],
+        ] + $this->addContextAssignmentElement($plugin, $contexts);
       }
-      $form['form_element'] = [
-        '#type' => 'select',
-        '#required'=> TRUE,
-        '#options' => $plugin_optiosn,
-        '#title' => $this->t('Form Element'),
-        '#ajax' => [
-          'callback' => [$this, 'ajaxFormElementSelect'],
-          'wrapper' => 'flexiform-form-element-add-wrapper',
-        ],
-      ];
+
+      $form += $plugin->settingsForm($form, $form_state);
     }
 
     return $form;
@@ -75,6 +121,17 @@ class FormElementComponentType extends FormComponentTypeCreateableBase {
    * {@inheritdoc}
    */
   public function addComponentFormSubmit(array $form, FormStateInterface $form_state) {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function ajaxFormElementSelect(array $form, FormStateInterface $form_state) {
+    $element = $form_state->getTriggeringElement();
+    $array_parents = $element['#array_parents'];
+    array_pop($array_parents);
+
+    return NestedArray::getValue($form, $array_parents);
   }
 
 }

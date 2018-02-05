@@ -205,7 +205,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
     $this->getFormEntityManager($provided);
 
     // Set #parents to 'top-level' by default.
-    $form += array('#parents' => array());
+    $form += array('#parents' => [], '#array_parents' => []);
     $original_parents = $form['#parents'];
 
     // Let each widget generate the form elements.

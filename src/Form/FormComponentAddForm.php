@@ -81,11 +81,17 @@ class FormComponentAddForm extends FormBase {
     $this->componentType = $this->pluginManager->createInstance($component_type);
     $this->componentType->setFormDisplay($form_display);
 
+    $form['admin_label'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Administration Label'),
+      '#description' => $this->t('A label for this component. This will only be used administrativly'),
+    ];
     $form['name'] = [
       '#type' => 'machine_name',
       '#title' => $this->t('Component Name'),
       '#description' => $this->t('The name of this component. This must be unique in the form.'),
       '#machine_name' => [
+        'source' => ['admin_label'],
         'exists' => [$this, 'nameExists'],
       ],
     ];
@@ -130,6 +136,7 @@ class FormComponentAddForm extends FormBase {
     $options = [
       'component_type' => $this->componentType->getPluginId(),
       'region' => $form_state->getValue('region'),
+      'admin_label' => $form_state->getValue('admin_label'),
     ];
     $this->componentType->addComponentFormSubmit($form['options'], $form_state);
     if ($plugin_options = $form_state->getValue('options')) {

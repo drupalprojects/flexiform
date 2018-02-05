@@ -97,12 +97,13 @@ abstract class FormComponentBase implements FormComponentInterface {
   public function settingsForm(array $form, FormStateInterface $form_state) {
     $settings_form['settings'] = [
       '#type' => 'container',
-      'label' => [
+      'admin_label' => [
         '#type' => 'textfield',
-        '#title' => t('Label'),
-        '#default_value' => $this->options['label'],
+        '#title' => t('Admin Label'),
+        '#default_value' => $this->options['admin_label'],
       ],
     ];
+
     return $settings_form;
   }
 
