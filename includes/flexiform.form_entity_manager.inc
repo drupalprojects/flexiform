@@ -331,9 +331,9 @@ class FlexiformFormEntityManagerDefault implements FlexiformFormEntityManagerInt
         continue;
       }
 
-      if ($handler = $this->getEntityHandler($namespace)) {
+      if (($handler = $this->getEntityHandler($namespace)) && ($entity = $this->getEntity($namespace))) {
         $this->executeCallbacks('preSave', $namespace);
-        $handler->saveEntity($this->getEntity($namespace));
+        $handler->saveEntity($entity);
         $this->executeCallbacks('postSave', $namespace);
       }
     }
