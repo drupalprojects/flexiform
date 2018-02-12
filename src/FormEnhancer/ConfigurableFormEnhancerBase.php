@@ -25,4 +25,16 @@ abstract class ConfigurableFormEnhancerBase extends FormEnhancerBase implements 
   public function getConfiguration() {
     return $this->configuration;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function applies($event) {
+    if ($event == 'configuration_form') {
+      return TRUE;
+    }
+    else {
+      return parent::applies($event);
+    }
+  }
 }

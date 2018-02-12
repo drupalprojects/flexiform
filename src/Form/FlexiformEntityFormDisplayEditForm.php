@@ -58,7 +58,7 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
     $form['enhancer'] = [
       '#type' => 'vertical_tabs',
     ];
-    foreach ($this->entity->getFormEnhancers() as $enhancer_name => $enhancer) {
+    foreach ($this->entity->getFormEnhancers('configuration_form') as $enhancer_name => $enhancer) {
       if ($enhancer instanceof ConfigurableFormEnhancerInterface) {
         $form['enhancer_'.$enhancer_name] = [
           '#type' => 'details',
@@ -72,7 +72,9 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
       }
     }
 
-    $form['modes']['#weight'] = 90;
+    if (!empty($form['modes'])) {
+      $form['modes']['#weight'] = 90;
+    }
 
     return $form;
   }
@@ -120,7 +122,7 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
 
     // Loop over the enhancers and let them set their configuration internally
     // this then gets saved in the presave of the FormDisplay entity.
-    foreach ($entity->getFormEnhancers() as $enhancer_name => $enhancer) {
+    foreach ($entity->getFormEnhancers('configuration_form') as $enhancer_name => $enhancer) {
       if ($enhancer instanceof ConfigurableFormEnhancerInterface) {
         $enhancer->configurationFormSubmit($form['enhancer_'.$enhancer_name], $form_state);
       }

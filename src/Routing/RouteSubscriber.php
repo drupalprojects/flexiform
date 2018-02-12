@@ -38,6 +38,12 @@ class RouteSubscriber extends FieldUIRouteSubscriber {
    * {@inheritdoc}
    */
   protected function alterRoutes(RouteCollection $collection) {
+    // Exposed form routes.
+    foreach ($this->entityTypeManager->getStorage('entity_form_mode')->loadMultiple() as $form_mode) {
+      $options = [];
+    }
+
+    // Admin UI Routes.
     foreach ($this->entityTypeManager->getDefinitions() as $entity_type_id => $entity_type) {
       if ($route_name = $entity_type->get('field_ui_base_route')) {
         // Try to get the route from the current collection.
