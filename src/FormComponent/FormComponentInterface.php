@@ -23,6 +23,7 @@ interface FormComponentInterface {
    * Extract the form values.
    *
    * @param array $form
+   *   The section of the form corresponding to this component.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    */
   public function extractFormValues(array $form, FormStateInterface $form_state);

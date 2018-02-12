@@ -163,11 +163,14 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
    */
   public function extractFormValues(array $form, FormStateInterface $form_state) {
     $original_parents = $form['#parents'];
+    array_pop($original_parents);
+    $form = [
+      '#parents' => $original_parents,
+      $this->name => $form,
+    ];
 
     if (strpos($this->name, ':')) {
       list($namespace, $field_name) = explode(':', $this->name, 2);
-
-      $form['#parents'][] = $namespace;
     }
     else {
       $namespace = '';
@@ -182,8 +185,6 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
         $widget->extractFormValues($items, $form, $form_state);
       }
     }
-
-    $form['#parents'] = $original_parents;
   }
 
   /**

@@ -15,6 +15,8 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\FormState;
+use Drupal\flexiform\FormComponent\FormComponentWithSubmitInterface;
+use Drupal\flexiform\FormComponent\FormComponentWithValidateInterface;
 use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 use Drupal\flexiform\FormEnhancer\ConfigurableFormEnhancerInterface;
 
@@ -244,8 +246,6 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
 
   /**
    * {@inheritdoc}
-   *
-   * @todo: Work with component types.
    */
   public function extractFormValues(FieldableEntityInterface $entity, array &$form, FormStateInterface $form_state) {
     // Make sure the form entity manager is appropriately constructed.
@@ -253,13 +253,39 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
     $this->getFormEntityManager($this->getProvidedEntities($form_state, $entity));
 
     foreach ($this->getComponents() as $name => $options) {
-      if ($component = $this->getComponentPlugin($name, $options)) {
-        $component->extractFormValues($form, $form_state);
+      if (($component = $this->getComponentPlugin($name, $options)) && !empty($form[$name])) {
+        $component->extractFormValues($form[$name], $form_state);
         $extracted[$name] = $name;
       }
     }
 
     return $extracted;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function formValidateComponents(array $form, FormStateInterface $form_state) {
+    foreach ($this->getComponents() as $name => $options) {
+      if ($component = $this->getComponentPlugin($name, $options)) {
+        if ($component instanceof FormComponentWithValidateInterface) {
+          $component->formValidate($form[$name], $form_state);
+        }
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function formSubmitComponents(array $form, FormStateInterface $form_state) {
+    foreach ($this->getComponents() as $name => $options) {
+      if ($component = $this->getComponentPlugin($name, $options)) {
+        if ($component instanceof FormComponentWithSubmitInterface) {
+          $component->formSubmit($form[$name], $form_state);
+        }
+      }
+    }
   }
 
   /**
@@ -285,13 +311,28 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
     if (isset($element['#type']) && $element['#type'] == 'submit') {
       if (!empty($element['#submit']) && in_array('::save', $element['#submit'])) {
         $new_submit = [];
+
+        // Add extra submit handlers to all buttons on the form.
+        // This includes adding a formSubmitComponents callback to allow
+        // components to have their own submission logic. This applies
+        // BEFORE the entities are saved.
+        // Also add the 'saveFormEntities' callback immediatly after the
+        // standard '::save'
         foreach ($element['#submit'] as $callback) {
+          if ($callback == '::save') {
+            $new_submit[] = [$form_display, 'formSubmitComponents'];
+          }
           $new_submit[] = $callback;
           if ($callback == '::save') {
             $new_submit[] = [$form_display, 'saveFormEntities'];
           }
         }
-        $element['#submit'] = $new_submit;
+      }
+
+      if (!empty($element['#validate'])) {
+        // Add extra validate handler to all buttons on the form.
+        // This allows form components to have their own validation logic.
+        $element['#validate'][] = [$form_display, 'formValidateComponents'];
       }
     }
     else {

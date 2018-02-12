@@ -41,4 +41,22 @@ trait FormElementBaseTrait {
     return [];
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function formValidate(array $form, FormStateInterface $form_state) {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function formSubmit(array $form, FormStateInterface $form_state) {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildEntities(array $form, FormStateInterface $form_state) {
+  }
+
 }

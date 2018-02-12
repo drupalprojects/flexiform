@@ -74,7 +74,7 @@ class AccountInfo extends ContextAwareFormElementBase {
           '#description' => $this->t('Required if you want to change the %mail or %pass below. <a href=":request_new_url" title="Send password reset instructions via email.">Reset your password</a>.', [
             '%mail' => $form['mail']['#title'],
             '%pass' => $this->t('Password'),
-            ':request_new_url' => Url::fromRoute('user.pass'),
+            ':request_new_url' => Url::fromRoute('user.pass')->toString(),
           ]),
         ];
       }
@@ -83,12 +83,31 @@ class AccountInfo extends ContextAwareFormElementBase {
       $form['pass'] = [
         '#type' => 'password_confirm',
         '#size' => 25,
-        '#description' => $this->t('Provide a password fo the new account in both fields.'),
+        '#description' => $this->t('Provide a password for the new account in both fields.'),
         '#required' => TRUE,
       ];
     }
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildEntities(array $form, FormStateInterface $form_state) {
+    /** @var \Drupal\user\UserInterface $account */
+    $account = $this->getContext('account')->getContextValue();
+    $element_values = $form_state->getValue($form['#parents']);
+
+    // Set the existing password of set in form state.
+    $current_pass = trim($element_values['current_pass']);
+    if (strlen($current_pass) > 0) {
+      $account->setExistingPassword($current_pass);
+    }
+
+    $account->pass->value = $element_values['pass'];
+    $account->name->value = $element_values['name'];
+    $account->mail->value = $element_values['mail'];
   }
 
 }

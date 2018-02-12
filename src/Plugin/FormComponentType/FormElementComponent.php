@@ -17,13 +17,15 @@ use Drupal\field_ui\Form\EntityDisplayFormBase;
 use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 use Drupal\flexiform\FlexiformEntityFormDisplay;
 use Drupal\flexiform\FormComponent\FormComponentBase;
+use Drupal\flexiform\FormComponent\FormComponentWithValidateInterface;
+use Drupal\flexiform\FormComponent\FormComponentWithSubmitInterface;
 use Drupal\flexiform\FormComponent\ContainerFactoryFormComponentInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Component class for field widgets.
  */
-class FormElementComponent extends FormComponentBase implements ContainerFactoryFormComponentInterface {
+class FormElementComponent extends FormComponentBase implements ContainerFactoryFormComponentInterface, FormComponentWithSubmitInterface, FormComponentWithValidateInterface {
   use ContextAwarePluginAssignmentTrait;
   use StringTranslationTrait;
 
@@ -103,7 +105,21 @@ class FormElementComponent extends FormComponentBase implements ContainerFactory
    * {@inheritdoc}
    */
   public function extractFormValues(array $form, FormStateInterface $form_state) {
-    // No form values to extract.
+    $this->getPlugin()->buildEntities($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function formValidate(array $form, FormStateInterface $form_state) {
+    $this->getPlugin()->formValidate($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function formSubmit(array $form, FormStateInterface $form_state) {
+    $this->getPlugin()->formSubmit($form, $form_state);
   }
 
   /**

@@ -7,6 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\ContextAwarePluginAssignmentTrait;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
+use Drupal\Core\Render\Element;
 use Drupal\field_ui\Form\EntityDisplayFormBase;
 use Drupal\flexiform\FormComponent\FormComponentTypeCreateableBase;
 use Drupal\flexiform\FormElementPluginManager;
@@ -107,8 +108,12 @@ class FormElementComponentType extends FormComponentTypeCreateableBase implement
       if ($plugin instanceof ContextAwarePluginInterface) {
         $contexts = $this->getFormEntityManager()->getContexts();
         $form['context_mapping'] = [
-          '#parents' => ['settings', 'context_mapping'],
+          '#parents' => ['options', 'settings', 'context_mapping'],
         ] + $this->addContextAssignmentElement($plugin, $contexts);
+
+        foreach (Element::children($form['context_mapping']) as $mapping_key) {
+          $form['context_mapping'][$mapping_key]['#empty_option'] = $this->t('- Select -');
+        }
       }
 
       $form += $plugin->settingsForm($form, $form_state);
