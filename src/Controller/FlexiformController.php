@@ -2,12 +2,14 @@
 
 namespace Drupal\flexiform\Controller;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\Entity\EntityFormMode;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Routing\RouteMatch;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\flexiform\Utility\Token;
 use Drupal\flexiform\FlexiformManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -65,16 +67,11 @@ class FlexiformController extends ControllerBase {
    * Flexiform form mode page.
    */
   public function formModePage(EntityFormMode $form_mode, Request $request) {
-    $route_match = RouteMatch::createFromRequest($request);
-    $settings = $form_mode->getThirdPartySettings('flexiform', 'exposure');
+    $provided = $this->getProvidedEntities($form_mode, $request);
+    $entity = $provided['base_entity'];
+    unset($provided['base_entity']);
 
-    $entity = $route_match->getParameter('base_entity');
-    $provided = [];
-    foreach ($settings['parameters'] as $namespace => $info) {
-      if ($provided_entity = $route_match->getParameter($namespace)) {
-        $provided[$namespace] = $provided_entity;
-      }
-    }
+    $settings = $form_mode->getThirdPartySetting('flexiform', 'exposure');
 
     list($entity_type_id, $display_mode_name) = explode('.', $form_mode->id(), 2);
     $entity_form_display = EntityFormDisplay::collectRenderDisplay($entity, $display_mode_name);
@@ -91,8 +88,41 @@ class FlexiformController extends ControllerBase {
    * Flexiform form mode title callback.
    */
   public function formModePageTitle(EntityFormMode $form_mode, Request $request) {
-    $settings = $form_mode->getThirdPartySettings('flexiform', 'exposure');
-    // @todo: Tokenize.
-    return $settings['title'];
+    $settings = $form_mode->getThirdPartySetting('flexiform', 'exposure');
+    $entities = $this->getProvidedEntities($form_mode, $request);
+
+    // @todo: Move this process somewhere better.
+    $token_data = $token_options = [];
+    $token_info = $this->token->getInfo();
+    foreach ($entities as $namespace => $entity) {
+      $token_type = $entity->getEntityType()->get('token_type') ?: (!empty($token_info['types'][$entity->getEntityTypeId()]) ? $entity->getEntityTypeId() : FALSE);
+      if ($token_type) {
+        $token_data[$namespace] = $entity;
+        $token_options['alias'][$namespace] = $token_type;
+      }
+    }
+
+    return $this->token->replace($settings['title'], $token_data, $token_options);
+  }
+
+  /**
+   * Get the provided entities.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface[]
+   *   An array of provided entities keyed by machine name.
+   */
+  protected function getProvidedEntities(EntityFormMode $form_mode, Request $request) {
+    $route_match = RouteMatch::createFromRequest($request);
+    $settings = $form_mode->getThirdPartySetting('flexiform', 'exposure');
+
+    $provided = [];
+    $provided['base_entity'] = $route_match->getParameter('base_entity');
+    foreach ($settings['parameters'] as $namespace => $info) {
+      if ($provided_entity = $route_match->getParameter($namespace)) {
+        $provided[$namespace] = $provided_entity;
+      }
+    }
+
+    return $provided;
   }
 }

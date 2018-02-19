@@ -59,7 +59,9 @@ class RouteSubscriber extends FieldUIRouteSubscriber {
             '_title_callback' => '\Drupal\flexiform\Controller\FlexiformController::formModePageTitle',
             'form_mode' => $form_mode_id,
           ],
-          [],
+          [
+            '_flexiform_form_mode_page_access_check' => 'TRUE',
+          ],
           $options
         );
         $collection->add("flexiform.form_mode_page.{$form_mode_id}", $route);

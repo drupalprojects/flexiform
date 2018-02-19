@@ -85,6 +85,13 @@ class PageExposure extends ConfigurableFormEnhancerBase implements ContainerFact
     ];
 
     $settings = $form_mode->getThirdPartySettings('flexiform');
+    $form['title'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Page Title'),
+      '#description' => $this->t('The title of the page on which the form will appear.'),
+      '#default_value' => !empty($settings['exposure']['title']) ? $settings['exposure']['title'] : '',
+    ];
+
     $form['path'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Path'),
@@ -102,13 +109,6 @@ class PageExposure extends ConfigurableFormEnhancerBase implements ContainerFact
       }
     }
     $form['path']['#description'] .= '</ul>';
-
-    $form['title'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Page Title'),
-      '#description' => $this->t('The title of the page on which the form will appear.'),
-      '#default_value' => !empty($settings['exposure']['title']) ? $settings['exposure']['title'] : '',
-    ];
 
     return $form;
   }
@@ -184,7 +184,7 @@ class PageExposure extends ConfigurableFormEnhancerBase implements ContainerFact
           continue;
         }
 
-        $form_entity_settings[$form_namespace] = [
+        $form_entity_settings[$namespace] = [
           'entity_type' => $entity_info['entity_type'],
           'bundle' => ($namespace != 'base_entity') ? $entity_info['bundle'] : $this->getFormDisplay()->getTargetBundle(),
           'plugin' => 'provided',

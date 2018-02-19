@@ -15,6 +15,11 @@ services:
     arguments: ['@entity.manager']
     tags:
       - { name: route_enhancer }
+  flexiform.form_mode_page_access_checker:
+    class: Drupal\flexiform\Access\FormModePageAccessCheck
+    arguments: ['@current_user']
+    tags:
+      - { name: access_check, applies_to: _flexiform_form_mode_page_access_check }
   plugin.manager.flexiform_form_entity:
     class: Drupal\flexiform\FlexiformFormEntityPluginManager
     parent: default_plugin_manager
