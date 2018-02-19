@@ -103,6 +103,13 @@ class PageExposure extends ConfigurableFormEnhancerBase implements ContainerFact
     }
     $form['path']['#description'] .= '</ul>';
 
+    $form['title'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Page Title'),
+      '#description' => $this->t('The title of the page on which the form will appear.'),
+      '#default_value' => !empty($settings['exposure']['title']) ? $settings['exposure']['title'] : '',
+    ];
+
     return $form;
   }
 
@@ -112,7 +119,21 @@ class PageExposure extends ConfigurableFormEnhancerBase implements ContainerFact
   public function configurationFormSubmit(array $form, FormStateInterface $form_state) {
     $form_mode = $form_state->get('entity_form_mode');
     $values = $form_state->getValue($form['#parents']);
-    $form_mode->setThirdPartySetting('flexiform', 'exposure', $values);
+    $settings = [];
+    $settings['path'] = $values['path'];
+    $settings['title'] = $values['title'];
+    $settings['parameters'] = [];
+    if (preg_match_all('/{(?P<namespace>[A-Za-z0-9_]+)}/', $settings['path'], $matches)) {
+      foreach ($matches['namespace'] as $namespace) {
+        if ($form_entity = $this->getFormDisplay()->getFormEntityManager()->getFormEntity($namespace)) {
+          $settings['parameters'][$namespace] = [
+            'entity_type' => $form_entity->getEntityType(),
+            'bundle' => $form_entity->getBundle(),
+          ];
+        }
+      }
+    }
+    $form_mode->setThirdPartySetting('flexiform', 'exposure', $settings);
     $form_mode->save();
   }
 
@@ -121,7 +142,7 @@ class PageExposure extends ConfigurableFormEnhancerBase implements ContainerFact
    */
   public function applies($event) {
     // Only applies on custom form modes.
-    if ($event != 'configuration_form') {
+    if (!in_array($event, ['configuration_form', 'init_form_entity_config'])) {
       return FALSE;
     }
     else {
@@ -140,5 +161,32 @@ class PageExposure extends ConfigurableFormEnhancerBase implements ContainerFact
     }
 
     return FALSE;
+  }
+
+  /**
+   * Init form entity config.
+   *
+   * @return array
+   */
+  public function initFormEntityConfig() {
+    $target_entity_type_id = $this->getFormDisplay()->getTargetEntityTypeId();
+    $mode = $this->getFormDisplay()->getMode();
+
+    $target_entity_type = $this->entityTypeManager->getDefinition($target_entity_type_id);
+    $form_mode = $this->entityFormModeStorage()->load("{$target_entity_type_id}.{$mode}");
+
+    $form_entity_settings = [];
+    if ($settings = $form_mode->getThirdPartySetting('flexiform', 'exposure')) {
+      foreach ($settings['parameters'] as $namespace => $entity_info) {
+        $form_entity_settings[$namespace] = [
+          'entity_type' => $entity_info['entity_type'],
+          'bundle' => ($namespace != 'base_entity') ? $settings['bundle'] : $this->getFormDisplay()->getTargetEntityBundle(),
+          'plugin' => 'provided',
+          'label' => $namespace,
+        ];
+      }
+    }
+
+    return $form_entity_settings;
   }
 }

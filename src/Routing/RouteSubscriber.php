@@ -39,8 +39,31 @@ class RouteSubscriber extends FieldUIRouteSubscriber {
    */
   protected function alterRoutes(RouteCollection $collection) {
     // Exposed form routes.
-    foreach ($this->entityTypeManager->getStorage('entity_form_mode')->loadMultiple() as $form_mode) {
-      $options = [];
+    foreach ($this->entityTypeManager->getStorage('entity_form_mode')->loadMultiple() as $form_mode_id => $form_mode) {
+      if ($exposure_settings = $form_mode->getThirdPartySetting('flexiform', 'exposure')) {
+        $options = [];
+        foreach ($exposure_settings['parameters'] as $name => $parameter_info) {
+          $options['parameters'][$name] = [
+            'type' => 'entity:'.$parameter_info['entity_type'],
+          ];
+        }
+        $options['parameters']['form_mode'] = [
+          'type' => 'entity:entity_form_mode',
+        ];
+
+        // @todo: Access
+        $route = new Route(
+          $exposure_settings['path'],
+          [
+            '_controller' => '\Drupal\flexiform\Controller\FlexiformController::formModePage',
+            '_title_callback' => '\Drupal\flexiform\Controller\FlexiformController::formModePageTitle',
+            'form_mode' => $form_mode_id,
+          ],
+          [],
+          $options
+        );
+        $collection->add("flexiform.form_mode_page.{$form_mode_id}", $route);
+      }
     }
 
     // Admin UI Routes.
