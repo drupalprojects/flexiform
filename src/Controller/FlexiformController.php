@@ -53,7 +53,7 @@ class FlexiformController extends ControllerBase {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContinerInterface $container) {
+  public static function create(ContainerInterface $container) {
     return new static(
       $container->get('flexiform.token'),
       $container->get('form_builder'),

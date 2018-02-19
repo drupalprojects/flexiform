@@ -425,11 +425,16 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
       return $this->formEnhancers;
     }
 
-    $applicable_enhancers = [];
+    $applicable_enhancer_names = [];
     foreach ($this->formEnhancers as $plugin_id => $enhancer) {
-      if ($enhancer->applies($event)) {
-        $applicable_enhancers[$plugin_id] = $enhancer;
+      if (($weight = $enhancer->applies($event)) !== FALSE) {
+        $applicable_enhancer_names[$plugin_id] = $weight;
       }
+    }
+    asort($applicable_enhancer_names);
+    $applicable_enhancers = [];
+    foreach ($applicable_enhancer_names as $plugin_id => $weight) {
+      $applicable_enhancers[$plugin_id] = $this->formEnhancers[$plugin_id];
     }
     return $applicable_enhancers;
   }

@@ -6,7 +6,7 @@ use Drupal\Core\DependencyInjection\ClassResolverInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\ctools\Wizard\FormWizardBase;
-use \Drupal\Core\TempStore\PrivateTempStoreFactory;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class DefaultWizard extends FormWizardBase {

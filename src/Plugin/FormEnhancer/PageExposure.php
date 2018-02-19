@@ -123,9 +123,11 @@ class PageExposure extends ConfigurableFormEnhancerBase implements ContainerFact
     $settings['path'] = $values['path'];
     $settings['title'] = $values['title'];
     $settings['parameters'] = [];
+
+    $form_display = $this->getFormDisplay();
     if (preg_match_all('/{(?P<namespace>[A-Za-z0-9_]+)}/', $settings['path'], $matches)) {
       foreach ($matches['namespace'] as $namespace) {
-        if ($form_entity = $this->getFormDisplay()->getFormEntityManager()->getFormEntity($namespace)) {
+        if ($form_entity = $form_display->getFormEntityManager()->getFormEntity(($namespace == 'base_entity') ? $form_display->getBaseEntityNamespace() : $namespace)) {
           $settings['parameters'][$namespace] = [
             'entity_type' => $form_entity->getEntityType(),
             'bundle' => $form_entity->getBundle(),
@@ -156,7 +158,7 @@ class PageExposure extends ConfigurableFormEnhancerBase implements ContainerFact
       // If we can load a custom form mode entity for this form display
       // than this enhancer applies.
       if ($this->entityFormModeStorage()->load("{$target_entity_type}.{$mode}")) {
-        return TRUE;
+        return 100;
       }
     }
 
@@ -176,11 +178,15 @@ class PageExposure extends ConfigurableFormEnhancerBase implements ContainerFact
     $form_mode = $this->entityFormModeStorage()->load("{$target_entity_type_id}.{$mode}");
 
     $form_entity_settings = [];
-    if ($settings = $form_mode->getThirdPartySetting('flexiform', 'exposure')) {
+    if (($settings = $form_mode->getThirdPartySetting('flexiform', 'exposure')) && !empty($settings['parameters'])) {
       foreach ($settings['parameters'] as $namespace => $entity_info) {
-        $form_entity_settings[$namespace] = [
+        if ($namespace == 'base_entity') {
+          continue;
+        }
+
+        $form_entity_settings[$form_namespace] = [
           'entity_type' => $entity_info['entity_type'],
-          'bundle' => ($namespace != 'base_entity') ? $settings['bundle'] : $this->getFormDisplay()->getTargetEntityBundle(),
+          'bundle' => ($namespace != 'base_entity') ? $entity_info['bundle'] : $this->getFormDisplay()->getTargetBundle(),
           'plugin' => 'provided',
           'label' => $namespace,
         ];
