@@ -250,7 +250,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   public function extractFormValues(FieldableEntityInterface $entity, array &$form, FormStateInterface $form_state) {
     // Make sure the form entity manager is appropriately constructed.
     $extracted = [];
-    $this->getFormEntityManager($this->getProvidedEntities($form_state, $entity));
+    $this->getFormEntityManager($this->getProvidedEntities($form_state, $entity), TRUE);
 
     foreach ($this->getComponents() as $name => $options) {
       if (($component = $this->getComponentPlugin($name, $options)) && !empty($form[$name])) {
@@ -258,6 +258,10 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
         $extracted[$name] = $name;
       }
     }
+    dpm($form_state->getValues(), 'Values');
+    dpm($entity->title->value, 'Base Entity Title');
+    dpm($this->getFormEntityManager()->getEntity()->title->value);
+    dpm($extracted);
 
     return $extracted;
   }
@@ -383,13 +387,18 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
 
   /**
    * Get the form entity manager.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface[] $provided
+   *   Provided entities to this entity manager.
+   * @param boolean $reset
+   *   If TRUE always create a new form entity manager.
    */
-  public function getFormEntityManager(array $provided = array()) {
+  public function getFormEntityManager(array $provided = array(), $reset = FALSE) {
     $supplied_namespaces = array_keys($provided);
 
     // If entities are being supplied that have not been supplied before then
     // rebuild the form entity manager.
-    if (empty($this->formEntityManager) || count(array_diff($supplied_namespaces, $this->formEntityManagerSuppliedNamespaces))) {
+    if ($reset || empty($this->formEntityManager) || count(array_diff($supplied_namespaces, $this->formEntityManagerSuppliedNamespaces))) {
       $this->formEntityManager = new FlexiformFormEntityManager($this, $provided);
       $this->formEntityManagerSuppliedNamespaces = $supplied_namespaces;
     }
