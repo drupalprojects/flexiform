@@ -258,10 +258,6 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
         $extracted[$name] = $name;
       }
     }
-    dpm($form_state->getValues(), 'Values');
-    dpm($entity->title->value, 'Base Entity Title');
-    dpm($this->getFormEntityManager()->getEntity()->title->value);
-    dpm($extracted);
 
     return $extracted;
   }
