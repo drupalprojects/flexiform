@@ -1,0 +1,72 @@
+# Flexiform configuration information for form mode displays.
+core.entity_form_display.*.*.*.third_party.flexiform:
+  type: mapping
+  label: 'Flexiform Entity form display'
+  mapping:
+    enhancer:
+      type: mapping
+      label: 'Enhancer'
+      mapping:
+        multiple_entities:
+          type: mapping
+          label: 'Multiple entities'
+          mapping:
+            entities:
+              type: sequence
+              label: 'Entity'
+              sequence:
+                type: mapping
+                mapping:
+                  label:
+                    type: string
+                    label: 'Entity label'
+                  plugin:
+                    type: string
+                    label: 'Entity plugin'
+                  save_on_submit:
+                    type: integer
+                    label: 'Save on submit'
+        submit_button_ajax:
+          type: mapping
+          label: 'Submit button AJAX settings'
+          mapping:
+            'actions::submit':
+              type: mapping
+              label: 'Submit action'
+              mapping:
+                enabled:
+                  type: integer
+                  label: 'Enabled'
+                response:
+                  type: string
+                  label: 'Response action'
+            'actions::preview':
+              type: mapping
+              label: 'Preview action'
+              mapping:
+                enabled:
+                  type: integer
+                  label: 'Enabled'
+                response:
+                  type: string
+                  label: 'Response action'
+        submit_button_label:
+          type: mapping
+          label: 'Submit button labels'
+          mapping:
+            'actions::submit':
+              type: string
+              label: 'Submit button label'
+            'actions::preview':
+              type: string
+              label: 'Preview button label'
+        submit_button_redirect:
+          type: mapping
+          label: 'Submit button redirect paths'
+          mapping:
+            'actions::submit':
+              type: path
+              label: 'Submit button redirect path'
+            'actions::preview':
+              type: path
+              label: 'Preview button redirect path'
