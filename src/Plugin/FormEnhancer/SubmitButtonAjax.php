@@ -52,13 +52,13 @@ class SubmitButtonAjax extends ConfigurableFormEnhancerBase {
     foreach ($this->locateSubmitButtons() as $path => $label) {
       $original_path = $path;
       $path = str_replace('][', '::', $path);
-      $form[$path] = [
+      $form['ajax'][$path] = [
         '#type' => 'details',
         '#title' => $this->t('@label Button Ajax', ['@label' => $label]),
         '#description' => 'Array Parents: '.$original_path,
         '#open' => TRUE,
       ];
-      $form[$path]['enabled'] = [
+      $form['ajax'][$path]['enabled'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Submit with Ajax'),
         '#description' => $this->t('Submit the form with Javascript to avoid page reloads.'),
@@ -70,7 +70,7 @@ class SubmitButtonAjax extends ConfigurableFormEnhancerBase {
       if (!empty($parents)) {
         $name .= '['.implode('][', $parents).']';
       }
-      $form[$path]['response'] = [
+      $form['ajax'][$path]['response'] = [
         '#type' => 'select',
         '#title' => $this->t('Response'),
         '#description' => $this->t('What should happen after the form has been successfully submitted.'),

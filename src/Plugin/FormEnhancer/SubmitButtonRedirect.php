@@ -65,7 +65,7 @@ class SubmitButtonRedirect extends ConfigurableFormEnhancerBase implements Conta
     foreach ($this->locateSubmitButtons() as $path => $label) {
       $original_path = $path;
       $path = str_replace('][', '::', $path);
-      $form[$path] = [
+      $form['redirect'][$path] = [
         '#type' => 'textfield',
         '#title' => $this->t('@label Button Redirect Path', ['@label' => $label]),
         '#description' => 'Array Parents: '.$original_path,

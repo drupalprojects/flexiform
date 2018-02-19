@@ -130,7 +130,9 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
     $enhancer_settings = $this->getThirdPartySetting('flexiform', 'enhancer', []);
     foreach ($this->formEnhancers as $enhancer_name => $enhancer) {
       if ($enhancer instanceof ConfigurableFormEnhancerInterface) {
-        $enhancer_settings[$enhancer_name] = $enhancer->getConfiguration();
+        $config = $enhancer->getConfiguration();
+        $config['id'] = $enhancer->getPluginId();
+        $enhancer_settings[$enhancer_name] = $config;
       }
     }
     $this->setThirdPartySetting('flexiform', 'enhancer', $enhancer_settings);

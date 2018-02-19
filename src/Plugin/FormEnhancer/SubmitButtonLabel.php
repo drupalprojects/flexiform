@@ -35,7 +35,7 @@ class SubmitButtonLabel extends ConfigurableFormEnhancerBase {
     foreach ($this->locateSubmitButtons() as $path => $label) {
       $original_path = $path;
       $path = str_replace('][', '::', $path);
-      $form[$path] = [
+      $form['label'][$path] = [
         '#type' => 'textfield',
         '#title' => $this->t('@label Button Text', ['@label' => $label]),
         '#description' => 'Array Parents: '.$original_path,
