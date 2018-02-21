@@ -1,32 +1,26 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\Plugin\FlexiformFormEntity\FlexiformFormEntityReferencedEntity.
- */
-
 namespace Drupal\flexiform\Plugin\FlexiformFormEntity;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
-use Drupal\flexiform\Annotation\FlexiformFormEntity;
 use Drupal\flexiform\FormEntity\FlexiformFormEntityBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Form Entity plugin for entities that are passed in through the configuration
- * like the base entity.
+ * Form Entity plugin.
+ *
+ * For entities that are passed in through the configuration like the base
+ * entity.
  *
  * @FlexiformFormEntity(
  *   id = "referenced_entity",
  *   deriver = "\Drupal\flexiform\Plugin\Deriver\FormEntityTypedDataReferencedEntityDeriver"
  * )
- *
  */
 class FlexiformFormEntityTypedDataReferencedEntity extends FlexiformFormEntityBase implements ContainerFactoryPluginInterface {
   use StringTranslationTrait;
@@ -34,6 +28,8 @@ class FlexiformFormEntityTypedDataReferencedEntity extends FlexiformFormEntityBa
   protected $entityTypeManager;
 
   /**
+   * The module handler.
+   *
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected $moduleHandler;
@@ -74,7 +70,7 @@ class FlexiformFormEntityTypedDataReferencedEntity extends FlexiformFormEntityBa
       if ($entity = $base->{$property}->entity) {
         return $entity;
       }
-      else if (!empty($this->configuration['create'])) {
+      elseif (!empty($this->configuration['create'])) {
         $entity = $this->createEntity();
         $base->{$property}->entity = $entity;
         return $entity;
@@ -104,13 +100,14 @@ class FlexiformFormEntityTypedDataReferencedEntity extends FlexiformFormEntityBa
    */
   public function configurationForm(array $form, FormStateInterface $form_state) {
     $form = parent::configurationForm($form, $form_state);
-    $form['create'] = array(
+    $form['create'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Create New Entity'),
       '#description' => $this->t('If the property is empty, and new entity will be created.'),
       '#default_value' => !empty($this->configuration['create']),
-    );
+    ];
 
     return $form;
   }
+
 }

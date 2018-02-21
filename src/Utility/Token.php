@@ -5,6 +5,9 @@ namespace Drupal\flexiform\Utility;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Utility\Token as CoreToken;
 
+/**
+ * Provides token integration.
+ */
 class Token extends CoreToken {
 
   /**
@@ -24,4 +27,5 @@ class Token extends CoreToken {
       return parent::generate($type, $tokens, $data, $options, $bubbleable_metadata);
     }
   }
+
 }

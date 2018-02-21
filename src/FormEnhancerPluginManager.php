@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\FormEnhancerPluginManager
- */
-
 namespace Drupal\flexiform;
 
 use Drupal\Core\Cache\CacheBackendInterface;
@@ -32,5 +27,5 @@ class FormEnhancerPluginManager extends DefaultPluginManager {
     $this->alterInfo('flexiform_form_enhancer');
     $this->setCacheBackend($cache_backend, 'flexiform_form_enhancer');
   }
-}
 
+}

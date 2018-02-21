@@ -68,7 +68,7 @@ class SubmitButtonRedirect extends ConfigurableFormEnhancerBase implements Conta
       $form['redirect'][$path] = [
         '#type' => 'textfield',
         '#title' => $this->t('@label Button Redirect Path', ['@label' => $label]),
-        '#description' => 'Array Parents: '.$original_path,
+        '#description' => 'Array Parents: ' . $original_path,
         '#default_value' => !empty($this->configuration[$path]) ? $this->configuration[$path] : '',
       ];
     }
@@ -128,7 +128,7 @@ class SubmitButtonRedirect extends ConfigurableFormEnhancerBase implements Conta
       // @todo: Support all the different schemes.
       $path = $element['#submit_redirect'];
       if (!in_array($path[0], ['/', '?', '#'])) {
-        $path = '/'.$path;
+        $path = '/' . $path;
       }
       $path = $this->token->replace($path, $token_data, $token_options);
 

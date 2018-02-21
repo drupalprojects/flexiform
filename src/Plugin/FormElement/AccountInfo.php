@@ -7,6 +7,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\flexiform\FormElement\ContextAwareFormElementBase;
 
 /**
+ * Form element class for user accounts.
+ *
  * @FormElement(
  *   id = "account_info",
  *   label = @Translation("Account Info"),

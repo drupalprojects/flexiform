@@ -14,7 +14,7 @@ function flexiform_install() {
   // Get hold of our user type definition.
   $entity_form_display_type = $manager->getEntityType('entity_form_display');
 
-  // Change the class
+  // Change the class.
   $entity_form_display_type->setClass('Drupal\flexiform\FlexiformEntityFormDisplay');
   $entity_form_display_type->setFormClass('edit', 'Drupal\flexiform\Form\FlexiformEntityFormDisplayEditForm');
   $manager->updateEntityType($entity_form_display_type);
@@ -29,7 +29,7 @@ function flexiform_uninstall() {
   // Get hold of our user type definition.
   $entity_form_display_type = $manager->getEntityType('entity_form_display');
 
-  // Change the class
+  // Change the class.
   $entity_form_display_type->setClass('Drupal\Core\Entity\Entity\EntityFormDisplay');
   $entity_form_display_type->setFormClass('edit', 'Drupal\field_ui\Form\EntityFormDisplayEditForm');
   $manager->updateEntityType($entity_form_display_type);

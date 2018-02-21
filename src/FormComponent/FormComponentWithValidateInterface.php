@@ -10,7 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 interface FormComponentWithValidateInterface extends FormComponentInterface {
 
   /**
-   * Perform validation logic
+   * Perform validation logic.
    *
    * @var array $form
    *   Form array

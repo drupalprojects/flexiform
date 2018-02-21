@@ -92,7 +92,7 @@ class FlexiformEntityFormTest extends BrowserTestBase {
 
     $this->drupalPostForm('node/add/article', $edit, t('Save'));
     $node = $this->drupalGetNodeByTitle($title1, TRUE);
-    $this->assertTrue($node,'Article node found in the database.');
+    $this->assertTrue($node, 'Article node found in the database.');
 
     $edit['title[0][value]'] = $title2;
     $this->drupalPostForm('node/' . $node->id() . '/edit', $edit, t('Save'));
@@ -101,8 +101,8 @@ class FlexiformEntityFormTest extends BrowserTestBase {
     $this->assertFalse($node, 'The Article node has been modified.');
 
     $node = $this->drupalGetNodeByTitle($title2, TRUE);
-    $this->assertTrue($node,'Modified Article node found in the database.');
-    $this->assertNotEquals($node->label(), $title1,'The Article node name has been modified.');
+    $this->assertTrue($node, 'Modified Article node found in the database.');
+    $this->assertNotEquals($node->label(), $title1, 'The Article node name has been modified.');
 
     $this->drupalGet('node/' . $node->id() . '/edit');
     $this->clickLink(t('Delete'));

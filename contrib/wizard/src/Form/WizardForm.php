@@ -46,5 +46,5 @@ class WizardForm extends EntityForm {
 
     return $form;
   }
-}
 
+}

@@ -10,7 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
  * Component types that implement this interface can be defined in a repeatable
  * custom fashion.
  */
-abstract class FormComponentTypeCreateableBase extends FormComponentTypeBase implements  FormComponentTypeCreateableInterface {
+abstract class FormComponentTypeCreateableBase extends FormComponentTypeBase implements FormComponentTypeCreateableInterface {
 
   /**
    * {@inheritdoc}

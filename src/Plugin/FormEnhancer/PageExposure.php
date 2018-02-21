@@ -5,9 +5,7 @@ namespace Drupal\flexiform\Plugin\FormEnhancer;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Url;
 use Drupal\flexiform\FormEnhancer\ConfigurableFormEnhancerBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -105,7 +103,7 @@ class PageExposure extends ConfigurableFormEnhancerBase implements ContainerFact
       }
 
       if ($form_entity->getPluginId() == 'provided') {
-        $form['path']['#description'] .= '<li><strong>{'.$namespace.'}</strong> - '.$form_entity->getFormEntityContextDefinition()->getLabel().'</li>';
+        $form['path']['#description'] .= '<li><strong>{' . $namespace . '}</strong> - ' . $form_entity->getFormEntityContextDefinition()->getLabel() . '</li>';
       }
     }
     $form['path']['#description'] .= '</ul>';
@@ -195,4 +193,5 @@ class PageExposure extends ConfigurableFormEnhancerBase implements ContainerFact
 
     return $form_entity_settings;
   }
+
 }

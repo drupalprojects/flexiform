@@ -25,8 +25,9 @@ interface FormEnhancerInterface extends PluginInspectionInterface {
    *
    * @param string $event
    *
-   * @return boolean
+   * @return bool
    *   True if the enhancer applies to a particular event.
    */
   public function applies($event);
+
 }

@@ -48,9 +48,13 @@ class FormElementComponentType extends FormComponentTypeCreateableBase implement
    * Construct a new form element component type object.
    *
    * @param array $configuration
-   * @param $plugin_id
-   * @param $plugin_definition
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
    * @param \Drupal\flexiform\FormElementPluginManager $plugin_manager
+   *   The form element plugin manager.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, FormElementPluginManager $plugin_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -93,7 +97,7 @@ class FormElementComponentType extends FormComponentTypeCreateableBase implement
     }
     $form['form_element'] = [
       '#type' => 'select',
-      '#required'=> TRUE,
+      '#required' => TRUE,
       '#options' => $plugin_options,
       '#title' => $this->t('Form Element'),
       '#ajax' => [

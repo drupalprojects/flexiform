@@ -56,7 +56,7 @@ class DefaultWizardOperation extends FormBase {
    * @return \Drupal\flexiform\FlexiformEntityFormDisplay
    */
   public function getFormDisplay() {
-    $id = 'flexiform_wizard.'.$this->wizardConfig->id().'.'.$this->step;
+    $id = 'flexiform_wizard.' . $this->wizardConfig->id() . '.' . $this->step;
     $display = $this->entityTypeManager->getStorage('entity_form_display')->load($id);
     return $display;
   }
@@ -77,4 +77,5 @@ class DefaultWizardOperation extends FormBase {
    */
   public function submitForm(array $form, FormStateInterface $form_state) {
   }
+
 }

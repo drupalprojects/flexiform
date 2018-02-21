@@ -7,6 +7,9 @@ use Drupal\Core\DependencyInjection\ClassResolverInterface;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 
+/**
+ * Provides the Flexiform manager.
+ */
 class FlexiformManager {
 
   /**
@@ -41,6 +44,9 @@ class FlexiformManager {
    * Construct a flexiform manager object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\Core\DependencyInjection\ClassResolverInterface $class_resolver
+   * @param \Drupal\Core\StringTranslation\TranslationInterface\TranslationInterface $translation
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface\ModuleHandlerInterface $module_handler
    */
   public function __construct(
     EntityTypeManagerInterface $entity_type_manager,
@@ -96,4 +102,5 @@ class FlexiformManager {
     else {
     }
   }
+
 }

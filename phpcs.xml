@@ -14,13 +14,12 @@
         <exclude name="Drupal.Commenting.DocComment.TagsNotGrouped"/>
         <exclude name="Drupal.Commenting.HookComment.HookParamDoc"/>
         <exclude name="Drupal.Commenting.HookComment.HookReturnDoc"/>
-        <exclude name="Drupal.Commenting.FileComment"/>
-        <exclude name="Drupal.Commenting.ClassComment"/>
-        <exclude name="Drupal.Commenting.FunctionComment"/>
-        <exclude name="Drupal.Commenting.InlineComment"/>
+        <exclude name="Drupal.Commenting.FunctionComment.MissingParamComment"/>
+        <exclude name="Drupal.Commenting.FunctionComment.MissingReturnComment"/>
 
         <exclude name="Drupal.Files.LineLength.TooLong"/>
         <exclude name="Drupal.Array.Array.LongLineDeclaration"/>
         <exclude name="Drupal.NamingConventions.ValidVariableName.LowerCamelName"/>
+        <exclude name="Drupal.NamingConventions.ValidFunctionName.ScopeNotCamelCaps"/>
     </rule>
 </ruleset>

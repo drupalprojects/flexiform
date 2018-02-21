@@ -4,6 +4,9 @@ namespace Drupal\flexiform_wizard\FormEntity;
 
 use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 
+/**
+ * Provides a tempstore aware form entity manager.
+ */
 class TempstoreAwareFlexiformFormEntityManager extends FlexiformFormEntityManager {
 
   /**
@@ -14,17 +17,17 @@ class TempstoreAwareFlexiformFormEntityManager extends FlexiformFormEntityManage
   protected $tempstore;
 
   /**
-   * Set the tempstore
+   * Set the tempstore.
    *
    * @param \Drupal\user\PrivateTempStore|\Drupal\user\SharedTempStore $tempstore
-   *   Either Drupal\user\PrivateTempStore or Drupal\user\SharedTempStore
+   *   Either Drupal\user\PrivateTempStore or Drupal\user\SharedTempStore.
    */
   protected function setTempstore($tempstore) {
     $this->tempstore = $tempstore;
   }
 
   /**
-   * Get the tempstore
+   * Get the tempstore.
    *
    * @return \Drupal\user\PrivateTempStore|\Drupal\user\SharedTempStore
    */
@@ -40,4 +43,5 @@ class TempstoreAwareFlexiformFormEntityManager extends FlexiformFormEntityManage
     $provided = $stored_entities + $provided;
     parent::initFormEntities($provided);
   }
+
 }

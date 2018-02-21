@@ -1,19 +1,15 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\FormEntity\FlexiformFormEntityBase.
- */
-
 namespace Drupal\flexiform\FormEntity;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContextAwarePluginBase;
 use Drupal\Core\Plugin\Context\Context;
-use Drupal\Core\Plugin\Context\ContextInterface;
-use Drupal\Core\Plugin\Context\ContextDefinition;
 
+/**
+ * Provides the base form entity plugin.
+ */
 abstract class FlexiformFormEntityBase extends ContextAwarePluginBase implements FlexiformFormEntityInterface {
 
   /**
@@ -26,12 +22,14 @@ abstract class FlexiformFormEntityBase extends ContextAwarePluginBase implements
   /**
    * The actual context, wraps the entity item.
    *
-   * @var \Drupal\Core\Plugin\Context\ContextInterface.
+   * @var \Drupal\Core\Plugin\Context\ContextInterface
    */
   protected $formEntityContext;
 
   /**
    * Whether or not the form entity has been prepared.
+   *
+   * @var bool
    */
   protected $prepared;
 
@@ -59,7 +57,7 @@ abstract class FlexiformFormEntityBase extends ContextAwarePluginBase implements
       foreach ($configuration['context_mapping'] as $key => $context_namespace) {
         $formEntity = $this->formEntityManager->getFormEntity($context_namespace);
         if (!$formEntity) {
-          throw new \Exception('No Form Entity with namespace '.$context_namespace);
+          throw new \Exception('No Form Entity with namespace ' . $context_namespace);
         }
 
         $this->context[$key] = $formEntity->getFormEntityContext();
@@ -179,4 +177,5 @@ abstract class FlexiformFormEntityBase extends ContextAwarePluginBase implements
    */
   public function configurationFormSubmit(array $form, FormStateInterface $form_state) {
   }
+
 }

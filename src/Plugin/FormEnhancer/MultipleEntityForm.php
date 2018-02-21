@@ -127,4 +127,5 @@ class MultipleEntityForm extends ConfigurableFormEnhancerBase {
     unset($this->configuration['entities'][$namespace]);
     return $this;
   }
+
 }

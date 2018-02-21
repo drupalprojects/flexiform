@@ -13,7 +13,7 @@ class FormEnhancerBase extends PluginBase implements FormEnhancerInterface {
   /**
    * The form display entity.
    *
-   * @var \Drupal\flexiform\FlexiformEntityFormDisplayInterface;
+   * @var \Drupal\flexiform\FlexiformEntityFormDisplayInterface
    */
   protected $formDisplay;
 
@@ -35,7 +35,7 @@ class FormEnhancerBase extends PluginBase implements FormEnhancerInterface {
   /**
    * Get the form display.
    *
-   * @return \Drupal\flexiform\FlexiformEntityFormDisplayInterface;
+   * @return \Drupal\flexiform\FlexiformEntityFormDisplayInterface
    */
   protected function getFormDisplay() {
     return $this->formDisplay;
@@ -47,4 +47,5 @@ class FormEnhancerBase extends PluginBase implements FormEnhancerInterface {
   public function applies($event) {
     return in_array($event, $this->supportedEvents);
   }
+
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\FormElementPluginManager
- */
-
 namespace Drupal\flexiform;
 
 use Drupal\Core\Cache\CacheBackendInterface;
@@ -35,5 +30,5 @@ class FormElementPluginManager extends DefaultPluginManager implements ContextAw
     $this->alterInfo('flexiform_form_element');
     $this->setCacheBackend($cache_backend, 'flexiform_form_element');
   }
-}
 
+}

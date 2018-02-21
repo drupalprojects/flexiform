@@ -4,6 +4,9 @@ namespace Drupal\flexiform\FormElement;
 
 use Drupal\Core\Form\FormStateInterface;
 
+/**
+ * Provides an interface for form element plugins.
+ */
 interface FormElementInterface {
 
   /**

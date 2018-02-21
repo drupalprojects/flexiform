@@ -3,18 +3,12 @@
 namespace Drupal\flexiform\Plugin\FormComponentType;
 
 use Drupal\flexiform\FormElementPluginManager;
-use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\WidgetPluginManager;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContextAwarePluginAssignmentTrait;
 use Drupal\Core\Plugin\Context\ContextHandlerInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\field_ui\Form\EntityDisplayFormBase;
-use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 use Drupal\flexiform\FlexiformEntityFormDisplay;
 use Drupal\flexiform\FormComponent\FormComponentBase;
 use Drupal\flexiform\FormComponent\FormComponentWithValidateInterface;
@@ -164,4 +158,5 @@ class FormElementComponent extends FormComponentBase implements ContainerFactory
     $options += $this->getPlugin()->settingsFormSubmit($values, $form, $form_state);
     return $options;
   }
+
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\Annotation\FormElement.
- */
-
 namespace Drupal\flexiform\Annotation;
 
 use Drupal\Component\Annotation\Plugin;
@@ -12,7 +7,7 @@ use Drupal\Component\Annotation\Plugin;
 /**
  * Defines a flexiform form entity plugin annotation object.
  *
- * Plugin Namespace: Plugin\FormElement
+ * Plugin Namespace: Plugin\FormElement.
  *
  * @see \Drupal\flexiform\FormElementInterface
  * @see \Drupal\flexiform\FormElementBase
@@ -33,9 +28,9 @@ class FormElement extends Plugin {
   /**
    * The human-readable name of the form element.
    *
-   * @ingroup plugin_translatable
-   *
    * @var \Drupal\Core\Annotation\Translation
+   *
+   * @ingroup plugin_translatable
    */
   public $label;
 
@@ -53,6 +48,6 @@ class FormElement extends Plugin {
    *
    * @var \Drupal\Core\Annotation\ContextDefinition[]
    */
-  public $context = array();
+  public $context = [];
 
 }

@@ -80,7 +80,7 @@ class FormComponentAddLocalAction extends DeriverBase implements ContainerDerive
           }
 
           $default_options = [
-            'title' => $this->t('Add '.$definition['label']),
+            'title' => $this->t('Add @label', ['@label' => $definition['label']]),
           ];
 
           $this->derivatives["entity.entity_form_display.{$entity_type_id}.default.component_type.{$plugin_id}.add"] = [
@@ -105,5 +105,5 @@ class FormComponentAddLocalAction extends DeriverBase implements ContainerDerive
 
     return $this->derivatives;
   }
-}
 
+}

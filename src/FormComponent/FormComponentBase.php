@@ -5,6 +5,9 @@ namespace Drupal\flexiform\FormComponent;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\flexiform\FlexiformEntityFormDisplay;
 
+/**
+ * Provides the base form component plugin.
+ */
 abstract class FormComponentBase implements FormComponentInterface {
 
   /**
@@ -65,7 +68,7 @@ abstract class FormComponentBase implements FormComponentInterface {
    */
   public function getAdminLabel() {
     if ($namespace = $this->getEntityNamespace()) {
-      return $this->options['label'].' ['.$this->getFormEntityManager()->getFormEntity($namespace)->getFormEntityContextDefinition()->getLabel().']';
+      return $this->options['label'] . ' [' . $this->getFormEntityManager()->getFormEntity($namespace)->getFormEntityContextDefinition()->getLabel() . ']';
     }
     return $this->options['label'];
   }
@@ -123,4 +126,5 @@ abstract class FormComponentBase implements FormComponentInterface {
       ],
     ];
   }
+
 }

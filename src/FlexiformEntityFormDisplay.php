@@ -1,17 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\FlexiformEntityFormDisplay.
- */
-
 namespace Drupal\flexiform;
 
-use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\FieldableEntityInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\FormState;
@@ -21,25 +14,30 @@ use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 use Drupal\flexiform\FormEnhancer\ConfigurableFormEnhancerInterface;
 
 /**
- * Defines a class to extend EntityFormDisplays to work with multiple entity
- * forms.
+ * Defines a class to extend EntityFormDisplays.
+ *
+ * To work with multiple entity forms.
  */
 class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformEntityFormDisplayInterface {
 
   /**
    * The base entity namespace.
    *
-   * @var string.
+   * @var string
    */
   protected $baseEntityNamespace = '';
 
   /**
    * The form entity configuration.
+   *
+   * @var array
    */
   protected $formEntities = [];
 
   /**
    * The form enhancers.
+   *
+   * @var array
    */
   protected $formEnhancers = [];
 
@@ -51,8 +49,9 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   protected $formEntityManager;
 
   /**
-   * What entities the form entity manager has been provided with. If more
-   * entities are supplied build a new entity manager.
+   * What entities the form entity manager has been provided with.
+   *
+   * If more entities are supplied build a new entity manager.
    *
    * @var string[]
    */
@@ -76,7 +75,8 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    *
    * @return array
    *   Example usage:
-   *   @code
+   *
+   * @code
    *     return array(
    *       'content' => array(
    *         // label for the region.
@@ -88,7 +88,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    *         'message' => $this->t('No field is displayed.'),
    *       ),
    *     );
-   *   @endcode
+   * @endcode
    */
   public function getRegions() {
     return [
@@ -195,10 +195,12 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   }
 
   /**
-   * Build standalone form. A standalone form does not have a single base
-   * this allows the passing of a single array of provided entities.
+   * Build standalone form.
    *
-   * @param \Drupal\Core\Entity\FieldableEntityInterface[] $entities
+   * A standalone form does not have a single base.
+   * This allows the passing of a single array of provided entities.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface[] $provided
    *   An array of provided entities keyed by namespace.
    * @param array $form
    *   The form array.
@@ -209,7 +211,10 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
     $this->getFormEntityManager($provided);
 
     // Set #parents to 'top-level' by default.
-    $form += array('#parents' => [], '#array_parents' => []);
+    $form += [
+      '#parents' => [],
+      '#array_parents' => [],
+    ];
     $original_parents = $form['#parents'];
 
     // Let each widget generate the form elements.
@@ -222,7 +227,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
       $component->render($form, $form_state, $this->renderer);
     }
 
-    // Set form parents back to the original
+    // Set form parents back to the original.
     $form['#parents'] = $original_parents;
 
     // Associate the cache tags for the form display.
@@ -233,7 +238,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   }
 
   /**
-   * {@inheritform}
+   * {@inheritdoc}
    */
   public function processForm($element, FormStateInterface $form_state, $form) {
     $element = parent::processForm($element, $form_state, $form);
@@ -298,8 +303,10 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   }
 
   /**
-   * Look through the form to find submit buttons, if they have the save submit
-   * method then add our saveEntities submit callback.
+   * Look through the form to find submit buttons.
+   *
+   * If they have the save submit method then add our saveEntities submit
+   * callback.
    *
    * @param array $element
    *   The element to add the submit callback to. If this is not a submit
@@ -319,7 +326,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
         // components to have their own submission logic. This applies
         // BEFORE the entities are saved.
         // Also add the 'saveFormEntities' callback immediatly after the
-        // standard '::save'
+        // standard '::save'.
         foreach ($element['#submit'] as $callback) {
           if ($callback == '::save') {
             $new_submit[] = [$form_display, 'formSubmitComponents'];
@@ -388,10 +395,13 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    *
    * @param \Drupal\Core\Entity\FieldableEntityInterface[] $provided
    *   Provided entities to this entity manager.
-   * @param boolean $reset
+   * @param bool $reset
    *   If TRUE always create a new form entity manager.
+   *
+   * @return \Drupal\flexiform\FormEntity\FlexiformFormEntityManager
+   *   The form entity manager.
    */
-  public function getFormEntityManager(array $provided = array(), $reset = FALSE) {
+  public function getFormEntityManager(array $provided = [], $reset = FALSE) {
     $supplied_namespaces = array_keys($provided);
 
     // If entities are being supplied that have not been supplied before then
@@ -493,4 +503,5 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   public function getBaseEntityNamespace() {
     return $this->baseEntityNamespace;
   }
+
 }

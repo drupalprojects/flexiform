@@ -28,7 +28,7 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
   /**
    * The entity manager.
    *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface;
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
@@ -75,9 +75,13 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
    * @param mixed $plugin_definition
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
    * @param \Drupal\Core\Form\FormBuilderInterface $form_builder
+   * @param \Drupal\Core\DependencyInjection\ClassResolverInterface $class_resolver
+   * @param \Drupal\Core\StringTranslation\TranslationInterface $translation
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   * @param \Drupal\flexiform\FlexiformManager $flexiform_manager
    */
   public function __construct(
-    $configuration,
+    array $configuration,
     $plugin_id,
     $plugin_definition,
     EntityTypeManagerInterface $entity_manager,
@@ -117,7 +121,7 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
    * {@inheritdoc}
    */
   public function build() {
-    /** @var $entity \Drupal\Core\Entity\EntityInterface **/
+    // @var $entity \Drupal\Core\Entity\EntityInterface
     $entity = $this->getContextValue('entity');
     $definition = $this->getPluginDefinition();
     if ($entity->bundle() !== $definition['bundle']) {
@@ -126,8 +130,8 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
 
     $entity_form_display = EntityFormDisplay::collectRenderDisplay($entity, $definition['form_mode']);
     $form_object = $this->flexiformManager->getFormObject($entity_form_display, [
-        $entity_form_display->getBaseEntityNamespace() => $entity,
-      ]);
+      $entity_form_display->getBaseEntityNamespace() => $entity,
+    ]);
 
     foreach ($entity_form_display->getFormEntityConfig() as $namespace => $configuration) {
       if ($configuration['plugin'] == 'provided' && ($provided_entity = $this->getContextValue($namespace))) {
@@ -138,4 +142,5 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
     $form_state->set('form_entity_provided', $provided['form_entity_provided']);
     return $this->formBuilder->buildForm($form_object, $form_state);
   }
+
 }

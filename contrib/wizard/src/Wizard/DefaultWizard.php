@@ -9,6 +9,9 @@ use Drupal\ctools\Wizard\FormWizardBase;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
+/**
+ * Provides a default form wizard.
+ */
 class DefaultWizard extends FormWizardBase {
 
   /**
@@ -19,9 +22,9 @@ class DefaultWizard extends FormWizardBase {
   protected $wizard = NULL;
 
   /**
-   * The provided entities
+   * The provided entities.
    *
-   * @var \Drupal\Core\Entity\FieldableEntityInterface[] $provided_entities
+   * @var \Drupal\Core\Entity\FieldableEntityInterface[]
    */
   protected $provided = [];
 
@@ -35,6 +38,8 @@ class DefaultWizard extends FormWizardBase {
    *   The class resolver.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match service.
    * @param string $tempstore_id
    *   The shared temp store factory collection name.
    * @param string|null $machine_name
@@ -44,7 +49,7 @@ class DefaultWizard extends FormWizardBase {
    * @param \Drupal\Core\Entity\FieldableEntityInterface[] $provided
    *   The provided (parameter) entities.
    */
-  public function __construct(PrivateTempStoreFactory $tempstore, FormBuilderInterface $builder, ClassResolverInterface $class_resolver, EventDispatcherInterface $event_dispatcher, RouteMatchInterface $route_match, $tempstore_id, $machine_name = NULL, $step = NULL, $provided = []) {
+  public function __construct(PrivateTempStoreFactory $tempstore, FormBuilderInterface $builder, ClassResolverInterface $class_resolver, EventDispatcherInterface $event_dispatcher, RouteMatchInterface $route_match, $tempstore_id, $machine_name = NULL, $step = NULL, array $provided = []) {
     parent::__construct($tempstore, $builder, $class_resolver, $event_dispatcher, $route_match, $tempstore_id, $machine_name, $step);
     $this->provided = $provided;
   }
@@ -102,6 +107,7 @@ class DefaultWizard extends FormWizardBase {
    * {@inheritdoc}
    */
   public function getRouteName() {
-    return 'flexiform_wizard.'.$this->wizard->id().'.step';
+    return 'flexiform_wizard.' . $this->wizard->id() . '.step';
   }
+
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\Annotation\FlexiformFormEntity.
- */
-
 namespace Drupal\flexiform\Annotation;
 
 use Drupal\Component\Annotation\Plugin;
@@ -12,7 +7,7 @@ use Drupal\Component\Annotation\Plugin;
 /**
  * Defines a flexiform form entity plugin annotation object.
  *
- * Plugin Namespace: Plugin\FlexiformFormEntity
+ * Plugin Namespace: Plugin\FlexiformFormEntity.
  *
  * @see \Drupal\flexiform\FlexiformFormEntityManager
  * @see \Drupal\flexiform\FlexiformFormEntityInterface
@@ -34,9 +29,9 @@ class FlexiformFormEntity extends Plugin {
   /**
    * The human-readable name of the condition.
    *
-   * @ingroup plugin_translatable
-   *
    * @var \Drupal\Core\Annotation\Translation
+   *
+   * @ingroup plugin_translatable
    */
   public $label;
 
@@ -54,6 +49,6 @@ class FlexiformFormEntity extends Plugin {
    *
    * @var \Drupal\Core\Annotation\ContextDefinition[]
    */
-  public $context = array();
+  public $context = [];
 
 }

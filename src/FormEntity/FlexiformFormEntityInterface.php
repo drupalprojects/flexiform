@@ -1,15 +1,13 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\FormEntity\FlexiformFormEntityBase.
- */
-
 namespace Drupal\flexiform\FormEntity;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
 
+/**
+ * Interface for form entity plugins.
+ */
 interface FlexiformFormEntityInterface extends ContextAwarePluginInterface {
 
   /**

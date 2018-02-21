@@ -27,7 +27,7 @@ function flexiform_entity_type_build(array &$entity_types) {
 }
 
 /**
- * Implements hook_element_info_alter()
+ * Implements hook_element_info_alter().
  */
 function flexiform_element_info_alter(array &$types) {
   foreach ($types as &$type) {
@@ -50,15 +50,17 @@ function flexiform_element_info_alter(array &$types) {
 }
 
 /**
- * Ajax element process to add our library to any element that accepts ajax
- * commands.
+ * Ajax element process to add our library.
+ *
+ * Can be added to any element that accepts ajax commands.
  */
 function flexiform_ajax_form_process(&$element, FormStateInterface $form_state, &$complete_form) {
   if (isset($element['#flexiform_ajax_processed'])) {
     return $element;
   }
 
-  // Initialize #flexiform_ajax_processed, so we do not process this element again.
+  // Initialize #flexiform_ajax_processed, so we do not process this element
+  // again.
   $element['#flexiform_ajax_processed'] = FALSE;
 
   // Nothing to do if there are no Ajax settings.

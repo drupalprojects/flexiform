@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\Annotation\FormComponentType.
- */
-
 namespace Drupal\flexiform\Annotation;
 
 use Drupal\Component\Annotation\Plugin;
@@ -12,7 +7,7 @@ use Drupal\Component\Annotation\Plugin;
 /**
  * Defines a flexiform form entity plugin annotation object.
  *
- * Plugin Namespace: Plugin\FormComponentType
+ * Plugin Namespace: Plugin\FormComponentType.
  *
  * @see \Drupal\flexiform\FormComponentTypePluginManager
  * @see \Drupal\flexiform\FormComponentTypeInterface
@@ -34,9 +29,9 @@ class FormComponentType extends Plugin {
   /**
    * The human-readable name of the form compoenent type.
    *
-   * @ingroup plugin_translatable
-   *
    * @var \Drupal\Core\Annotation\Translation
+   *
+   * @ingroup plugin_translatable
    */
   public $label;
 

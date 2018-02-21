@@ -4,6 +4,9 @@ namespace Drupal\flexiform_wizard\Form;
 
 use Drupal\Core\Form\FormStateInterface;
 
+/**
+ * Provides an edit form for flexiform wizard entities.
+ */
 class WizardEditForm extends WizardForm {
 
   /**
@@ -16,15 +19,23 @@ class WizardEditForm extends WizardForm {
     $form['parameters'] = [
       '#type' => 'table',
       '#title' => $this->t('Parameters'),
-      '#header' => [$this->t('Label'), $this->t('Machine-Name'), $this->t('Entity Type')],
-      '#empty' => $this->t('This wizard doesn\'t have an parameters defined yet. Add parameters by altering the path.'),
+      '#header' => [
+        $this->t('Label'),
+        $this->t('Machine-Name'),
+        $this->t('Entity Type'),
+      ],
+      '#empty' => $this->t("This wizard doesn't have an parameters defined yet. Add parameters by altering the path."),
     ];
     // @todo: Parameter rows.
 
     $form['pages'] = [
       '#type' => 'table',
-      '#header' => [$this->t('Label'), $this->t('Machine-Name'), $this->t('Weight')],
-      '#empty' => $this->t('This wizard doesn\'t have any pages defined yet.'),
+      '#header' => [
+        $this->t('Label'),
+        $this->t('Machine-Name'),
+        $this->t('Weight'),
+      ],
+      '#empty' => $this->t("This wizard doesn't have any pages defined yet."),
       '#tabledrag' => [
         [
           'action' => 'order',
@@ -59,4 +70,5 @@ class WizardEditForm extends WizardForm {
 
     return $form;
   }
+
 }

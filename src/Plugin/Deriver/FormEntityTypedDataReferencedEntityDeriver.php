@@ -8,12 +8,16 @@ use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Core\TypedData\DataDefinitionInterface;
 use Drupal\Core\TypedData\TypedDataManagerInterface;
 use Drupal\ctools\Plugin\Deriver\TypedDataPropertyDeriverBase;
-use Drupal\field\FieldConfigInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Provides a deriver class for Flexiform form entities.
+ */
 class FormEntityTypedDataReferencedEntityDeriver extends TypedDataPropertyDeriverBase {
 
   /**
+   * The entity type bundle info.
+   *
    * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
    */
   protected $entityBundleInfo;
@@ -57,7 +61,7 @@ class FormEntityTypedDataReferencedEntityDeriver extends TypedDataPropertyDerive
     $bundle_info = $base_definition->getConstraint('Bundle');
     // Identify base definitions that appear on bundle-able entities.
     if ($bundle_info && array_filter($bundle_info) && $base_definition->getConstraint('EntityType')) {
-      $base_data_type =  'entity:' . $base_definition->getConstraint('EntityType');
+      $base_data_type = 'entity:' . $base_definition->getConstraint('EntityType');
     }
     // Otherwise, just use the raw data type identifier.
     else {
@@ -91,7 +95,7 @@ class FormEntityTypedDataReferencedEntityDeriver extends TypedDataPropertyDerive
       else {
         $label = $derivative['label'];
         foreach ($this->entityBundleInfo->getBundleInfo($derivative['entity_type']) as $bundle => $info) {
-          $derivative['label'] = $label.' ('.$info['label'].')';
+          $derivative['label'] = $label . ' (' . $info['label'] . ')';
           $derivative['bundle'] = $bundle;
           $this->derivatives[$base_data_type . ':' . $property_name . ':' . $bundle] = $derivative;
         }

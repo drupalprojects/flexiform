@@ -5,8 +5,9 @@ namespace Drupal\flexiform\FormElement;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Trait for basic form element things. Because ContextAwarePluginBase is not
- * split into traits.
+ * Trait for basic form element things.
+ *
+ * Because ContextAwarePluginBase is not split into traits.
  */
 trait FormElementBaseTrait {
 

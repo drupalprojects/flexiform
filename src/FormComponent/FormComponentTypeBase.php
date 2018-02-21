@@ -4,11 +4,12 @@ namespace Drupal\flexiform\FormComponent;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\field_ui\Form\EntityDisplayFormBase;
-use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 use Drupal\flexiform\FlexiformEntityFormDisplay;
 
+/**
+ * Base class for form component types.
+ */
 class FormComponentTypeBase extends PluginBase implements FormComponentTypeInterface {
 
   /**
@@ -35,10 +36,10 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
   /**
    * {@inheritdoc}
    */
-  public function getComponent($name, $options = []) {
+  public function getComponent($name, array $options = []) {
     $class = $this->getPluginDefinition()['component_class'];
     if (!class_exists($class)) {
-      throw new \Exception("No Component class for Form Component Type ".$this->getPluginId());
+      throw new \Exception("No Component class for Form Component Type " . $this->getPluginId());
     }
 
     if (empty($options)) {
@@ -76,13 +77,6 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
    */
   public function getFormDisplay() {
     return $this->formDisplay;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
   /**
@@ -146,12 +140,6 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
     $form_display = $this->getFormDisplay();
     $display_options = $form_display->getComponent($component_name);
 
-    // Disable fields without any applicable plugins.
-    //if (empty($this->getApplicableRendererPluginOptions($component_name))) {
-    //  $form_display->removeComponent($component_name)->save();
-    //  $display_options = $form_display->getComponent($component_name);
-    //}
-
     $component = $this->getComponent($component_name, $display_options);
     $label = $component->getAdminLabel();
 
@@ -169,16 +157,16 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
       ],
       'weight' => [
         '#type' => 'textfield',
-        '#title' => t('Weight for @title', array('@title' => $label)),
+        '#title' => t('Weight for @title', ['@title' => $label]),
         '#title_display' => 'invisible',
         '#default_value' => $display_options ? $display_options['weight'] : '0',
         '#size' => 3,
-        '#attributes' => array('class' => array('field-weight')),
+        '#attributes' => ['class' => ['field-weight']],
       ],
       'parent_wrapper' => [
         'parent' => [
           '#type' => 'select',
-          '#title' => t('Label display for @title', array('@title' => $label)),
+          '#title' => t('Label display for @title', ['@title' => $label]),
           '#title_display' => 'invisible',
           '#options' => array_combine($regions, $regions),
           '#empty_value' => '',
@@ -205,29 +193,29 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
       ],
     ];
 
-    $row['plugin'] = array(
-      'type' => array(
+    $row['plugin'] = [
+      'type' => [
         '#type' => 'select',
-        '#title' => t('Plugin for @title', array('@title' => $label)),
+        '#title' => t('Plugin for @title', ['@title' => $label]),
         '#title_display' => 'invisible',
         '#options' => $this->getApplicableRendererPluginOptions($component_name),
         '#default_value' => $display_options ? (!empty($display_options['type']) ? $display_options['type'] : $this->getDefaultRendererPlugin($component_name)) : 'hidden',
-        '#parents' => array('fields', $component_name, 'type'),
-        '#attributes' => array('class' => array('field-plugin-type')),
-      ),
-      'settings_edit_form' => array(),
-    );
+        '#parents' => ['fields', $component_name, 'type'],
+        '#attributes' => ['class' => ['field-plugin-type']],
+      ],
+      'settings_edit_form' => [],
+    ];
 
     // Base button element for the various plugin settings actions.
-    $base_button = array(
-      '#submit' => array('::multistepSubmit'),
-      '#ajax' => array(
+    $base_button = [
+      '#submit' => ['::multistepSubmit'],
+      '#ajax' => [
         'callback' => '::multistepAjax',
         'wrapper' => 'field-display-overview-wrapper',
         'effect' => 'fade',
-      ),
+      ],
       '#field_name' => $component_name,
-    );
+    ];
 
     $settings_form_base = [
       '#parents' => ['fields', $component_name, 'settings_edit_form'],
@@ -235,76 +223,79 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
     if ($form_state->get('plugin_settings_edit') == $component_name) {
       // We are currently editing this field's plugin settings. Display the
       // settings form and submit buttons.
-      $row['plugin']['settings_edit_form'] = array();
+      $row['plugin']['settings_edit_form'] = [];
 
       // Generate the settings form and allow other modules to alter it.
       if ($settings_form = $component->settingsForm($settings_form_base, $form_state)) {
         $row['plugin']['#cell_attributes'] = ['colspan' => 3];
         $row['plugin']['settings_edit_form'] = $settings_form + [
           '#type' => 'container',
-          '#attributes' => array('class' => array('field-plugin-settings-edit-form')),
-          '#parents' => array('fields', $component_name, 'settings_edit_form'),
-          'label' => array(
+          '#attributes' => ['class' => ['field-plugin-settings-edit-form']],
+          '#parents' => ['fields', $component_name, 'settings_edit_form'],
+          'label' => [
             '#markup' => t('Plugin settings'),
-          ),
-          'actions' => array(
+          ],
+          'actions' => [
             '#type' => 'actions',
-            'save_settings' => $base_button + array(
+            'save_settings' => $base_button + [
               '#type' => 'submit',
               '#button_type' => 'primary',
               '#name' => $component_name . '_plugin_settings_update',
               '#value' => t('Update'),
               '#op' => 'update',
-            ),
-            'cancel_settings' => $base_button + array(
+            ],
+            'cancel_settings' => $base_button + [
               '#type' => 'submit',
               '#name' => $component_name . '_plugin_settings_cancel',
               '#value' => t('Cancel'),
               '#op' => 'cancel',
               // Do not check errors for the 'Cancel' button, but make sure we
               // get the value of the 'plugin type' select.
-              '#limit_validation_errors' => array(array('fields', $component_name, 'type')),
-            ),
-          ),
+              '#limit_validation_errors' => [
+                ['fields', $component_name, 'type'],
+              ],
+            ],
+          ],
         ];
         $row['#attributes']['class'][] = 'field-plugin-settings-editing';
       }
     }
     else {
-      $row['settings_summary'] = array();
-      $row['settings_edit'] = array();
+      $row['settings_summary'] = [];
+      $row['settings_edit'] = [];
 
       // Display a summary of the current plugin settings, and (if the
       // summary is not empty) a button to edit them.
       $summary = $component->settingsSummary();
 
       if (!empty($summary)) {
-        $row['settings_summary'] = array(
+        $row['settings_summary'] = [
           '#type' => 'inline_template',
           '#template' => '<div class="field-plugin-summary">{{ summary|safe_join("<br />") }}</div>',
-          '#context' => array('summary' => $summary),
-          '#cell_attributes' => array('class' => array('field-plugin-summary-cell')),
-        );
+          '#context' => ['summary' => $summary],
+          '#cell_attributes' => ['class' => ['field-plugin-summary-cell']],
+        ];
       }
 
       // Check selected plugin settings to display edit link or not.
       $settings_form = $component->settingsForm($settings_form_base, $form_state);
       if (!empty($settings_form)) {
-        $row['settings_edit'] = $base_button + array(
+        $row['settings_edit'] = $base_button + [
           '#type' => 'image_button',
           '#name' => $component_name . '_settings_edit',
           '#src' => 'core/misc/icons/787878/cog.svg',
-          '#attributes' => array('class' => array('field-plugin-settings-edit'), 'alt' => t('Edit')),
+          '#attributes' => ['class' => ['field-plugin-settings-edit'], 'alt' => t('Edit')],
           '#op' => 'edit',
           // Do not check errors for the 'Edit' button, but make sure we get
           // the value of the 'plugin type' select.
-          '#limit_validation_errors' => array(array('fields', $component_name, 'type')),
+          '#limit_validation_errors' => [['fields', $component_name, 'type']],
           '#prefix' => '<div class="field-plugin-settings-edit-wrapper">',
           '#suffix' => '</div>',
-        );
+        ];
       }
     }
 
     return $row;
   }
+
 }

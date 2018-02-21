@@ -1,18 +1,17 @@
 <?php
+
 namespace Drupal\flexiform\Form;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Ajax\SetDialogTitleCommand;
 use Drupal\Core\Ajax\ReplaceCommand;
-use Drupal\Core\Ajax\RedirectCommand;
-use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\flexiform\FlexiformEntityFormDisplayInterface;
-use Drupal\flexiform\FlexiformFormEntityPluginManager;
-use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Provides a form for adding new entity forms.
+ */
 class FormEntityAddForm extends FormEntityBaseForm {
 
   /**
@@ -102,4 +101,5 @@ class FormEntityAddForm extends FormEntityBaseForm {
     parent::submitForm($form, $form_state);
     $form_state->set('selected_form_entity', FALSE);
   }
+
 }

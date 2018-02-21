@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\Annotation\FormEnhancer.
- */
-
 namespace Drupal\flexiform\Annotation;
 
 use Drupal\Component\Annotation\Plugin;
@@ -12,7 +7,7 @@ use Drupal\Component\Annotation\Plugin;
 /**
  * Defines a flexiform form enchancer plugin annotation object.
  *
- * Plugin Namespace: Plugin\FormEnhancer
+ * Plugin Namespace: Plugin\FormEnhancer.
  *
  * @see \Drupal\flexiform\FormEnhancerPluginManager
  * @see \Drupal\flexiform\FormEnhancerInterface
@@ -34,9 +29,9 @@ class FormEnhancer extends Plugin {
   /**
    * The human-readable name of the form compoenent type.
    *
-   * @ingroup plugin_translatable
-   *
    * @var \Drupal\Core\Annotation\Translation
+   *
+   * @ingroup plugin_translatable
    */
   public $label;
 

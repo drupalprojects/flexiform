@@ -79,4 +79,5 @@ class WizardAccess extends EntityAccessControlHandler implements EntityHandlerIn
     }
     return parent::checkAccess($entity, $operation, $account);
   }
+
 }

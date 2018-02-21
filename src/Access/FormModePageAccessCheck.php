@@ -4,7 +4,6 @@ namespace Drupal\flexiform\Access;
 
 use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\Entity\EntityFormMode;
 use Drupal\Core\Routing\RouteMatch;
 use Symfony\Component\HttpFoundation\Request;
@@ -52,4 +51,5 @@ class FormModePageAccessCheck implements AccessInterface {
 
     return $provided;
   }
+
 }

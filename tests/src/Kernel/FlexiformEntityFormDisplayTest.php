@@ -2,7 +2,7 @@
 
 namespace Drupal\Tests\flexiform\Kernel;
 
-use \Drupal\Tests\field_ui\Kernel\EntityFormDisplayTest;
+use Drupal\Tests\field_ui\Kernel\EntityFormDisplayTest;
 
 /**
  * Tests the entity display configuration entities with Flexiform enabled.
@@ -17,9 +17,5 @@ class FlexiformEntityFormDisplayTest extends EntityFormDisplayTest {
    * @var string[]
    */
   public static $modules = ['field_ui', 'field', 'flexiform', 'entity_test', 'field_test', 'user', 'text'];
-
-  protected function setUp() {
-    parent::setUp();
-  }
 
 }

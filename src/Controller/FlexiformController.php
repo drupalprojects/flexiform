@@ -2,14 +2,12 @@
 
 namespace Drupal\flexiform\Controller;
 
-use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\Entity\EntityFormMode;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Routing\RouteMatch;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\flexiform\Utility\Token;
 use Drupal\flexiform\FlexiformManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -45,6 +43,11 @@ class FlexiformController extends ControllerBase {
    * Construct a new flexiform controller.
    *
    * @param \Drupal\flexiform\Utility\Token $token
+   *   The token service.
+   * @param \Drupal\Core\Form\FormBuilderInterface $form_builder
+   *   The entity form builder.
+   * @param \Drupal\flexiform\FlexiformManager $flexiform_manager
+   *   The flexiform manager.
    */
   public function __construct(Token $token, FormBuilderInterface $form_builder, FlexiformManager $flexiform_manager) {
     $this->token = $token;
@@ -76,8 +79,8 @@ class FlexiformController extends ControllerBase {
     list($entity_type_id, $display_mode_name) = explode('.', $form_mode->id(), 2);
     $entity_form_display = EntityFormDisplay::collectRenderDisplay($entity, $display_mode_name);
     $form_object = $this->flexiformManager->getFormObject($entity_form_display, [
-        $entity_form_display->getBaseEntityNamespace() => $entity,
-      ]);
+      $entity_form_display->getBaseEntityNamespace() => $entity,
+    ]);
 
     $form_state = new FormState();
     $form_state->set('form_entity_provided', $provided);
@@ -125,4 +128,5 @@ class FlexiformController extends ControllerBase {
 
     return $provided;
   }
+
 }

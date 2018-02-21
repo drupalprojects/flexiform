@@ -9,9 +9,7 @@ use Drupal\Core\Field\FieldTypePluginManagerInterface;
 use Drupal\Core\Field\WidgetPluginManager;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Render\RendererInterface;
 use Drupal\field_ui\Form\EntityDisplayFormBase;
-use Drupal\flexiform\FlexiformEntityFormDisplay;
 use Drupal\flexiform\FormComponent\FormComponentTypeBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -69,14 +67,20 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
   }
 
   /**
-   * Construct a new FieldWidgetComponentType object
+   * Construct a new FieldWidgetComponentType object.
    *
    * @param array $configuration
-   * @param $plugin_id
-   * @param $plugin_definitions
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
    * @param \Drupal\Core\Field\WidgetPluginManager $plugin_manager
+   *   The plugin type manager.
    * @param \Drupal\Core\Field\FieldTypePluginManagerInterface $field_type_manager
+   *   The field type plugin manager.
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
+   *   The entity field manager.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, WidgetPluginManager $plugin_manager, FieldTypePluginManagerInterface $field_type_manager, EntityFieldManagerInterface $entity_field_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -94,8 +98,8 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
       foreach ($this->getFormEntityManager()->getFormEntities() as $namespace => $form_entity) {
         foreach ($this->entityFieldManager->getFieldDefinitions($form_entity->getEntityType(), $form_entity->getBundle()) as $field_name => $field_definition) {
           if (($this->getFormDisplay()->getMode() === EntityDisplayBase::CUSTOM_MODE) || ($field_definition->getDisplayOptions('form'))) {
-            // Give field definitions a clone for form entities so that overrides
-            // don't copy accross two different fields.
+            // Give field definitions a clone for form entities so that
+            // overrides don't copy accross two different fields.
             $component_name = !empty($namespace) ? "{$namespace}:{$field_name}" : $field_name;
             $this->fieldDefinitions[$component_name] = clone $field_definition;
 
@@ -131,7 +135,7 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
   /**
    * {@inheritdoc}
    */
-  public function getComponent($name, $options = []) {
+  public function getComponent($name, array $options = []) {
     $component = parent::getComponent($name, $options);
     if ($field_definition = $this->getFieldDefinition($name)) {
       $component->setFieldDefinition($this->getFieldDefinition($name));
@@ -159,7 +163,7 @@ class FieldWidgetComponentType extends FormComponentTypeBase implements Containe
   protected function getApplicableRendererPluginOptions($component_name) {
     $field_definition = $this->getFieldDefinition($component_name);
     if (!$field_definition) {
-      print "NAME: ".$component_name;
+      print "NAME: " . $component_name;
     }
     $options = $this->pluginManager->getOptions($field_definition->getType());
     $applicable_options = [];

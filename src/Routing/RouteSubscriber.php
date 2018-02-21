@@ -44,7 +44,7 @@ class RouteSubscriber extends FieldUIRouteSubscriber {
         $options = [];
         foreach ($exposure_settings['parameters'] as $name => $parameter_info) {
           $options['parameters'][$name] = [
-            'type' => 'entity:'.$parameter_info['entity_type'],
+            'type' => 'entity:' . $parameter_info['entity_type'],
           ];
         }
         $options['parameters']['form_mode'] = [
@@ -79,9 +79,9 @@ class RouteSubscriber extends FieldUIRouteSubscriber {
 
         $options = $entity_route->getOptions();
         if ($bundle_entity_type = $entity_type->getBundleEntityType()) {
-          $options['parameters'][$bundle_entity_type] = array(
+          $options['parameters'][$bundle_entity_type] = [
             'type' => 'entity:' . $bundle_entity_type,
-          );
+          ];
         }
         // Special parameter used to easily recognize all Field UI routes.
         $options['_field_ui'] = TRUE;
@@ -98,22 +98,22 @@ class RouteSubscriber extends FieldUIRouteSubscriber {
 
         $route = new Route(
           "$path/form-display/{form_mode_name}/add-form-entity",
-          array(
+          [
             '_form' => '\Drupal\flexiform\Form\FormEntityAddForm',
             '_title' => 'Add form entity',
-          ) + $defaults,
-          array('_field_ui_form_mode_access' => 'administer ' . $entity_type_id . ' form display'),
+          ] + $defaults,
+          ['_field_ui_form_mode_access' => 'administer ' . $entity_type_id . ' form display'],
           $options
         );
         $collection->add("entity.entity_form_display.{$entity_type_id}.form_mode.form_entity_add", $route);
 
         $route = new Route(
           "$path/form-display/{form_mode_name}/edit-form-entity/{entity_namespace}",
-          array(
+          [
             '_form' => '\Drupal\flexiform\Form\FormEntityEditForm',
             '_title' => 'Configure form entity',
-          ) + $defaults,
-          array('_field_ui_form_mode_access' => 'administer ' . $entity_type_id . ' form display'),
+          ] + $defaults,
+          ['_field_ui_form_mode_access' => 'administer ' . $entity_type_id . ' form display'],
           $options
         );
         $collection->add("entity.entity_form_display.{$entity_type_id}.form_mode.form_entity_edit", $route);
@@ -123,29 +123,29 @@ class RouteSubscriber extends FieldUIRouteSubscriber {
           $component_type = $this->formComponentTypeManager->createInstance($plugin_id);
           if ($component_type instanceof FormComponentTypeCreateableInterface) {
             $route = new Route(
-              "$path/form-display/add-component-".str_replace('_', '-', $plugin_id),
+              "$path/form-display/add-component-" . str_replace('_', '-', $plugin_id),
               [
                 'component_type' => $plugin_id,
                 'form_mode_name' => 'default',
                 '_form' => '\Drupal\flexiform\Form\FormComponentAddForm',
-                '_title' => 'Add '.$definition['label'],
+                '_title' => 'Add ' . $definition['label'],
               ] + $defaults,
               [
-                '_permission' => 'administer '.$entity_type_id.' display',
+                '_permission' => 'administer ' . $entity_type_id . ' display',
               ],
               $options
             );
             $collection->add("entity.entity_form_display.{$entity_type_id}.default.component_type.{$plugin_id}.add", $route);
 
             $route = new Route(
-              "$path/form-display/{form_mode_name}/add-component-".str_replace('_', '-', $plugin_id),
+              "$path/form-display/{form_mode_name}/add-component-" . str_replace('_', '-', $plugin_id),
               [
                 'component_type' => $plugin_id,
                 '_form' => '\Drupal\flexiform\Form\FormComponentAddForm',
-                '_title' => 'Add '.$definition['label'],
+                '_title' => 'Add ' . $definition['label'],
               ] + $defaults,
               [
-                '_permission' => 'administer '.$entity_type_id.' display',
+                '_permission' => 'administer ' . $entity_type_id . ' display',
               ],
               $options
             );
@@ -155,4 +155,5 @@ class RouteSubscriber extends FieldUIRouteSubscriber {
       }
     }
   }
+
 }

@@ -4,7 +4,6 @@ namespace Drupal\flexiform_rules\Plugin\FormEnhancer;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\SortArray;
-use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -79,7 +78,7 @@ class SubmitButtonRules extends ConfigurableFormEnhancerBase implements Containe
       $form[$path] = [
         '#type' => 'details',
         '#title' => $this->t('@label Button Submission Rules', ['@label' => $label]),
-        '#description' => 'Array Parents: '.$original_path,
+        '#description' => 'Array Parents: ' . $original_path,
         '#tree' => TRUE,
         '#open' => TRUE,
       ];
@@ -111,7 +110,7 @@ class SubmitButtonRules extends ConfigurableFormEnhancerBase implements Containe
 
           $form[$path]['rules'][$rule_name] = [
             '#attributes' => [
-              'class' => [ 'draggable' ],
+              'class' => ['draggable'],
             ],
             '#weight' => $info['weight'],
             'rule' => $rule->toLink($rule->label(), 'edit-form')->toRenderable(),
@@ -120,7 +119,7 @@ class SubmitButtonRules extends ConfigurableFormEnhancerBase implements Containe
               '#title' => $this->t('Execution Order for @title', ['@title' => $rule->label()]),
               '#title_display' => 'invisible',
               '#default_value' => $info['weight'],
-              '#attributes' => [ 'class' => [ 'rule-weight' ] ],
+              '#attributes' => ['class' => ['rule-weight']],
             ],
             'operations' => [
               '#type' => 'container',
@@ -143,7 +142,7 @@ class SubmitButtonRules extends ConfigurableFormEnhancerBase implements Containe
       $parents = $form['#parents'];
       $form[$path]['rules']['__new_rule'] = [
         '#attributes' => [
-          'class' => [ 'draggable' ],
+          'class' => ['draggable'],
         ],
         '#weight' => $max_weight + 1,
         'rule' => [
@@ -159,7 +158,10 @@ class SubmitButtonRules extends ConfigurableFormEnhancerBase implements Containe
             '#machine_name' => [
               'exists' => [static::class, 'configurationFormRuleExists'],
               'replace_pattern' => '([^a-z0-9_]+)|(^custom$)',
-              'source' => array_merge($form['#array_parents'], [$path, 'rules', '__new_rule', 'rule', 'label']),
+              'source' => array_merge(
+                $form['#array_parents'],
+                [$path, 'rules', '__new_rule', 'rule', 'label']
+              ),
             ],
           ],
         ],
@@ -168,12 +170,12 @@ class SubmitButtonRules extends ConfigurableFormEnhancerBase implements Containe
           '#title' => $this->t('Execution Order for New Rule'),
           '#title_display' => 'invisible',
           '#default_value' => $max_weight,
-          '#attributes' => [ 'class' => [ 'rule-weight' ] ],
+          '#attributes' => ['class' => ['rule-weight']],
         ],
         'operations' => [
           '#type' => 'container',
           'add' => [
-            '#name' => 'add'.$path.'rule',
+            '#name' => 'add' . $path . 'rule',
             '#type' => 'submit',
             '#value' => $this->t('Add New Rule'),
             '#submit' => [
@@ -274,9 +276,10 @@ class SubmitButtonRules extends ConfigurableFormEnhancerBase implements Containe
   }
 
   /**
-   * Form Check For whether the rule Exists.
+   * Form Check For whether the rule exists.
    *
-   * I made this static because something about the serialization wasn't working.
+   * I made this static because something about the serialization wasn't
+   * working.
    */
   public static function configurationFormRuleExists($name) {
     return (bool) \Drupal::service('entity_type.manager')->getStorage('rules_component')->load($name);

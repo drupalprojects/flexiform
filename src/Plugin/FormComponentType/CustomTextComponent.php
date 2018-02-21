@@ -3,14 +3,8 @@
 namespace Drupal\flexiform\Plugin\FormComponentType;
 
 use Drupal\flexiform\Utility\Token;
-use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\WidgetPluginManager;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\field_ui\Form\EntityDisplayFormBase;
-use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 use Drupal\flexiform\FlexiformEntityFormDisplay;
 use Drupal\flexiform\FormComponent\FormComponentBase;
 use Drupal\flexiform\FormComponent\ContainerFactoryFormComponentInterface;
@@ -22,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class CustomTextComponent extends FormComponentBase implements ContainerFactoryFormComponentInterface {
 
   /**
-   * Token service
+   * Token service.
    *
    * @var \Drupal\Core\Utility\Token
    */
@@ -130,4 +124,5 @@ class CustomTextComponent extends FormComponentBase implements ContainerFactoryF
     $options['format'] = $values['content']['format'];
     return $options;
   }
+
 }

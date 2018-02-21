@@ -6,10 +6,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\WidgetPluginManager;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\field_ui\Form\EntityDisplayFormBase;
-use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 use Drupal\flexiform\FlexiformEntityFormDisplay;
 use Drupal\flexiform\FormComponent\FormComponentBase;
 use Drupal\flexiform\FormComponent\ContainerFactoryFormComponentInterface;
@@ -193,7 +190,7 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
   public function getAdminLabel() {
     if (count($this->getFormEntityManager()->getFormEntities()) > 1) {
       $namespace = $this->getEntityNamespace();
-      return $this->getFieldDefinition()->getLabel().' ['.$this->getFormEntityManager()->getFormEntity($namespace)->getFormEntityContextDefinition()->getLabel().']';
+      return $this->getFieldDefinition()->getLabel() . ' [' . $this->getFormEntityManager()->getFormEntity($namespace)->getFormEntityContextDefinition()->getLabel() . ']';
     }
     return $this->getFieldDefinition()->getLabel();
   }
@@ -266,7 +263,7 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
         $this->getFieldDefinition(),
         $this->getFormDisplay()->getMode(),
         $form,
-        $form_state
+        $form_state,
       ]);
     }
 
@@ -278,4 +275,5 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
     ];
     return $settings_form;
   }
+
 }

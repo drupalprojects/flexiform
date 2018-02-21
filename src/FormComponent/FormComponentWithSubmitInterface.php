@@ -10,7 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 interface FormComponentWithSubmitInterface extends FormComponentInterface {
 
   /**
-   * Perform submission logic
+   * Perform submission logic.
    *
    * @var array $form
    *   Form array

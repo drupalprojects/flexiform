@@ -5,7 +5,6 @@ namespace Drupal\flexiform\Plugin\FormEnhancer;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Element;
 use Drupal\flexiform\FormEnhancer\ConfigurableFormEnhancerBase;
 use Drupal\flexiform\FormEnhancer\SubmitButtonFormEnhancerTrait;
 
@@ -38,7 +37,7 @@ class SubmitButtonLabel extends ConfigurableFormEnhancerBase {
       $form['label'][$path] = [
         '#type' => 'textfield',
         '#title' => $this->t('@label Button Text', ['@label' => $label]),
-        '#description' => 'Array Parents: '.$original_path,
+        '#description' => 'Array Parents: ' . $original_path,
         '#default_value' => !empty($this->configuration[$path]) ? $this->configuration[$path] : '',
       ];
     }

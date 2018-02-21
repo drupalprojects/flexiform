@@ -4,10 +4,13 @@ namespace Drupal\flexiform\FormEnhancer;
 
 use Drupal\Core\Render\Element;
 
+/**
+ * Trait for submit buttons in form enhancers.
+ */
 trait SubmitButtonFormEnhancerTrait {
 
   /**
-   * Form display
+   * Form display.
    *
    * @var \Drupal\flexiform\FlexiformEntityFormDisplayInterface
    */
@@ -41,4 +44,5 @@ trait SubmitButtonFormEnhancerTrait {
     }
     return $buttons;
   }
+
 }

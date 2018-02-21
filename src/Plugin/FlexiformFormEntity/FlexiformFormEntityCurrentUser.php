@@ -5,7 +5,9 @@ namespace Drupal\flexiform\Plugin\FlexiformFormEntity;
 use Drupal\flexiform\FormEntity\FlexiformFormEntityBase;
 
 /**
- * Form Entity plugin for entities that are passed in through the configuration
+ * Form Entity plugin.
+ *
+ * For entities that are passed in through the configuration
  * like the base entity.
  *
  * @FlexiformFormEntity(
@@ -14,7 +16,6 @@ use Drupal\flexiform\FormEntity\FlexiformFormEntityBase;
  *   entity_type = "user",
  *   bundle = "user"
  * )
- *
  */
 class FlexiformFormEntityCurrentUser extends FlexiformFormEntityBase {
 

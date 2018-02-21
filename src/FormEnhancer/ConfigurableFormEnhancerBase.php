@@ -37,4 +37,5 @@ abstract class ConfigurableFormEnhancerBase extends FormEnhancerBase implements 
       return parent::applies($event);
     }
   }
+
 }

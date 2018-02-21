@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\FlexiformFormEntityPluginManager
- */
-
 namespace Drupal\flexiform;
 
 use Drupal\Core\Cache\CacheBackendInterface;
@@ -16,7 +11,7 @@ use Drupal\Core\Plugin\DefaultPluginManager;
 /**
  * Provides a Flexiform form Entity Plugin Manager.
  */
-class FlexiformFormEntityPluginManager extends DefaultPluginManager implements ContextAwarePluginManagerInterface  {
+class FlexiformFormEntityPluginManager extends DefaultPluginManager implements ContextAwarePluginManagerInterface {
 
   use ContextAwarePluginManagerTrait;
 
@@ -36,4 +31,5 @@ class FlexiformFormEntityPluginManager extends DefaultPluginManager implements C
     $this->alterInfo('flexiform_form_entity');
     $this->setCacheBackend($cache_backend, 'flexiform_form_entity_plugins');
   }
+
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\Plugin\FlexiformFormEntity\FlexiformFormEntityProvided.
- */
-
 namespace Drupal\flexiform\Plugin\FlexiformFormEntity;
 
 use Drupal\Core\Entity\EntityInterface;
@@ -12,28 +7,32 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\flexiform\Annotation\FlexiformFormEntity;
 use Drupal\flexiform\FormEntity\FlexiformFormEntityBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Form Entity plugin for entities that are passed in through the configuration
+ * Form Entity plugin.
+ *
+ * For entities that are passed in through the configuration
  * like the base entity.
  *
  * @FlexiformFormEntity(
  *   id = "provided",
  *   label = @Translation("Provided Entity"),
  * )
- *
  */
 class FlexiformFormEntityProvided extends FlexiformFormEntityBase implements ContainerFactoryPluginInterface {
 
   /**
+   * The entity type manager.
+   *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
   /**
+   * The entity type bundle info service.
+   *
    * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
    */
   protected $entityBundleInfo;
@@ -54,12 +53,19 @@ class FlexiformFormEntityProvided extends FlexiformFormEntityBase implements Con
   }
 
   /**
-   * Create a new instance of this plugins.
+   * Create a new instance of this plugin.
    *
    * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
+   *   The container to pull out services.
    * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
-   * @param array $definition
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   *
+   * @return FlexiformFormEntityProvided
+   *   The new instance of this plugin.
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
@@ -151,4 +157,5 @@ class FlexiformFormEntityProvided extends FlexiformFormEntityBase implements Con
   public function ajaxBundleElementCallback(array $form, FormStateInterface $form_state) {
     return $form['configuration']['bundle'];
   }
+
 }

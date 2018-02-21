@@ -4,6 +4,7 @@
  * @file
  * Hooks specific to flexiform.
  */
+
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\flexiform\FormEntity\FlexiformFormEntityInterface;
 

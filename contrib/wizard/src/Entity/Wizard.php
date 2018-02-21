@@ -352,4 +352,5 @@ class Wizard extends ConfigEntityBase implements EntityWithPluginCollectionInter
 
     return $vars;
   }
+
 }

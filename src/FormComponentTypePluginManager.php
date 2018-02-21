@@ -1,16 +1,10 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\FormComponentTypePluginManager
- */
-
 namespace Drupal\flexiform;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
-use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 
 /**
  * Provides a Flexiform form Entity Plugin Manager.
@@ -33,5 +27,5 @@ class FormComponentTypePluginManager extends DefaultPluginManager {
     $this->alterInfo('flexiform_form_compoent_type');
     $this->setCacheBackend($cache_backend, 'flexiform_form_component_type_plugins');
   }
-}
 
+}

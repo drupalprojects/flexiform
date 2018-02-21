@@ -3,8 +3,10 @@
 namespace Drupal\flexiform\FormComponent;
 
 use Drupal\flexiform\FlexiformEntityFormDisplay;
-use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 
+/**
+ * Interface for form component type plugins.
+ */
 interface FormComponentTypeInterface {
 
   /**
@@ -41,6 +43,6 @@ interface FormComponentTypeInterface {
    *
    * @return \Drupal\flexiform\FormComponent\FormComponentInterface
    */
-  public function getComponent($name, $options);
+  public function getComponent($name, array $options);
 
 }

@@ -2,7 +2,6 @@
 
 namespace Drupal\flexiform\Plugin\FormEnhancer;
 
-use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Ajax\AjaxResponse;
@@ -15,8 +14,6 @@ use Drupal\Core\Url;
 use Drupal\flexiform\Ajax\ReloadCommand;
 use Drupal\flexiform\FormEnhancer\ConfigurableFormEnhancerBase;
 use Drupal\flexiform\FormEnhancer\SubmitButtonFormEnhancerTrait;
-use Drupal\flexiform\Utility\Token;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -55,7 +52,7 @@ class SubmitButtonAjax extends ConfigurableFormEnhancerBase {
       $form['ajax'][$path] = [
         '#type' => 'details',
         '#title' => $this->t('@label Button Ajax', ['@label' => $label]),
-        '#description' => 'Array Parents: '.$original_path,
+        '#description' => 'Array Parents: ' . $original_path,
         '#open' => TRUE,
       ];
       $form['ajax'][$path]['enabled'] = [
@@ -68,7 +65,7 @@ class SubmitButtonAjax extends ConfigurableFormEnhancerBase {
       $parents = array_merge($form['#parents'], [$path, 'enabled']);
       $name = array_shift($parents);
       if (!empty($parents)) {
-        $name .= '['.implode('][', $parents).']';
+        $name .= '[' . implode('][', $parents) . ']';
       }
       $form['ajax'][$path]['response'] = [
         '#type' => 'select',
@@ -82,7 +79,7 @@ class SubmitButtonAjax extends ConfigurableFormEnhancerBase {
         ],
         '#states' => [
           'visible' => [
-            ':input[name="'.$name.'"]' => ['checked' => TRUE],
+            ':input[name="' . $name . '"]' => ['checked' => TRUE],
           ],
         ],
       ];
@@ -103,7 +100,7 @@ class SubmitButtonAjax extends ConfigurableFormEnhancerBase {
    */
   public function processForm($element, FormStateInterface $form_state, $form) {
     $needs_wrapping = FALSE;
-    $wrapper_id = $form['#build_id'].'-ajax-wrapper';
+    $wrapper_id = $form['#build_id'] . '-ajax-wrapper';
     foreach ($this->configuration as $key => $ajax_info) {
       if (empty($ajax_info['enabled'])) {
         continue;
@@ -123,8 +120,8 @@ class SubmitButtonAjax extends ConfigurableFormEnhancerBase {
     }
 
     if ($needs_wrapping) {
-      $element['#prefix'] = '<div id="'.$wrapper_id.'">'.(!empty($element['#prefix']) ? $element['#prefix'] : '');
-      $element['#suffix'] = (!empty($element['#suffix']) ? $element['#suffix'] : '').'</div>';
+      $element['#prefix'] = '<div id="' . $wrapper_id . '">' . (!empty($element['#prefix']) ? $element['#prefix'] : '');
+      $element['#suffix'] = (!empty($element['#suffix']) ? $element['#suffix'] : '') . '</div>';
     }
 
     return $element;
@@ -134,7 +131,7 @@ class SubmitButtonAjax extends ConfigurableFormEnhancerBase {
    * Submit AJAX callback for a form.
    */
   public static function formAjaxCallback($form, FormStateInterface $form_state) {
-    $wrapper = (isset($form['#build_id_old']) ? $form['#build_id_old'] : $form['#build_id']).'-ajax-wrapper';
+    $wrapper = (isset($form['#build_id_old']) ? $form['#build_id_old'] : $form['#build_id']) . '-ajax-wrapper';
     if (!$form_state->isExecuted()) {
       return $form;
     }
@@ -153,12 +150,14 @@ class SubmitButtonAjax extends ConfigurableFormEnhancerBase {
           $new_form_state
         );
 
-        $response->addCommand(new InsertCommand('#'.$wrapper, $new_form));
-        $response->addCommand(new PrependCommand('#'.$new_form['#build_id'].'-ajax-wrapper', ['#type' => 'status_messages']));
+        $response->addCommand(new InsertCommand('#' . $wrapper, $new_form));
+        $response->addCommand(new PrependCommand('#' . $new_form['#build_id'] . '-ajax-wrapper', ['#type' => 'status_messages']));
         break;
+
       case 'reload':
         $response->addCommand(new ReloadCommand());
         break;
+
       case 'redirect':
         $redirect_disabled = $form_state->isRedirectdisabled();
         $form_state->disableRedirect(FALSE);
@@ -167,7 +166,7 @@ class SubmitButtonAjax extends ConfigurableFormEnhancerBase {
           if ($redirect instanceof Url) {
             $url = $redirect->toString();
           }
-          else if ($redirect instanceof RedirectResponse) {
+          elseif ($redirect instanceof RedirectResponse) {
             $url = $redirect->getTargetUrl();
           }
           $response->addCommand(new RedirectCommand($url));

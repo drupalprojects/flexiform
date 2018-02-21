@@ -28,4 +28,5 @@ class WizardListBuilder extends ConfigEntityListBuilder {
     $row['path'] = $entity->get('path');
     return $row + parent::buildRow($entity);
   }
+
 }

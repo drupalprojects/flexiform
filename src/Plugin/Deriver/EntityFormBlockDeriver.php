@@ -6,7 +6,6 @@ use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -14,6 +13,9 @@ use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\flexiform\FlexiformEntityFormDisplay;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Provides a deriver class.
+ */
 class EntityFormBlockDeriver extends DeriverBase implements ContainerDeriverInterface {
 
   use StringTranslationTrait;
@@ -111,10 +113,10 @@ class EntityFormBlockDeriver extends DeriverBase implements ContainerDeriverInte
             'form_mode' => $mode_name,
             'context' => [
               'entity' => new ContextDefinition(
-                'entity:'.$entity_type_id,
+                'entity:' . $entity_type_id,
                 $this->t('Base @entity_type', ['@entity_type' => $entity_type->getLabel()])
               ),
-            ]
+            ],
           ] + $base_plugin_definition;
 
           foreach ($entity_form_display->getFormEntityConfig() as $namespace => $form_entity_info) {
@@ -123,7 +125,7 @@ class EntityFormBlockDeriver extends DeriverBase implements ContainerDeriverInte
             }
 
             $this->derivatives[$plugin_id]['context'][$namespace] = new ContextDefinition(
-              'entity:'.$form_entity_info['entity_type'],
+              'entity:' . $form_entity_info['entity_type'],
               $form_entity_info['label']
             );
           }
@@ -133,4 +135,5 @@ class EntityFormBlockDeriver extends DeriverBase implements ContainerDeriverInte
 
     return $this->derivatives;
   }
+
 }

@@ -1,17 +1,14 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\FormEntity\FlexiformFormEntityManager.
- */
-
 namespace Drupal\flexiform\FormEntity;
 
 use Drupal\flexiform\FlexiformEntityFormDisplayInterface;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
-use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
+/**
+ * Class for form entity managers.
+ */
 class FlexiformFormEntityManager {
 
   use StringTranslationTrait;

@@ -66,7 +66,7 @@ class ExtraFieldComponent extends FormComponentBase {
    */
   public function getAdminLabel() {
     if (count($this->getFormEntityManager()->getFormEntities()) > 1) {
-      return $this->extraField['label'].' ['.$this->getFormEntityManager()->getFormEntity('')->getFormEntityContextDefinition()->getLabel().']';
+      return $this->extraField['label'] . ' [' . $this->getFormEntityManager()->getFormEntity('')->getFormEntityContextDefinition()->getLabel() . ']';
     }
     return $this->extraField['label'];
   }

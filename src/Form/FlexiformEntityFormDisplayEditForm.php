@@ -1,27 +1,17 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\flexiform\Form\FlexiformEntityFormDisplayEditForm.
- */
-
 namespace Drupal\flexiform\Form;
 
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\OpenModalDialogCommand;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\PluginSettingsInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\Context\ContextDefinition;
-use Drupal\Core\Url;
 use Drupal\ctools\Form\AjaxFormTrait;
 use Drupal\field_ui\Form\EntityFormDisplayEditForm;
-use Drupal\flexiform\FormEntity\FlexiformFormEntityInterface;
-use Drupal\flexiform\FormEntity\FlexiformFormEntityManager;
 use Drupal\flexiform\FormEnhancer\ConfigurableFormEnhancerInterface;
 
+/**
+ * Provides Flexiform form elements for the EntityFormDisplay entity type.
+ */
 class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
 
   use AjaxFormTrait;
@@ -29,7 +19,7 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
   /**
    * The form entity manager object.
    *
-   * @var \Drupal\flexiform\FormEntity\FlexiformFormEntityManager.
+   * @var \Drupal\flexiform\FormEntity\FlexiformFormEntityManager
    */
   protected $formEntityManager;
 
@@ -60,15 +50,15 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
     ];
     foreach ($this->entity->getFormEnhancers('configuration_form') as $enhancer_name => $enhancer) {
       if ($enhancer instanceof ConfigurableFormEnhancerInterface) {
-        $form['enhancer_'.$enhancer_name] = [
+        $form['enhancer_' . $enhancer_name] = [
           '#type' => 'details',
           '#title' => $enhancer->getPluginDefinition()['label'],
           '#parents' => ['enhancer', $enhancer_name],
-          '#array_parents' => ['enhancer_'.$enhancer_name],
+          '#array_parents' => ['enhancer_' . $enhancer_name],
           '#group' => 'enhancer',
           '#tree' => TRUE,
         ];
-        $form['enhancer_'.$enhancer_name] += $enhancer->configurationForm($form['enhancer_'.$enhancer_name], $form_state);
+        $form['enhancer_' . $enhancer_name] += $enhancer->configurationForm($form['enhancer_' . $enhancer_name], $form_state);
       }
     }
 
@@ -124,7 +114,7 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
     // this then gets saved in the presave of the FormDisplay entity.
     foreach ($entity->getFormEnhancers('configuration_form') as $enhancer_name => $enhancer) {
       if ($enhancer instanceof ConfigurableFormEnhancerInterface) {
-        $enhancer->configurationFormSubmit($form['enhancer_'.$enhancer_name], $form_state);
+        $enhancer->configurationFormSubmit($form['enhancer_' . $enhancer_name], $form_state);
       }
     }
   }
@@ -141,4 +131,5 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
 
     return $this->formEntityManager;
   }
+
 }

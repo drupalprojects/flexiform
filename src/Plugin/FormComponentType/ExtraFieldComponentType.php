@@ -33,12 +33,16 @@ class ExtraFieldComponentType extends FormComponentTypeBase implements Container
   }
 
   /**
-   * Construct a new FieldWidgetComponentType object
+   * Construct a new FieldWidgetComponentType object.
    *
    * @param array $configuration
-   * @param $plugin_id
-   * @param $plugin_definitions
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
+   *   The entity field manager.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityFieldManagerInterface $entity_field_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
@@ -49,7 +53,7 @@ class ExtraFieldComponentType extends FormComponentTypeBase implements Container
   /**
    * {@inheritdoc}
    */
-  public function getComponent($name, $options = []) {
+  public function getComponent($name, array $options = []) {
     $component = parent::getComponent($name, $options);
     $component->setExtraField($this->getExtraField($name));
     return $component;
@@ -203,4 +207,5 @@ class ExtraFieldComponentType extends FormComponentTypeBase implements Container
     $extra_fields = $this->getExtraFields();
     return isset($extra_fields[$component_name]) ? $extra_fields[$component_name] : [];
   }
+
 }

@@ -5,6 +5,9 @@ namespace Drupal\flexiform\FormComponent;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\RendererInterface;
 
+/**
+ * Interface for form component plugins.
+ */
 interface FormComponentInterface {
 
   /**

@@ -5,14 +5,15 @@ namespace Drupal\flexiform\Plugin\FlexiformFormEntity;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Form Entity plugin for entities that are passed in through the configuration
+ * Form Entity plugin.
+ *
+ * For entities that are passed in through the configuration
  * like the base entity.
  *
  * @FlexiformFormEntity(
  *   id = "load",
  *   label = @Translation("Load Entity"),
  * )
- *
  */
 class FlexiformFormEntityLoad extends FlexiformFormEntityProvided {
 

@@ -1,10 +1,9 @@
 <?php
+
 namespace Drupal\flexiform\Form;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
-use Drupal\Core\Ajax\SetDialogTitleCommand;
-use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\Core\Ajax\RedirectCommand;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
@@ -15,6 +14,9 @@ use Drupal\flexiform\FormComponentTypePluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\RouterInterface;
 
+/**
+ * Provides a form for adding new form components.
+ */
 class FormComponentAddForm extends FormBase {
 
   /**
@@ -155,10 +157,10 @@ class FormComponentAddForm extends FormBase {
       $route = $this->router->getRouteCollection()->get($route_name);
       $path = $route->getPath();
 
-      if (strpos($path, '{'.$entity_type->getBundleEntityType().'}') !== FALSE) {
+      if (strpos($path, '{' . $entity_type->getBundleEntityType() . '}') !== FALSE) {
         $params[$entity_type->getBundleEntityType()] = $this->formDisplay->get('bundle');
       }
-      else if (strpos($path, '{bundle}') !== FALSE) {
+      elseif (strpos($path, '{bundle}') !== FALSE) {
         $params['bundles'] = $this->formDisplay->get('bundle');
       }
     }
@@ -182,10 +184,10 @@ class FormComponentAddForm extends FormBase {
       $route = $this->router->getCollection()->get($route_name);
       $path = $route->getPath();
 
-      if (strpos($path, '{'.$entity_type->getBundleEntityType().'}') !== FALSE) {
+      if (strpos($path, '{' . $entity_type->getBundleEntityType() . '}') !== FALSE) {
         $params[$entity_type->getBundleEntityType()] = $this->formDisplay->get('bundle');
       }
-      else if (strpos($path, '{bundle}') !== FALSE) {
+      elseif (strpos($path, '{bundle}') !== FALSE) {
         $params['bundles'] = $this->formDisplay->get('bundle');
       }
     }
@@ -206,4 +208,5 @@ class FormComponentAddForm extends FormBase {
   public function nameExists($name, $element, FormStateInterface $form_state) {
     return ($this->formDisplay->getComponent($name) !== NULL);
   }
+
 }
