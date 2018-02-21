@@ -49,7 +49,7 @@ use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
  *   },
  * )
  */
-class Wizard extends ConfigEntityBase implements EntityWithPluginCollectionInterface {
+class Wizard extends ConfigEntityBase implements WizardInterface {
 
   /**
    * The ID of the wizard entity.
@@ -329,14 +329,14 @@ class Wizard extends ConfigEntityBase implements EntityWithPluginCollectionInter
    * {@inheritdoc}
    */
   public function getContexts() {
-    return $this->contexts;
+    return $this->contexts ?: [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function getPages() {
-    return $this->pages;
+    return $this->pages ?: [];
   }
 
   /**

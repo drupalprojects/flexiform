@@ -4,6 +4,7 @@ namespace Drupal\flexiform_wizard\Form;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -31,6 +32,14 @@ class DefaultWizardOperation extends FormBase {
    * @var string
    */
   protected $step = '';
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormId() {
+    return 'flexiform_wizard_operation_form';
+  }
+
 
   /**
    * {@inheritdoc}
@@ -66,6 +75,13 @@ class DefaultWizardOperation extends FormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $cached_values = $form_state->getTemporaryValue('wizard');
+
+
+    /** @var $page \Drupal\ctools_wizard_test\Entity\ExampleConfigEntity */
+    $this->wizardConfig = $cached_values['flexiform_wizard'];
+    $this->step = $cached_values['step'] = 'test';
+
+
     $this->getFormDisplay()->buildAdvancedForm($cached_values['entities'], $form, $form_state);
 
     // @todo: Actions.
@@ -75,7 +91,7 @@ class DefaultWizardOperation extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array $form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
   }
 
 }

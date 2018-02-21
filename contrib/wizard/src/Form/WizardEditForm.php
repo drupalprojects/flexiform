@@ -13,6 +13,7 @@ class WizardEditForm extends WizardForm {
    * {@inheritdoc}
    */
   public function form(array $form, FormStateInterface $form_state) {
+    /* @var \Drupal\flexiform_wizard\Entity\Wizard $entity */
     $entity = $this->entity;
     $form = parent::form($form, $form_state);
 

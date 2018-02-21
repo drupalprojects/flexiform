@@ -3,8 +3,11 @@
 namespace Drupal\flexiform_wizard\Wizard;
 
 use Drupal\Core\DependencyInjection\ClassResolverInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\TempStore\SharedTempStoreFactory;
+use Drupal\ctools\Wizard\EntityFormWizardBase;
 use Drupal\ctools\Wizard\FormWizardBase;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -12,7 +15,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 /**
  * Provides a default form wizard.
  */
-class DefaultWizard extends FormWizardBase {
+class DefaultWizard extends EntityFormWizardBase {
 
   /**
    * The wizard configuration object.
@@ -28,8 +31,20 @@ class DefaultWizard extends FormWizardBase {
    */
   protected $provided = [];
 
+
+  public function initValues() {
+    $cached_values = parent::initValues();
+
+    $cached_values['step'] = 'test';
+
+    if (!empty($cached_values[$this->getEntityType()])) {
+      $this->wizard = $cached_values[$this->getEntityType()];
+    }
+    return $cached_values;
+  }
+
   /**
-   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $tempstore
+   * @param \Drupal\user\SharedTempStoreFactory $tempstore
    *   Tempstore Factory for keeping track of values in each step of the
    *   wizard.
    * @param \Drupal\Core\Form\FormBuilderInterface $builder
@@ -38,48 +53,48 @@ class DefaultWizard extends FormWizardBase {
    *   The class resolver.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
-   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
-   *   The route match service.
-   * @param string $tempstore_id
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
+   *   The entity manager.
+   * @param $tempstore_id
    *   The shared temp store factory collection name.
-   * @param string|null $machine_name
+   * @param null $machine_name
    *   The SharedTempStore key for our current wizard values.
-   * @param string|null $step
+   * @param null $step
    *   The current active step of the wizard.
    * @param \Drupal\Core\Entity\FieldableEntityInterface[] $provided
    *   The provided (parameter) entities.
    */
-  public function __construct(PrivateTempStoreFactory $tempstore, FormBuilderInterface $builder, ClassResolverInterface $class_resolver, EventDispatcherInterface $event_dispatcher, RouteMatchInterface $route_match, $tempstore_id, $machine_name = NULL, $step = NULL, array $provided = []) {
-    parent::__construct($tempstore, $builder, $class_resolver, $event_dispatcher, $route_match, $tempstore_id, $machine_name, $step);
+  public function __construct(SharedTempStoreFactory $tempstore, FormBuilderInterface $builder, ClassResolverInterface $class_resolver, EventDispatcherInterface $event_dispatcher, EntityManagerInterface $entity_manager, RouteMatchInterface $route_match, $tempstore_id, $machine_name = NULL, $step = NULL, $provided = []) {
+    parent::__construct($tempstore, $builder, $class_resolver, $event_dispatcher, $entity_manager, $route_match, $tempstore_id, $machine_name, $step);
     $this->provided = $provided;
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function getParameters() {
-    return [
-      'tempstore' => \Drupal::service('user.private_tempstore'),
-      'builder' => \Drupal::service('form_builder'),
-      'class_resolver' => \Drupal::service('class_resolver'),
-      'event_dispatcher' => \Drupal::service('event_dispatcher'),
-    ];
+  public function getEntityType() {
+    return 'flexiform_wizard';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function initValues() {
-    $values = parent::initValues();
-    $values['entities'] += $this->provided;
-    return $values;
+  public function exists() {
+    return '\Drupal\flexiform_wizard\Entity\Wizard::load';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getMachineName() {
-    return $this->wizard->id();
+  public function getWizardLabel() {
+    return $this->t('Flexiform');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMachineLabel() {
+    return $this->t('Administrative title');
   }
 
   /**
@@ -89,17 +104,42 @@ class DefaultWizard extends FormWizardBase {
     return \Drupal::service('user.private_tempstore')->get($this->getTempstoreId());
   }
 
+  public function getNextParameters($cached_values) {
+    $parameters = parent::getNextParameters($cached_values);
+    $parameters['commerce_order'] = 1;
+
+    return $parameters;
+  }
+
+  public function getPreviousParameters($cached_values) {
+    $parameters = parent::getPreviousParameters($cached_values);
+    $parameters['commerce_order'] = 1;
+
+    return $parameters;
+  }
+
   /**
    * {@inheritdoc}
    */
   public function getOperations($cached_values) {
     $operations = [];
-    foreach ($this->wizard->getPages() as $name => $page) {
-      $operations[$name] = [
-        'form' => 'Drupal\flexiform_wizard\Form\DefaultWizardOperation',
-        'title' => $page['name'],
-      ];
-    }
+
+//    if ($this->wizard) {
+//      foreach ($this->wizard->getPages() as $name => $page) {
+
+//      }
+//    }
+
+    $operations['test'] = [
+      'form' => 'Drupal\flexiform_wizard\Form\DefaultWizardOperation',
+      'title' => 'Test',
+    ];
+
+    $operations['final'] = [
+      'form' => 'Drupal\flexiform_wizard\Form\DefaultWizardOperation',
+      'title' => 'Final',
+    ];
+
     return $operations;
   }
 
@@ -107,7 +147,8 @@ class DefaultWizard extends FormWizardBase {
    * {@inheritdoc}
    */
   public function getRouteName() {
-    return 'flexiform_wizard.' . $this->wizard->id() . '.step';
+    return 'flexiform_wizard.'.$this->wizard->id().'.step';
   }
 
 }
+
