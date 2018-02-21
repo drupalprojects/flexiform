@@ -21,30 +21,49 @@ use Symfony\Component\Routing\RouterInterface;
 abstract class FormEntityBaseForm extends FormBase {
 
   /**
+   * The form display.
+   *
    * @var \Drupal\flexiform\FlexiformEntityFormDisplay
    */
   protected $formDisplay;
 
   /**
-   * @var \Drupal\flexiform\FlexiformFormEntityInterface
+   * The form entity.
+   *
+   * @var \Drupal\flexiform\FormEntity\FlexiformFormEntityInterface
    */
   protected $formEntity;
 
   /**
+   * The form entity plugin manager.
+   *
    * @var \Drupal\flexiform\FlexiformFormEntityPluginManager
    */
   protected $pluginManager;
 
   /**
+   * The entity type manager.
+   *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
   /**
-   * @var \Symfony\Component\Routing\RouterInterface
+   * The router service.
    *
-   * /**
-   * Constructor.
+   * @var \Symfony\Component\Routing\RouterInterface
+   */
+  protected $router;
+
+  /**
+   * FormEntityBaseForm constructor.
+   *
+   * @param \Drupal\flexiform\FlexiformFormEntityPluginManager $plugin_manager
+   *   The form entity plugin manager.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Symfony\Component\Routing\RouterInterface $router
+   *   The router service.
    */
   public function __construct(FlexiformFormEntityPluginManager $plugin_manager, EntityTypeManagerInterface $entity_type_manager, RouterInterface $router) {
     $this->pluginManager = $plugin_manager;
@@ -66,7 +85,7 @@ abstract class FormEntityBaseForm extends FormBase {
   /**
    * Get the form entity manager.
    *
-   * @return \Drupal\flexiform\FlexiformFormEntityManager
+   * @return \Drupal\flexiform\FormEntity\FlexiformFormEntityManager
    */
   protected function formEntityManager() {
     return $this->formDisplay->getFormEntityManager();

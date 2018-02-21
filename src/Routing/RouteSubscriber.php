@@ -2,6 +2,7 @@
 
 namespace Drupal\flexiform\Routing;
 
+use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\field_ui\Routing\RouteSubscriber as FieldUIRouteSubscriber;
 use Drupal\flexiform\FormComponentTypePluginManager;
@@ -15,6 +16,13 @@ use Symfony\Component\Routing\RouteCollection;
 class RouteSubscriber extends FieldUIRouteSubscriber {
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * The form component type plugin manager.
    *
    * @var \Drupal\flexiform\FormComponentTypePluginManager
@@ -24,12 +32,15 @@ class RouteSubscriber extends FieldUIRouteSubscriber {
   /**
    * Constructs a RouteSubscriber object.
    *
+   * @param \Drupal\Core\Entity\EntityManagerInterface $manager
+   *   The entity type manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    * @param \Drupal\flexiform\FormComponentTypePluginManager $form_component_type_manager
    *   The form component type manager.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, FormComponentTypePluginManager $form_component_type_manager) {
+  public function __construct(EntityManagerInterface $manager, EntityTypeManagerInterface $entity_type_manager, FormComponentTypePluginManager $form_component_type_manager) {
+    parent::__construct($manager);
     $this->entityTypeManager = $entity_type_manager;
     $this->formComponentTypeManager = $form_component_type_manager;
   }
