@@ -144,7 +144,7 @@ class ExtraFieldComponentType extends FormComponentTypeBase implements Container
         ],
         'hidden_name' => [
           '#type' => 'hidden',
-          '#default_value' => $field_id,
+          '#default_value' => $component_name,
           '#attributes' => [
             'class' => [
               'field-name',
