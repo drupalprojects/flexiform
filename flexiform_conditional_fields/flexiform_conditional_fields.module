@@ -138,7 +138,6 @@ function flexiform_conditional_fields_element_after_build($element, &$form_state
         if (!empty($field['#type']) && $field['#type'] != 'container'
           && in_array($dependency['options']['state'], array('required', '!required'))
           && !empty($form[$dependency['dependee']]['#flexiform_element'])) {
-          $field['#element_validate']['fcfv'] = 'flexiform_conditional_fields_required_element_validate';
           $field['#fcfv_elements'][$dependency['dependee']] = array(
             'element' => $form[$dependency['dependee']],
             'state' => $dependency['options']['state'],
@@ -184,7 +183,7 @@ function flexiform_conditional_fields_form_after_build($form, &$form_state) {
   // Unset the normal conditional fields validator.
   foreach ($form['#validate'] as $key => $validate) {
     if ($validate == 'conditional_fields_form_validate') {
-      unset($form['#validate'][$key]);
+      $form['#validate'][$key] = 'flexiform_conditional_fields_form_validate';
     }
   }
 
@@ -200,6 +199,29 @@ function flexiform_conditional_fields_form_after_build($form, &$form_state) {
   }
 
   return $form;
+}
+
+/**
+ * Form Validate for flexiform conditional fields.
+ *
+ * Cycle through all elements and check whether their conditional fields
+ * required status is set. We do this as a form validator instead of element
+ * validate as some element validate callbacks set the value that we need to
+ * validate with.
+ */
+function flexiform_conditional_fields_form_validate($form, &$form_state, $complete_form = NULL) {
+  if (empty($complete_form)) {
+    $complete_form = $form;
+  }
+
+  foreach (element_children($form) as $child) {
+    if (!empty($form[$child]['#fcfv_elements'])) {
+      flexiform_conditional_fields_required_element_validate($form[$child], $form_state, $complete_form);
+    }
+    if (element_children($form[$child])) {
+      flexiform_conditional_fields_form_validate($form[$child], $form_state, $complete_form);
+    }
+  }
 }
 
 /**
