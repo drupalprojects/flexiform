@@ -28,7 +28,7 @@ use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
  *   admin_permission = "administer flexiform wizards",
  *   links = {
  *     "add-form" = "/admin/structure/wizards/add",
- *     "edit-form" = "/admin/structure/wizards/manager/{flexiform_wizard}",
+ *     "edit-form" = "/admin/structure/wizards/manage/{flexiform_wizard}",
  *     "collection" = "/admin/structure/wizards",
  *   },
  *   entity_keys = {

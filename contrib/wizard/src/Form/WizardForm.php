@@ -47,4 +47,13 @@ class WizardForm extends EntityForm {
     return $form;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    parent::submitForm($form, $form_state);
+
+    $form_state->setRedirect('entity.flexiform_wizard.edit_form', ['flexiform_wizard' => $this->entity->id()]);
+  }
+
 }

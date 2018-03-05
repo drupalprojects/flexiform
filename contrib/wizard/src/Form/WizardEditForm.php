@@ -20,13 +20,45 @@ class WizardEditForm extends WizardForm {
       '#type' => 'table',
       '#title' => $this->t('Parameters'),
       '#header' => [
-        $this->t('Label'),
         $this->t('Machine-Name'),
+        $this->t('Label'),
         $this->t('Entity Type'),
       ],
       '#empty' => $this->t("This wizard doesn't have an parameters defined yet. Add parameters by altering the path."),
     ];
-    // @todo: Parameter rows.
+    preg_match_all('/\{(?P<parameter>[A-Za-z0-9_\-]+)\}/', $entity->get('path'), $matches, PREG_PATTERN_ORDER);
+    $parameters = $entity->get('parameters');
+    dpm($entity);
+    $entity_type_options = [];
+    foreach ($this->entityTypeManager->getDefinitions() as $entity_type_id => $entity_type) {
+      foreach(\Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type_id) as $bundle_id => $bundle_info) {
+        $entity_type_options[$entity_type->getLabel()->render()][$entity_type_id.':'.$bundle_id] = $bundle_info['label'];
+      }
+    }
+
+    foreach ($matches['parameter'] as $param_name) {
+      $form['parameters'][$param_name]['machine_name'] = [
+        '#type' => 'item',
+        '#markup' => $param_name,
+        '#value' => $param_name,
+      ];
+      $form['parameters'][$param_name]['label'] = [
+        '#type' => 'textfield',
+        '#title' => $this->t('Parameter Label'),
+        '#title_display' => 'invisible',
+        '#default_value' => !empty($parameters[$param_name]['label']) ? $parameters[$param_name]['label'] : '',
+      ];
+      $form['parameters'][$param_name]['entity_type_bundle'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Entity Type'),
+        '#title_display' => 'invisible',
+        '#options' => $entity_type_options,
+        '#default_value' => !empty($parameters[$param_name]['entity_type']) && !empty($parameters[$param_name]['bundle']) ? $parameters[$param_name]['entity_type'].':'.$parameters[$param_name]['bundle'] : NULL,
+        '#element_validate' => [
+          ['\Drupal\flexiform_wizard\Form\WizardEditForm', 'parameterEntityTypeBundleElementValidate'],
+        ],
+      ];
+    }
 
     $form['pages'] = [
       '#type' => 'table',
@@ -71,4 +103,22 @@ class WizardEditForm extends WizardForm {
     return $form;
   }
 
+  /**
+   * Element validate for the entity type bundle selector in the parameters list.
+   *
+   * @param array $element
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   * @param array $form
+   */
+  public static function parameterEntityTypeBundleElementValidate(array $element, FormStateInterface $form_state, array $form = []) {
+    $parents = $element['#parents'];
+    $entity_type_bundle = $form_state->getValue($parents);
+
+    array_pop($parents);
+    $parameter_info = $form_state->getValue($parents);
+    unset($parameter_info['entity_type_bundle']);
+    list($parameter_info['entity_type'], $parameter_info['bundle']) = explode(':', $entity_type_bundle, 2);
+
+    $form_state->setValue($parents, $parameter_info);
+  }
 }
