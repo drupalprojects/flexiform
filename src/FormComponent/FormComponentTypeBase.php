@@ -140,7 +140,7 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
     $form_display = $this->getFormDisplay();
     $display_options = $form_display->getComponent($component_name);
 
-    $component = $this->getComponent($component_name, $display_options);
+    $component = $this->getComponent($component_name, $display_options ?: []);
     $label = $component->getAdminLabel();
 
     $regions = array_keys($form_object->getRegions());
