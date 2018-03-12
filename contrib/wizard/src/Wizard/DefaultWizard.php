@@ -7,15 +7,15 @@ use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\TempStore\SharedTempStoreFactory;
-use Drupal\ctools\Wizard\EntityFormWizardBase;
 use Drupal\ctools\Wizard\FormWizardBase;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
+use Drupal\flexiform_wizard\Entity\Wizard as WizardEntity;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Provides a default form wizard.
  */
-class DefaultWizard extends EntityFormWizardBase {
+class DefaultWizard extends FormWizardBase {
 
   /**
    * The wizard configuration object.
@@ -61,11 +61,35 @@ class DefaultWizard extends EntityFormWizardBase {
    *   The SharedTempStore key for our current wizard values.
    * @param null $step
    *   The current active step of the wizard.
-   * @param \Drupal\Core\Entity\FieldableEntityInterface[] $provided
-   *   The provided (parameter) entities.
    */
-  public function __construct(SharedTempStoreFactory $tempstore, FormBuilderInterface $builder, ClassResolverInterface $class_resolver, EventDispatcherInterface $event_dispatcher, EntityManagerInterface $entity_manager, RouteMatchInterface $route_match, $tempstore_id, $machine_name = NULL, $step = NULL, $provided = []) {
-    parent::__construct($tempstore, $builder, $class_resolver, $event_dispatcher, $entity_manager, $route_match, $tempstore_id, $machine_name, $step);
+  public function __construct(
+    PrivateTempStoreFactory $tempstore,
+    FormBuilderInterface $builder,
+    ClassResolverInterface $class_resolver,
+    EventDispatcherInterface $event_dispatcher,
+    RouteMatchInterface $route_match,
+    WizardEntity $wizard,
+    $step = NULL
+  ) {
+    parent::__construct(
+      $tempstore,
+      $builder,
+      $class_resolver,
+      $event_dispatcher,
+      $route_match,
+      'flexiform_wizard.'.$wizard->id(),
+      'flexiform_wizard__'.$wizard->id(),
+      $step
+    );
+
+    $this->wizard = $wizard;
+
+    $provided = [];
+    foreach ($this->wizard->get('parameters') as $param_name => $param_info) {
+      if ($provided_entity = $route_match->getParameter($param_name)) {
+        $provided[$param_name] = $provided_entity;
+      }
+    }
     $this->provided = $provided;
   }
 
@@ -74,13 +98,6 @@ class DefaultWizard extends EntityFormWizardBase {
    */
   public function getEntityType() {
     return 'flexiform_wizard';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function exists() {
-    return '\Drupal\flexiform_wizard\Entity\Wizard::load';
   }
 
   /**

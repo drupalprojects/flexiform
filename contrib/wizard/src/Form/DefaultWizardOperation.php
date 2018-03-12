@@ -83,8 +83,6 @@ class DefaultWizardOperation extends FormBase {
 
 
     $this->getFormDisplay()->buildAdvancedForm($cached_values['entities'], $form, $form_state);
-
-    // @todo: Actions.
     return $form;
   }
 

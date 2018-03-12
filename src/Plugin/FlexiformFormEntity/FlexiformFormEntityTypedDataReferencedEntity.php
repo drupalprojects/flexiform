@@ -64,6 +64,10 @@ class FlexiformFormEntityTypedDataReferencedEntity extends FlexiformFormEntityBa
    */
   public function getEntity() {
     $base = $this->getContextValue('base');
+    if (!$base) {
+      return NULL;
+    }
+
     $property = $this->pluginDefinition['property_name'];
 
     try {
