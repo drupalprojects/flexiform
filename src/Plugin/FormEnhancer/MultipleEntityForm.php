@@ -31,26 +31,31 @@ class MultipleEntityForm extends ConfigurableFormEnhancerBase {
    * {@inheritdoc}
    */
   public function configurationForm(array $form, FormStateInterface $form_state) {
-    // Prepare a link to add an entity to this form.
-    $target_entity_type = $this->formDisplay->get('targetEntityType');
-    $target_entity_def = \Drupal::service('entity_type.manager')->getDefinition($target_entity_type);
-    $url_params = [
-      'form_mode_name' => $this->formDisplay->get('mode'),
-    ];
-    if ($target_entity_def->get('bundle_entity_type')) {
-      $url_params[$target_entity_def->get('bundle_entity_type')] = $this->formDisplay->get('bundle');
-    }
-    $form['add'] = [
-      '#type' => 'link',
-      '#title' => $this->t('Add Entity'),
-      '#url' => Url::fromRoute("entity.entity_form_display.{$target_entity_type}.form_mode.form_entity_add", $url_params),
-      '#attributes' => $this->getAjaxButtonAttributes(),
-      '#attached' => [
-        'library' => [
-          'core/drupal.ajax',
+
+    // @todo: Make this path NOT form mode specific.
+    if ($this->formDisplay->get('targetEntityType')) {
+      // Prepare a link to add an entity to this form.
+      $target_entity_type = $this->formDisplay->get('targetEntityType');
+      $target_entity_def = \Drupal::service('entity_type.manager')->getDefinition($target_entity_type);
+      $url_params = [
+        'form_mode_name' => $this->formDisplay->get('mode'),
+      ];
+      if ($target_entity_def->get('bundle_entity_type')) {
+        $url_params[$target_entity_def->get('bundle_entity_type')] = $this->formDisplay->get('bundle');
+      }
+
+      $form['add'] = [
+        '#type' => 'link',
+        '#title' => $this->t('Add Entity'),
+        '#url' => Url::fromRoute("entity.entity_form_display.{$target_entity_type}.form_mode.form_entity_add", $url_params),
+        '#attributes' => $this->getAjaxButtonAttributes(),
+        '#attached' => [
+          'library' => [
+            'core/drupal.ajax',
+          ],
         ],
-      ],
-    ];
+      ];
+    }
     $form['entities'] = [
       '#type' => 'table',
       '#header' => [

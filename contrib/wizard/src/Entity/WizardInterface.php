@@ -42,4 +42,30 @@ interface WizardInterface extends ConfigEntityInterface, EntityWithPluginCollect
    */
   public function usesAdminTheme();
 
+  /**
+   * Get pages.
+   *
+   * @return array
+   *   Array of information keyed by machine_name.
+   */
+  public function getPages();
+
+  /**
+   * Remove page.
+   *
+   * @param string $machine_name
+   *   The machine name of the page to remove.
+   */
+  public function removePage($machine_name);
+
+  /**
+   * Add a page.
+   *
+   * @param string $machine_name
+   *   The machine name of the page to add.
+   * @param array $settings
+   *   An array of settings describing the page.
+   */
+  public function addPage($machine_name, array $settings = []);
+
 }

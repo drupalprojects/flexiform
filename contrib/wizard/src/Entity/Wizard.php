@@ -311,7 +311,7 @@ class Wizard extends ConfigEntityBase implements WizardInterface {
     $names = $this->getParameterNames();
     foreach ($this->get('parameters') as $name => $parameter) {
       // Remove parameters without any type, or which are no longer valid.
-      if (empty($parameter['type']) || !in_array($name, $names)) {
+      if (empty($parameter['entity_type']) || !in_array($name, $names)) {
         $this->removeParameter($name);
       }
     }
@@ -337,6 +337,20 @@ class Wizard extends ConfigEntityBase implements WizardInterface {
    */
   public function getPages() {
     return $this->pages ?: [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addPage($machine_name, array $settings = []) {
+    $this->pages[$machine_name] = $settings;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function removePage($machine_name) {
+    unset($this->pages[$machine_name]);
   }
 
   /**

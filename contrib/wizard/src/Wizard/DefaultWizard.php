@@ -123,14 +123,12 @@ class DefaultWizard extends FormWizardBase {
 
   public function getNextParameters($cached_values) {
     $parameters = parent::getNextParameters($cached_values);
-    $parameters['commerce_order'] = 1;
 
     return $parameters;
   }
 
   public function getPreviousParameters($cached_values) {
     $parameters = parent::getPreviousParameters($cached_values);
-    $parameters['commerce_order'] = 1;
 
     return $parameters;
   }
@@ -141,21 +139,14 @@ class DefaultWizard extends FormWizardBase {
   public function getOperations($cached_values) {
     $operations = [];
 
-//    if ($this->wizard) {
-//      foreach ($this->wizard->getPages() as $name => $page) {
-
-//      }
-//    }
-
-    $operations['test'] = [
-      'form' => 'Drupal\flexiform_wizard\Form\DefaultWizardOperation',
-      'title' => 'Test',
-    ];
-
-    $operations['final'] = [
-      'form' => 'Drupal\flexiform_wizard\Form\DefaultWizardOperation',
-      'title' => 'Final',
-    ];
+    if ($this->wizard) {
+      foreach ($this->wizard->getPages() as $name => $page) {
+        $operations[$name] = [
+          'form' => 'Drupal\flexiform_wizard\Form\DefaultWizardOperation',
+          'title' => $page['label'],
+        ];
+      }
+    }
 
     return $operations;
   }

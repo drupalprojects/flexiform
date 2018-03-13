@@ -3,6 +3,7 @@
 namespace Drupal\flexiform\Form;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ctools\Form\AjaxFormTrait;
@@ -26,23 +27,68 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
   /**
    * {@inheritdoc}
    */
+  public function getTableHeader() {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function form(array $form, FormStateInterface $form_state) {
-    $form = parent::form($form, $form_state);
+    $form = EntityForm::form($form, $form_state);
     $form['#attached']['library'][] = 'core/drupal.dialog.ajax';
     $form['#attached']['library'][] = 'core/drupal.ajax';
 
-    $form['fields']['#header'][0] = $this->t('Component');
+    $form['fields'] = [
+      '#type' => 'field_ui_table',
+      '#header' => [
+        $this->t('Component'),
+        $this->t('Weight'),
+        $this->t('Parent'),
+        $this->t('Region'),
+        [
+          'data' => $this->t('Widget'),
+          'colspan' => 3,
+        ],
+      ],
+      '#regions' => $this->getRegions(),
+      '#attributes' => [
+        'class' => [
+          'field-ui-overview',
+        ],
+        'id' => 'field-display-overview',
+      ],
+      '#tabledrag' => [
+        [
+          'action' => 'order',
+          'relationship' => 'sibling',
+          'group' => 'field-weight',
+        ],
+        [
+          'action' => 'match',
+          'relationship' => 'parent',
+          'group' => 'field-parent',
+          'subgroup' => 'field-parent',
+          'source' => 'field-name',
+        ],
+        [
+          'action' => 'match',
+          'relationship' => 'parent',
+          'group' => 'field-region',
+          'subgroup' => 'field-region',
+          'source' => 'field-name',
+        ],
+      ],
+    ];
 
     // Components.
     $component_type_manager = \Drupal::service('plugin.manager.flexiform.form_component_type');
     $component_rows = [];
     foreach ($component_type_manager->getDefinitions() as $component_type => $definition) {
-      $component_rows += $component_type_manager
+      $form['fields'] += $component_type_manager
         ->createInstance($component_type)
         ->setFormDisplay($this->entity)
         ->componentRows($this, $form, $form_state);
     }
-    $form['fields'] = $component_rows + $form['fields'];
 
     // Enhancers.
     $form['enhancer'] = [
@@ -62,10 +108,86 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
       }
     }
 
-    if (!empty($form['modes'])) {
-      $form['modes']['#weight'] = 90;
+    // Custom display settings.
+    if ($this->entity
+      ->getMode() == 'default') {
+
+      // Only show the settings if there is at least one custom display mode.
+      $display_mode_options = $this
+        ->getDisplayModeOptions();
+
+      // Unset default option.
+      unset($display_mode_options['default']);
+      if ($display_mode_options) {
+        $form['modes'] = [
+          '#type' => 'details',
+          '#title' => $this
+            ->t('Custom display settings'),
+        ];
+
+        // Prepare default values for the 'Custom display settings' checkboxes.
+        $default = [];
+        if ($enabled_displays = array_filter($this
+          ->getDisplayStatuses())) {
+          $default = array_keys(array_intersect_key($display_mode_options, $enabled_displays));
+        }
+        $form['modes']['display_modes_custom'] = [
+          '#type' => 'checkboxes',
+          '#title' => $this
+            ->t('Use custom display settings for the following @display_context modes', [
+            '@display_context' => $this->displayContext,
+          ]),
+          '#options' => $display_mode_options,
+          '#default_value' => $default,
+        ];
+
+        // Provide link to manage display modes.
+        $form['modes']['display_modes_link'] = $this
+          ->getDisplayModesLink();
+      }
     }
 
+    // In overviews involving nested rows from contributed modules (i.e
+    // field_group), the 'plugin type' selects can trigger a series of changes
+    // in child rows. The #ajax behavior is therefore not attached directly to
+    // the selects, but triggered by the client-side script through a hidden
+    // #ajax 'Refresh' button. A hidden 'refresh_rows' input tracks the name of
+    // affected rows.
+    $form['refresh_rows'] = [
+      '#type' => 'hidden',
+    ];
+    $form['refresh'] = [
+      '#type' => 'submit',
+      '#value' => $this
+        ->t('Refresh'),
+      '#op' => 'refresh_table',
+      '#submit' => [
+        '::multistepSubmit',
+      ],
+      '#ajax' => [
+        'callback' => '::multistepAjax',
+        'wrapper' => 'field-display-overview-wrapper',
+        'effect' => 'fade',
+        // The button stays hidden, so we hide the Ajax spinner too. Ad-hoc
+        // spinners will be added manually by the client-side script.
+        'progress' => 'none',
+      ],
+      '#attributes' => [
+        'class' => [
+          'visually-hidden',
+        ],
+      ],
+    ];
+    $form['actions'] = [
+      '#type' => 'actions',
+    ];
+    $form['actions']['submit'] = [
+      '#type' => 'submit',
+      '#button_type' => 'primary',
+      '#value' => $this
+        ->t('Save'),
+    ];
+    $form['#attached']['library'][] = 'field_ui/drupal.field_ui';
     return $form;
   }
 

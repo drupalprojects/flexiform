@@ -2,6 +2,7 @@
 
 namespace Drupal\flexiform_wizard\Form;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
@@ -14,7 +15,11 @@ class WizardEditForm extends WizardForm {
    */
   public function form(array $form, FormStateInterface $form_state) {
     /* @var \Drupal\flexiform_wizard\Entity\Wizard $entity */
-    $entity = $this->entity;
+    if (!$form_state->get('entity')) {
+      $form_state->set('entity', $this->entity);
+    }
+    $entity = $form_state->get('entity');
+
     $form = parent::form($form, $form_state);
 
     $form['parameters'] = [
@@ -29,7 +34,6 @@ class WizardEditForm extends WizardForm {
     ];
     preg_match_all('/\{(?P<parameter>[A-Za-z0-9_\-]+)\}/', $entity->get('path'), $matches, PREG_PATTERN_ORDER);
     $parameters = $entity->get('parameters');
-    dpm($entity);
     $entity_type_options = [];
     foreach ($this->entityTypeManager->getDefinitions() as $entity_type_id => $entity_type) {
       foreach(\Drupal::service('entity_type.bundle.info')->getBundleInfo($entity_type_id) as $bundle_id => $bundle_info) {
@@ -67,6 +71,7 @@ class WizardEditForm extends WizardForm {
         $this->t('Label'),
         $this->t('Machine-Name'),
         $this->t('Weight'),
+        $this->t('Operations'),
       ],
       '#empty' => $this->t("This wizard doesn't have any pages defined yet."),
       '#tabledrag' => [
@@ -77,6 +82,8 @@ class WizardEditForm extends WizardForm {
         ],
       ],
     ];
+
+    $max_weight = 0;
     foreach ($entity->getPages() as $name => $page) {
       $form['pages'][$name]['#attributes']['class'][] = 'draggable';
       $form['pages'][$name]['#weight'] = $page['weight'] ?: 0;
@@ -91,17 +98,148 @@ class WizardEditForm extends WizardForm {
         '#title' => $this->t('Machine-Name'),
         '#title_display' => 'invisible',
         '#default_value' => $name,
+        '#disabled' => TRUE,
       ];
       $form['pages'][$name]['weight'] = [
         '#type' => 'weight',
         '#title' => $this->t('Weight for @title', ['@title' => $page['label']]),
         '#title_display' => 'invisible',
         '#default_value' => $page['weight'],
-        '#attributes' => ['class' => ['wizard-page-weight']],
+        '#attributes' => [
+          'class' => [ 'wizard-page-weight' ],
+        ],
       ];
+      $form['pages'][$name]['operations'] = [
+        '#type' => 'container',
+        'form_display' => [
+          '#type' => 'submit',
+          '#value' => $this->t('Manage Form Display'),
+          '#name' => 'manage_page_'.$name,
+          '#page' => $name,
+          '#limit_validation_errors' => [],
+          '#submit' => [
+            [ $this, 'submitManagePage' ],
+          ],
+        ],
+        'remove' => [
+          '#type' => 'submit',
+          '#value' => $this->t('Remove'),
+          '#name' => 'remove_page_'.$name,
+          '#page' => $name,
+          '#limit_validation_errors' => [],
+          '#submit' => [
+            [ $this, 'submitRemovePage' ],
+          ],
+        ],
+      ];
+
+      if (!empty($page['weight']) && ($page['weight'] > $max_weight)) {
+        $max_weight = $page['weight'];
+      }
     }
+    $form['pages']['__add_new'] = [
+      '#attributes' => [
+        'class' => [ 'draggable' ],
+      ],
+      '#weight' => $max_weight,
+      'label' => [
+        '#type' => 'textfield',
+        '#title' => $this->t('Page Label'),
+        '#title_display' => 'invisible',
+      ],
+      'machine_name' => [
+        '#type' => 'textfield',
+        '#title' => $this->t('Machine-Name'),
+        '#title_display' => 'invisible',
+      ],
+      'weight' => [
+        '#type' => 'weight',
+        '#title' => $this->t('Weight for New Page'),
+        '#title_display' => 'invisible',
+        '#default_value' => $max_weight,
+        '#attributes' => [
+          'class' => [ 'wizard-page-weight' ],
+        ],
+      ],
+      'operations' => [
+        '#type' => 'container',
+        'remove' => [
+          '#type' => 'submit',
+          '#value' => $this->t('Add Page'),
+          '#name' => 'add_page',
+          '#limit_validation_errors' => [
+            [ 'pages', '__add_new' ],
+          ],
+          '#validate' => [
+            [ $this, 'validateAddPage' ],
+          ],
+          '#submit' => [
+            [ $this, 'submitAddPage' ],
+          ],
+        ],
+      ],
+    ];
 
     return $form;
+  }
+
+  /**
+   * Submit to remove a page.
+   */
+  public function submitRemovePage(array $form, FormStateInterface $form_state) {
+    $element = $form_state->getTriggeringElement();
+    $form_state->get('entity')->removePage($element['#page']);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Validate adding of a page.
+   */
+  public function validateAddPage(array $form, FormStateInterface $form_state) {
+    $values = $form_state->getValue(['pages', '__add_new']);
+    if (empty($values['machine_name'])) {
+      $form_state->setError($form['pages']['__add_new'], $this->t('You must specify a machine name for a page.'));
+    }
+  }
+
+  /**
+   * Submit to add a page.
+   */
+  public function submitAddPage(array $form, FormStateInterface $form_state) {
+    $values = $form_state->getValue(['pages', '__add_new']);
+    $input = &$form_state->getUserInput();
+    unset($input['pages']['__add_new']);
+    unset($values['operations']);
+    $form_state->get('entity')->addPage($values['machine_name'], $values);
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Submit to manage a page.
+   */
+  public function submitManagePage(array $form, FormStateInterface $form_state) {
+    $element = $form_state->getTriggeringElement();
+    $form_state->setRedirect(
+      'entity.flexiform_wizard.edit_page_form',
+      [
+        'flexiform_wizard' => $this->entity->id(),
+        'page' => $element['#page'],
+      ]
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state) {
+    parent::copyFormValuesToEntity($entity, $form, $form_state);
+
+    $page_values = $form_state->getValue(['pages']);
+    unset($page_values['__add_new']);
+    foreach ($page_values as &$page) {
+      unset($page['operations']);
+    }
+    $entity->set('pages', $page_values);
   }
 
   /**

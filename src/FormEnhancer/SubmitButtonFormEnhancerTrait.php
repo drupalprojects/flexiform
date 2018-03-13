@@ -22,8 +22,10 @@ trait SubmitButtonFormEnhancerTrait {
    * @return array
    */
   protected function locateSubmitButtons() {
-    $form_info = $this->formDisplay->getFormInformation();
-    return $this->locateSubmitButtonsR($form_info['form']);
+    if ($form_info = $this->formDisplay->getFormInformation()) {
+      return $this->locateSubmitButtonsR($form_info['form']);
+    }
+    return [];
   }
 
   /**

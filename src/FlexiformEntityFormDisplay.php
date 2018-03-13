@@ -2,6 +2,7 @@
 
 namespace Drupal\flexiform;
 
+use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\FieldableEntityInterface;
@@ -63,6 +64,26 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    * @var \Drupal\flexiform\FormComponent\FormComponentTypeInterface[]
    */
   protected $componentTypePlugins = [];
+
+  /**
+   * {@inheritdoc}
+   *
+   * We override this to allow for EntityFormDisplay objects without a base
+   * entity.
+   */
+  public function __construct(array $values, $entity_type) {
+    // @todo: Do we even need these two anymore?
+    $this->renderer = \Drupal::service('renderer');
+    $this->pluginManager = \Drupal::service('plugin.manager.field.widget');
+
+    if (empty($values['targetEntityType'])) {
+      $values['mode'] = static::CUSTOM_MODE;
+    }
+
+    ConfigEntityBase::__construct($values, $entity_type);
+    $this->originalMode = $this->mode;
+    $this->init();
+  }
 
   /**
    * Get the regions needed to create the overview form.
@@ -475,6 +496,11 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    *   - form: array
    */
   public function getFormInformation() {
+    // @todo: Try and atleast return somthing!
+    if (!$this->getTargetEntityTypeId()) {
+      return FALSE;
+    }
+
     $operation = $this->get('originalMode') ?: $this->get('mode');
     $form_object = \Drupal::service('flexiform.manager')->getFormObject($this);
 
