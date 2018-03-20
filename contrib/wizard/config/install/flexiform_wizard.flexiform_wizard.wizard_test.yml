@@ -1,0 +1,33 @@
+langcode: en
+status: true
+dependencies: {  }
+id: wizard_test
+label: 'Test Wizard'
+description: null
+use_admin_theme: null
+path: 'flexiform_wizard/test/{node}/{user}'
+access_logic: and
+access_conditions: {  }
+parameters:
+  node:
+    label: Content
+    machine_name: node
+    bundle: page
+    entity_type: node
+  user:
+    label: User
+    machine_name: user
+    bundle: user
+    entity_type: user
+pages:
+  first:
+    plugin: 'entity_form_mode:node.page.default'
+    settings:
+      context_mapping:
+        entity: node
+      title: 'Node Edit'
+  seconds:
+    plugin: 'entity_form_mode:user.user.default'
+    settings:
+      context_mapping:
+        entity: user

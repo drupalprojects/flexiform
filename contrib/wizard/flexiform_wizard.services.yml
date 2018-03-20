@@ -1,0 +1,4 @@
+services:
+  plugin.manager.flexiform_wizard.wizard_step:
+    class: Drupal\flexiform_wizard\WizardStep\WizardStepPluginManager
+    parent: default_plugin_manager

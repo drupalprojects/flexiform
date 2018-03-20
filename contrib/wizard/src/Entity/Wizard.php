@@ -356,6 +356,15 @@ class Wizard extends ConfigEntityBase implements WizardInterface {
   /**
    * {@inheritdoc}
    */
+  public function getSteps() {
+    $steps = [];
+    foreach ($this->getPages() as $name => $page) {
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function __sleep() {
     $vars = parent::__sleep();
 

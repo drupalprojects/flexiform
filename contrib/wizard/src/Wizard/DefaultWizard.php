@@ -141,10 +141,9 @@ class DefaultWizard extends FormWizardBase {
 
     if ($this->wizard) {
       foreach ($this->wizard->getPages() as $name => $page) {
-        $operations[$name] = [
-          'form' => 'Drupal\flexiform_wizard\Form\DefaultWizardOperation',
-          'title' => $page['label'],
-        ];
+        $plugin = \Drupal::service('plugin.manager.flexiform_wizard.wizard_step')
+          ->createInstance($page['plugin'], $page['settings']);
+        $operations[$name] = $plugin->stepInfo();
       }
     }
 
