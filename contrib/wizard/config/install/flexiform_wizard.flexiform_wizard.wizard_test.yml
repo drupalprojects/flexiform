@@ -1,3 +1,4 @@
+uuid: 889212b0-2166-4a29-8024-b0905cfd6056
 langcode: en
 status: true
 dependencies: {  }
@@ -22,12 +23,18 @@ parameters:
 pages:
   first:
     plugin: 'entity_form_mode:node.page.default'
+    machine_name: first
+    label: 'Node'
+    weight: 0
     settings:
       context_mapping:
         entity: node
       title: 'Node Edit'
   seconds:
     plugin: 'entity_form_mode:user.user.default'
+    machine_name: seconds
+    label: 'User'
+    weight: 1
     settings:
       context_mapping:
         entity: user

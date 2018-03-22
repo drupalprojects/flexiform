@@ -26,7 +26,7 @@ class WizardStepPluginManager extends DefaultPluginManager implements ContextAwa
    *   The module handler to invoke the alter hook with.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/WizardStep', $namespaces, $module_handler, 'Drupal\flexiform_wizard\WizardStepInterface', 'Drupal\flexiform_wizard\Annotation\WizardStep');
+    parent::__construct('Plugin/WizardStep', $namespaces, $module_handler, 'Drupal\flexiform_wizard\WizardStep\WizardStepInterface', 'Drupal\flexiform_wizard\Annotation\WizardStep');
 
     $this->alterInfo('flexiform_wizard_step_plugin');
     $this->setCacheBackend($cache_backend, 'flexiform_wizard_step_plugin');

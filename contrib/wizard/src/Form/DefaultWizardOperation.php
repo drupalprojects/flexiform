@@ -98,7 +98,7 @@ class DefaultWizardOperation extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $cached_values = $form_state->getTemporaryValue('wizard');
 
-    $this->wizardConfig = $cached_values['flexiform_wizard'];
+    $this->wizardConfig = $cached_values['flexiform_wizard'] ?? [];
     $this->step = $cached_values['step'];
 
     $entity_contexts = [];
@@ -113,11 +113,12 @@ class DefaultWizardOperation extends FormBase {
       );
     }
 
-    $page = $this->getPages()[$this->step];
+    $page = $cached_values['wizard']->getPages()[$this->step];
     $plugin = $this->wizardStepPluginManager->createInstance(
       $page['plugin'],
       $page['settings']
     );
+
     $this->contextHandler->applyContextMapping($plugin, $entity_contexts);
     $form += $plugin->buildForm($form, $form_state);
 

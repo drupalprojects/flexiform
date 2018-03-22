@@ -3,13 +3,13 @@
 namespace Drupal\flexiform_wizard\Wizard;
 
 use Drupal\Core\DependencyInjection\ClassResolverInterface;
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\TempStore\SharedTempStoreFactory;
+use Drupal\user\SharedTempStoreFactory;
+use Drupal\ctools\Event\WizardEvent;
 use Drupal\ctools\Wizard\FormWizardBase;
-use Drupal\Core\TempStore\PrivateTempStoreFactory;
-use Drupal\flexiform_wizard\Entity\Wizard as WizardEntity;
+use Drupal\ctools\Wizard\FormWizardInterface;
+use Drupal\flexiform_wizard\Entity\Wizard;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -32,15 +32,17 @@ class DefaultWizard extends FormWizardBase {
   protected $provided = [];
 
 
+  /**
+   * {@inheritdoc}
+   */
   public function initValues() {
-    $cached_values = parent::initValues();
+    $values['entities'] = $this->provided;
+    $values['wizard'] = $this->wizard;
+    $values['step'] = $this->getStep($values);
 
-    $cached_values['step'] = 'test';
-
-    if (!empty($cached_values[$this->getEntityType()])) {
-      $this->wizard = $cached_values[$this->getEntityType()];
-    }
-    return $cached_values;
+    $event = new WizardEvent($this, $values);
+    $this->dispatcher->dispatch(FormWizardInterface::LOAD_VALUES, $event);
+    return $event->getValues();
   }
 
   /**
@@ -53,34 +55,15 @@ class DefaultWizard extends FormWizardBase {
    *   The class resolver.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
-   *   The entity manager.
-   * @param $tempstore_id
-   *   The shared temp store factory collection name.
-   * @param null $machine_name
-   *   The SharedTempStore key for our current wizard values.
-   * @param null $step
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match service.
+   * @param \Drupal\flexiform_wizard\Entity\Wizard $wizard
+   *   The wizard configuration object.
+   * @param string|null $step
    *   The current active step of the wizard.
    */
-  public function __construct(
-    PrivateTempStoreFactory $tempstore,
-    FormBuilderInterface $builder,
-    ClassResolverInterface $class_resolver,
-    EventDispatcherInterface $event_dispatcher,
-    RouteMatchInterface $route_match,
-    WizardEntity $wizard,
-    $step = NULL
-  ) {
-    parent::__construct(
-      $tempstore,
-      $builder,
-      $class_resolver,
-      $event_dispatcher,
-      $route_match,
-      'flexiform_wizard.'.$wizard->id(),
-      'flexiform_wizard__'.$wizard->id(),
-      $step
-    );
+  public function __construct(SharedTempStoreFactory $tempstore, FormBuilderInterface $builder, ClassResolverInterface $class_resolver, EventDispatcherInterface $event_dispatcher, RouteMatchInterface $route_match, Wizard $wizard, $step = NULL) {
+    parent::__construct($tempstore, $builder, $class_resolver, $event_dispatcher, $route_match, 'flexiform_wizard.'.$wizard->id(), 'flexiform_wizard__'.$wizard->id(), $step);
 
     $this->wizard = $wizard;
 
@@ -123,13 +106,17 @@ class DefaultWizard extends FormWizardBase {
 
   public function getNextParameters($cached_values) {
     $parameters = parent::getNextParameters($cached_values);
-
+    foreach ($this->provided as $key => $entity) {
+      $parameters[$key] = $entity->id();
+    }
     return $parameters;
   }
 
   public function getPreviousParameters($cached_values) {
     $parameters = parent::getPreviousParameters($cached_values);
-
+    foreach ($this->provided as $key => $entity) {
+      $parameters[$key] = $entity->id();
+    }
     return $parameters;
   }
 
@@ -141,6 +128,7 @@ class DefaultWizard extends FormWizardBase {
 
     if ($this->wizard) {
       foreach ($this->wizard->getPages() as $name => $page) {
+        /* @var \Drupal\flexiform_wizard\WizardStep\WizardStepInterface $plugin */
         $plugin = \Drupal::service('plugin.manager.flexiform_wizard.wizard_step')
           ->createInstance($page['plugin'], $page['settings']);
         $operations[$name] = $plugin->stepInfo();

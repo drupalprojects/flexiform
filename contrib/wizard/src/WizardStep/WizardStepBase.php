@@ -2,6 +2,8 @@
 
 namespace Drupal\flexiform_wizard\WizardStep;
 
+use Drupal\Core\Plugin\ContextAwarePluginBase;
+
 /**
  * Base class for wizard steps.
  */

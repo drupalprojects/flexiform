@@ -2,8 +2,6 @@
 
 namespace Drupal\flexiform_wizard\WizardStep;
 
-use Drupal\Core\Form\FormStateInterface;
-
 /**
  * Interface for wizard steps plugins.
  */

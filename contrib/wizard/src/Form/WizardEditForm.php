@@ -86,7 +86,7 @@ class WizardEditForm extends WizardForm {
     $max_weight = 0;
     foreach ($entity->getPages() as $name => $page) {
       $form['pages'][$name]['#attributes']['class'][] = 'draggable';
-      $form['pages'][$name]['#weight'] = $page['weight'] ?: 0;
+      $form['pages'][$name]['#weight'] = $page['weight'] ?? 0;
       $form['pages'][$name]['label'] = [
         '#type' => 'textfield',
         '#title' => $this->t('Page Label'),
@@ -104,7 +104,7 @@ class WizardEditForm extends WizardForm {
         '#type' => 'weight',
         '#title' => $this->t('Weight for @title', ['@title' => $page['label']]),
         '#title_display' => 'invisible',
-        '#default_value' => $page['weight'],
+        '#default_value' => $page['weight'] ?? 0,
         '#attributes' => [
           'class' => [ 'wizard-page-weight' ],
         ],

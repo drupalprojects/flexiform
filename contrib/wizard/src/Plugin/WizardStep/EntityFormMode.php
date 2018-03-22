@@ -2,6 +2,7 @@
 
 namespace Drupal\flexiform_wizard\Plugin\WizardStep;
 
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\flexiform_wizard\WizardStep\WizardStepBase;
 
@@ -18,9 +19,20 @@ class EntityFormMode extends WizardStepBase {
   /**
    * {@inheritdoc}
    */
+  public function getContextDefinitions() {
+    // @todo Fix broken deriver context.
+    $definitions = parent::getContextDefinitions();
+    unset($definitions['']);
+    return $definitions;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $base_entity = $this->getContextValue('entity');
     $definition = $this->getPluginDefinition();
+    /* @var \Drupal\Flexiform\FlexiformEntityFormDisplay $form_display */
     $form_display = EntityFormDisplay::collectRenderDisplay($base_entity, $definition['form_mode']);
 
     $provided = $this->getContextValues();
