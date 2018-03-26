@@ -17,6 +17,6 @@ interface WizardStepInterface {
    *     - title - The page title.
    *     - form - The fully qualified class name of the form object for this page.
    */
-  public function stepInfo(array $cached_values = []);
+  public function stepInfo($name = '', array $cached_values = []);
 
 }

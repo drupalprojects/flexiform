@@ -12,10 +12,13 @@ class WizardStepBase extends ContextAwarePluginBase implements WizardStepInterfa
   /**
    * {@inheritdoc}
    */
-  public function stepInfo(array $cached_values = []) {
+  public function stepInfo($name = '', array $cached_values = []) {
     return [
       'form' => 'Drupal\flexiform_wizard\Form\DefaultWizardOperation',
-      'title' => $this->configuration['label'],
+      'title' => !empty($this->configuration['label']) ? $this->configuration['label'] : '',
+      'values' => [
+        'step' => $name,
+      ],
     ];
   }
 }

@@ -4,6 +4,7 @@ namespace Drupal\flexiform_wizard\Plugin\WizardStep;
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\flexiform_wizard\WizardStep\WizardStepBase;
 
 /**
@@ -17,23 +18,20 @@ use Drupal\flexiform_wizard\WizardStep\WizardStepBase;
 class EntityFormMode extends WizardStepBase {
 
   /**
-   * {@inheritdoc}
+   * Get entity form display.
    */
-  public function getContextDefinitions() {
-    // @todo Fix broken deriver context.
-    $definitions = parent::getContextDefinitions();
-    unset($definitions['']);
-    return $definitions;
+  protected function getFormDisplay() {
+    $base_entity = $this->getContextValue('entity');
+    $definition = $this->getPluginDefinition();
+    return EntityFormDisplay::collectRenderDisplay($base_entity, $definition['form_mode']);
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $base_entity = $this->getContextValue('entity');
-    $definition = $this->getPluginDefinition();
-    /* @var \Drupal\Flexiform\FlexiformEntityFormDisplay $form_display */
-    $form_display = EntityFormDisplay::collectRenderDisplay($base_entity, $definition['form_mode']);
+    $form_display = $this->getFormDisplay();
+    $form_state->set('form_display', $form_display);
 
     $provided = $this->getContextValues();
     $provided[''] = $provided['entity'];
@@ -43,6 +41,26 @@ class EntityFormMode extends WizardStepBase {
     $form_display->buildAdvancedForm($provided, $form, $form_state);
 
     return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    $entity = $this->getContextValue('entity');
+
+    $form_display = $form_state->get('form_display');
+    $form_display->extractFormValues($entity, $form, $form_state);
+
+    $form_display->formSubmitComponents($form, $form_state);
+    $entity->save();
+    $form_display->saveFormEntities($form, $form_state);
   }
 
   /**

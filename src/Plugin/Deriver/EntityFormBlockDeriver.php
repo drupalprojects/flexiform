@@ -120,7 +120,7 @@ class EntityFormBlockDeriver extends DeriverBase implements ContainerDeriverInte
           ] + $base_plugin_definition;
 
           foreach ($entity_form_display->getFormEntityConfig() as $namespace => $form_entity_info) {
-            if ($form_entity_info['plugin'] != 'provided') {
+            if ($form_entity_info['plugin'] != 'provided' || empty($namespace)) {
               continue;
             }
 

@@ -113,14 +113,14 @@ class DefaultWizardOperation extends FormBase {
       );
     }
 
-    $page = $cached_values['wizard']->getPages()[$this->step];
-    $plugin = $this->wizardStepPluginManager->createInstance(
+    $page = $this->wizardConfig->getPages()[$this->step];
+    $this->plugin = $this->wizardStepPluginManager->createInstance(
       $page['plugin'],
-      $page['settings']
+      $page['settings'] ?: []
     );
 
-    $this->contextHandler->applyContextMapping($plugin, $entity_contexts);
-    $form += $plugin->buildForm($form, $form_state);
+    $this->contextHandler->applyContextMapping($this->plugin, $entity_contexts);
+    $form += $this->plugin->buildForm($form, $form_state);
 
     return $form;
   }
@@ -128,7 +128,15 @@ class DefaultWizardOperation extends FormBase {
   /**
    * {@inheritdoc}
    */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    $this->plugin->validateForm($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $this->plugin->submitForm($form, $form_state);
   }
 
 }

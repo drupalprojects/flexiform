@@ -88,6 +88,7 @@ class WizardHtmlRouteProvider extends DefaultHtmlRouteProvider {
       ];
 
       $route = new Route($path);
+      $route->setOptions($options);
       $route->setDefaults($defaults);
       $route->setOptions($options);
       $route->setRequirement('_access', 'TRUE');
