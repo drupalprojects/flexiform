@@ -3,12 +3,9 @@
 namespace Drupal\flexiform_wizard\Wizard;
 
 use Drupal\Core\DependencyInjection\ClassResolverInterface;
-<<<<<<< HEAD
-=======
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
->>>>>>> by rlmumford: Make work and work towards saving.
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\user\SharedTempStoreFactory;
@@ -89,7 +86,7 @@ class DefaultWizard extends FormWizardBase {
     $this->dispatcher = $event_dispatcher;
     $this->routeMatch = $route_match;
     $this->tempstore_id = 'flexiform_wizard.'.$wizard->id();
-    $this->machine_name = 'flexiform_wizard6__'.$wizard->id();
+    $this->machine_name = 'flexiform_wizard__'.$wizard->id();
     $this->step = $step;
     $this->wizard = $wizard;
 
