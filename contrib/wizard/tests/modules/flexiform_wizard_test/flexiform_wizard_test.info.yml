@@ -1,0 +1,9 @@
+name: Flexiform Wizard Test
+type: module
+description: 'Support module for Flexiform Wizard Tests'
+package: Flexiform
+core: 8.x
+dependencies:
+  - flexiform
+  - flexiform_wizard
+  - node
