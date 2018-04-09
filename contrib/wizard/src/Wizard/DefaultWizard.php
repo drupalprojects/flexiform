@@ -12,7 +12,7 @@ use Drupal\user\PrivateTempStoreFactory;
 use Drupal\ctools\Event\WizardEvent;
 use Drupal\ctools\Wizard\FormWizardBase;
 use Drupal\ctools\Wizard\FormWizardInterface;
-use Drupal\flexiform_wizard\Entity\Wizard;
+use Drupal\flexiform_wizard\Entity\Wizard as WizardEntity;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**

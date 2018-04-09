@@ -2,7 +2,6 @@
 
 namespace Drupal\flexiform_wizard\Plugin\WizardStep;
 
-use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\flexiform_wizard\WizardStep\WizardStepBase;
