@@ -8,7 +8,7 @@ use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\user\SharedTempStoreFactory;
+use Drupal\user\PrivateTempStoreFactory;
 use Drupal\ctools\Event\WizardEvent;
 use Drupal\ctools\Wizard\FormWizardBase;
 use Drupal\ctools\Wizard\FormWizardInterface;
