@@ -46,6 +46,7 @@ use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
  *     "access_conditions",
  *     "parameters",
  *     "pages",
+ *     "save_on_finish"
  *   },
  * )
  */
@@ -133,6 +134,17 @@ class Wizard extends ConfigEntityBase implements WizardInterface {
    * @var array[]
    */
   protected $pages = [];
+
+  /**
+   * Whether to save entities when the form is fully finished.
+   *
+   * When set to true, entities will not be saved until the user
+   * clicks the finish button. When set to false, entities will be saved at
+   * the end of each wizard step.
+   *
+   * @var bool
+   */
+  protected $save_on_finish;
 
   /**
    * {@inheritdoc}
@@ -360,6 +372,13 @@ class Wizard extends ConfigEntityBase implements WizardInterface {
     $steps = [];
     foreach ($this->getPages() as $name => $page) {
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function shouldSaveOnFinish() {
+    return $this->save_on_finish;
   }
 
   /**

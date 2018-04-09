@@ -124,7 +124,7 @@ class DefaultWizard extends FormWizardBase {
    * {@inheritdoc}
    */
   public function getTempstore() {
-    return \Drupal::service('user.private_tempstore')->get($this->getTempstoreId());
+    return $this->tempstore->get($this->getTempstoreId());
   }
 
   public function getNextParameters($cached_values) {
@@ -190,5 +190,22 @@ class DefaultWizard extends FormWizardBase {
     $actions['#weight'] = 200;
     return $actions;
   }
-}
 
+  /**
+   * {@inheritdoc}
+   */
+  public function finish(array &$form, FormStateInterface $form_state) {
+    if ($this->wizard->shouldSaveOnFinish()) {
+      $cached_values = $this->getTempstore()->get($this->getMachineName());
+
+      /* @var \Drupal\Core\Entity\EntityInterface $entity */
+      foreach ($cached_values['entities'] as $key => $entity) {
+        $entity->save();
+      }
+    }
+    // Save entities before calling parent.
+    // Parent clears the cached data.
+    parent::finish($form, $form_state);
+  }
+
+}
