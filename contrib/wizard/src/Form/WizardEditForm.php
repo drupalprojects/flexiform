@@ -4,11 +4,41 @@ namespace Drupal\flexiform_wizard\Form;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\Context\Context;
+use Drupal\Core\Plugin\Context\ContextDefinition;
+use Drupal\flexiform_wizard\WizardStep\WizardStepPluginManager;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides an edit form for flexiform wizard entities.
  */
 class WizardEditForm extends WizardForm {
+
+  /**
+   * The wizard step pluign manager.
+   *
+   * @var \Drupal\flexiform_wizard\WizardStep\WizardStepPluginManager
+   */
+  protected $stepPluginManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('plugin.manager.flexiform_wizard.wizard_step')
+    );
+  }
+
+  /**
+   * Create a new WizardEditForm class
+   *
+   * @param \Drupal\flexiform_wizard\WizardStep\WizardStepPluginManager $step_plugin_manager
+   *   The wizard step plugin manager.
+   */
+  public function __construct(WizardStepPluginManager $step_plugin_manager) {
+    $this->stepPluginManager = $step_plugin_manager;
+  }
 
   /**
    * {@inheritdoc}
@@ -41,6 +71,7 @@ class WizardEditForm extends WizardForm {
       }
     }
 
+    $parameter_contexts = [];
     foreach ($matches['parameter'] as $param_name) {
       $form['parameters'][$param_name]['machine_name'] = [
         '#type' => 'item',
@@ -63,6 +94,10 @@ class WizardEditForm extends WizardForm {
           ['\Drupal\flexiform_wizard\Form\WizardEditForm', 'parameterEntityTypeBundleElementValidate'],
         ],
       ];
+
+      if (!empty($parameters[$param_name]['entity_type']) && !empty($parameters[$param_name]['bundle'])) {
+        $parameter_contexts[$param_name] = new Context(new ContextDefinition($parameters[$param_name]['entity_type'], $parameters[$param_name]['label']));
+      }
     }
 
     $form['pages'] = [
@@ -70,6 +105,7 @@ class WizardEditForm extends WizardForm {
       '#header' => [
         $this->t('Label'),
         $this->t('Machine-Name'),
+        $this->t('Plugin'),
         $this->t('Weight'),
         $this->t('Operations'),
       ],
@@ -85,13 +121,15 @@ class WizardEditForm extends WizardForm {
 
     $max_weight = 0;
     foreach ($entity->getPages() as $name => $page) {
+      $plugin_definition = $this->stepPluginManager->getDefinition($page['plugin']);
+
       $form['pages'][$name]['#attributes']['class'][] = 'draggable';
       $form['pages'][$name]['#weight'] = $page['weight'] ?? 0;
       $form['pages'][$name]['label'] = [
         '#type' => 'textfield',
         '#title' => $this->t('Page Label'),
         '#title_display' => 'invisible',
-        '#default_value' => $page['label'],
+        '#default_value' => !empty($page['settings']['title']) ? $page['settings']['title'] : '' ,
       ];
       $form['pages'][$name]['machine_name'] = [
         '#type' => 'textfield',
@@ -100,9 +138,13 @@ class WizardEditForm extends WizardForm {
         '#default_value' => $name,
         '#disabled' => TRUE,
       ];
+      $form['pages'][$name]['plugin'] = [
+        '#type' => 'markup',
+        '#markup' => $plugin_definition['admin_label'],
+      ];
       $form['pages'][$name]['weight'] = [
         '#type' => 'weight',
-        '#title' => $this->t('Weight for @title', ['@title' => $page['label']]),
+        '#title' => $this->t('Weight'),
         '#title_display' => 'invisible',
         '#default_value' => $page['weight'] ?? 0,
         '#attributes' => [
@@ -137,6 +179,12 @@ class WizardEditForm extends WizardForm {
         $max_weight = $page['weight'];
       }
     }
+
+    $page_plugin_options = [];
+    foreach ($this->stepPluginManager->getDefinitionsForContexts($parameter_contexts) as $plugin_id => $plugin_info) {
+      $page_plugin_options[$plugin_id] = $plugin_info['label'];
+    }
+
     $form['pages']['__add_new'] = [
       '#attributes' => [
         'class' => [ 'draggable' ],
@@ -151,6 +199,12 @@ class WizardEditForm extends WizardForm {
         '#type' => 'textfield',
         '#title' => $this->t('Machine-Name'),
         '#title_display' => 'invisible',
+      ],
+      'plugin' => [
+        '#type' => 'select',
+        '#title' => $this->t('Plugin'),
+        '#title_display' => 'invisible',
+        '#options' => $page_plugin_options,
       ],
       'weight' => [
         '#type' => 'weight',
