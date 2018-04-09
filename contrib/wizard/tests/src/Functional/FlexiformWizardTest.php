@@ -7,6 +7,8 @@ use Drupal\Tests\BrowserTestBase;
 
 /**
  * Basic tests for flexiform wizard.
+ *
+ * @group FlexiformWizard
  */
 class FlexiformWizardTest extends BrowserTestBase {
 
