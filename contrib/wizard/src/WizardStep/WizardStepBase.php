@@ -4,7 +4,7 @@ namespace Drupal\flexiform_wizard\WizardStep;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContextAwarePluginBase;
-use Drupal\user\PrivateTempStore;
+use Drupal\flexiform_wizard\Entity\Wizard;
 
 /**
  * Base class for wizard steps.
