@@ -68,4 +68,16 @@ interface WizardInterface extends ConfigEntityInterface, EntityWithPluginCollect
    */
   public function addPage($machine_name, array $settings = []);
 
+  /**
+   * Whether to defer saving until all steps are completed.
+   *
+   * When set to true, entities will not be saved until the user
+   * clicks the finish button. When set to false, entities will be saved at
+   * the end of each wizard step.
+   *
+   * @return bool
+   *   Whether the save should be delayed until all steps are completed.
+   */
+  public function shouldSaveOnFinish();
+
 }

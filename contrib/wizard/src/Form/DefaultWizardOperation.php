@@ -52,6 +52,13 @@ class DefaultWizardOperation extends FormBase {
   protected $step = '';
 
   /**
+   * The plugin that handles this wizard step.
+   *
+   * @var \Drupal\flexiform_wizard\WizardStep\WizardStepInterface
+   */
+  protected $plugin;
+
+  /**
    * {@inheritdoc}
    */
   public function getFormId() {
@@ -114,6 +121,9 @@ class DefaultWizardOperation extends FormBase {
     }
 
     $page = $this->wizardConfig->getPages()[$this->step];
+    $page['settings']['step'] = $this->step;
+    $page['settings']['wizard_config'] = $this->wizardConfig;
+
     $this->plugin = $this->wizardStepPluginManager->createInstance(
       $page['plugin'],
       $page['settings'] ?: []
