@@ -123,6 +123,14 @@ class WizardEditForm extends WizardForm {
     foreach ($entity->getPages() as $name => $page) {
       $plugin_definition = $this->stepPluginManager->getDefinition($page['plugin']);
 
+      $plugin = $this->stepPluginManager->createInstance(
+        $page['plugin'],
+        $page + ['step' => $name, 'wizard_config' => $entity]
+      );
+      if ($plugin instanceof ContextProvidingWizardStepInterface) {
+        $parameter_contexts += $plugin->getProvidedContexts();
+      }
+
       $form['pages'][$name]['#attributes']['class'][] = 'draggable';
       $form['pages'][$name]['#weight'] = $page['weight'] ?? 0;
       $form['pages'][$name]['label'] = [

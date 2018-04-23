@@ -15,15 +15,49 @@ use Drupal\flexiform_wizard\WizardStep\WizardStepBase;
  *   deriver = "\Drupal\flexiform\Plugin\Deriver\EntityFormBlockDeriver",
  * )
  */
-class EntityFormMode extends WizardStepBase {
+class EntityFormMode extends WizardStepBase implements ContextProvidingWizardStepInterface {
+
+  /**
+   * The form display.
+   *
+   * @var \Drupal\flexiform\FlexiformEntityFormDisplayInterface
+   */
+  protected $formDisplay;
 
   /**
    * Get entity form display.
    */
   protected function getFormDisplay() {
-    $base_entity = $this->getContextValue('entity');
-    $definition = $this->getPluginDefinition();
-    return EntityFormDisplay::collectRenderDisplay($base_entity, $definition['form_mode']);
+    if (!$this->formDisplay) {
+      $base_entity = $this->getContextValue('entity');
+      $definition = $this->getPluginDefinition();
+      $this->formDisplay = EntityFormDisplay::collectRenderDisplay($base_entity, $definition['form_mode']);
+    }
+
+    return $this->formDisplay;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getProvidedContexts() {
+    $form_display = $form_display ?:$this->getFormDisplay();
+    $context_mapping = $this->getContextMapping();
+    $provided_contexts = [];
+    foreach ($form_display->getFormEntityManager()->getContexts() as $namespace => $form_entity_context) {
+      if ($namespace == '') {
+        $namespace = 'entity';
+      }
+
+      if (!empty($context_mapping[$namespace])) {
+        $provided_contexts[$context_mapping[$namespace]] = $form_entity_context;
+      }
+      else {
+        $provided_contexts[$this->configuration['step'].'.'.$namespace] = $form_entity_context;
+      }
+    }
+
+    return $provided_context;
   }
 
   /**
@@ -77,20 +111,34 @@ class EntityFormMode extends WizardStepBase {
 
     $form_display->formSubmitComponents($form, $form_state);
 
+    $cached_values = $form_state->getTemporaryValue('wizard');
+    $flexiform_entities = array_map(function ($wrapper) {
+      return $wrapper->getEntity();
+    }, $form_display->getFormEntityManager()->getFormEntities());
+
     if (!$config->shouldSaveOnFinish()) {
       $entity->save();
       $form_display->saveFormEntities($form, $form_state);
     }
     else {
       // Only saving at the end - cache the other form entities for now.
-      $flexiform_entities = array_map(function ($wrapper) {
-        return $wrapper->getEntity();
-      }, $form_display->getFormEntityManager()->getFormEntities());
-
-      $cached_values = $form_state->getTemporaryValue('wizard');
       $cached_values['flexiform_entities'][$step] = $flexiform_entities;
-      $form_state->setTemporaryValue('wizard', $cached_values);
     }
+
+    $context_mapping = $this->getContextMapping();
+    foreach ($flexiform_entities as $entity_namespace => $form_entity) {
+      if ($entity_namespace == '') {
+        $entity_namespace = 'entity';
+      }
+
+      if (!empty($context_mapping[$entity_namespace])) {
+        $cached_values['entities'][$context_mapping[$entity_namespace]] = $form_entity;
+      }
+      else {
+        $cached_values['entities']["{$step}.{$entity_namespace}"] = $form_entity;
+      }
+    }
+    $form_state->setTemporaryValue('wizard', $cached_values);
   }
 
   /**
