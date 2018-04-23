@@ -2,13 +2,14 @@
 
 namespace Drupal\flexiform_wizard\WizardStep;
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContextAwarePluginBase;
+use Drupal\flexiform_wizard\Entity\Wizard;
 
 /**
  * Base class for wizard steps.
  */
-class WizardStepBase extends ContextAwarePluginBase implements WizardStepInterface {
-
+abstract class WizardStepBase extends ContextAwarePluginBase implements WizardStepInterface {
   /**
    * {@inheritdoc}
    */
@@ -21,4 +22,20 @@ class WizardStepBase extends ContextAwarePluginBase implements WizardStepInterfa
       ],
     ];
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  abstract public function buildForm(array $form, FormStateInterface $form_state);
+
+  /**
+   * {@inheritdoc}
+   */
+  abstract public function validateForm(array &$form, FormStateInterface $form_state);
+
+  /**
+   * {@inheritdoc}
+   */
+  abstract public function submitForm(array &$form, FormStateInterface $form_state);
+
 }
