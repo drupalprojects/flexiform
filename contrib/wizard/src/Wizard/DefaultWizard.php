@@ -167,7 +167,7 @@ class DefaultWizard extends FormWizardBase {
       foreach ($this->wizard->getPages() as $name => $page) {
         /* @var \Drupal\flexiform_wizard\WizardStep\WizardStepInterface $plugin */
         $plugin = \Drupal::service('plugin.manager.flexiform_wizard.wizard_step')
-          ->createInstance($page['plugin'], $page['settings']);
+          ->createInstance($page['plugin'], $page['settings'] ?: []);
         $operations[$name] = $plugin->stepInfo($name, $cached_values);
       }
     }

@@ -6,6 +6,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\flexiform_wizard\Entity\WizardInterface;
 use Drupal\flexiform_wizard\WizardStep\WizardStepBase;
+use Drupal\flexiform_wizard\WizardStep\ContextProvidingWizardStepInterface;
 
 /**
  * Entity Form Mode plugin.
@@ -57,7 +58,7 @@ class EntityFormMode extends WizardStepBase implements ContextProvidingWizardSte
       }
     }
 
-    return $provided_context;
+    return $provided_contexts;
   }
 
   /**

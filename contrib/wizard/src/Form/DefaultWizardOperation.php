@@ -9,6 +9,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextHandlerInterface;
 use Drupal\flexiform_wizard\WizardStep\WizardStepPluginManager;
+use Drupal\flexiform_wizard\WizardStep\ContextProvidingWizardStepInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -89,17 +90,6 @@ class DefaultWizardOperation extends FormBase {
   }
 
   /**
-   * Get the operation form display.
-   *
-   * @return \Drupal\flexiform\FlexiformEntityFormDisplay
-   */
-  public function getFormDisplay() {
-    $id = 'flexiform_wizard.' . $this->wizardConfig->id() . '.' . $this->step;
-    $display = $this->entityTypeManager->getStorage('entity_form_display')->load($id);
-    return $display;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
@@ -109,16 +99,6 @@ class DefaultWizardOperation extends FormBase {
     $this->step = $cached_values['step'];
 
     $entity_contexts = [];
-    foreach ($cached_values['entities'] as $parameter_name => $entity) {
-      $entity_contexts[$parameter_name] = new Context(
-        new ContextDefinition(
-          'entity:'.$entity->getEntityTypeId(),
-          $parameter_name,
-          TRUE
-        ),
-        $entity
-      );
-    }
 
     // Add a current_user context.
     $entity_contexts['_current_user'] = new Context(
@@ -129,6 +109,17 @@ class DefaultWizardOperation extends FormBase {
       ),
       $this->entityTypeManager->getStorage('user')->load(\Drupal::currentUser()->id())
     );
+
+    foreach ($cached_values['entities'] as $parameter_name => $entity) {
+      $entity_contexts[$parameter_name] = new Context(
+        new ContextDefinition(
+          'entity:'.$entity->getEntityTypeId(),
+          $parameter_name,
+          TRUE
+        ),
+        $entity
+      );
+    }
 
     $page = $this->wizardConfig->getPages()[$this->step];
     $page['settings']['step'] = $this->step;
@@ -160,7 +151,9 @@ class DefaultWizardOperation extends FormBase {
 
     if ($this->plugin instanceof ContextProvidingWizardStepInterface) {
       $cached_values = $form_state->getTemporaryValue('wizard');
-      $cached_values['entities'] = $this->plugin->getProvidedContexts() + $cached_values['entities'];
+      $cached_values['entities'] = array_map(function($context) {
+        return $context->getContextValue();
+      }, $this->plugin->getProvidedContexts()) + $cached_values['entities'];
       $form_state->setTemporaryValue('wizard', $cached_values);
     }
   }

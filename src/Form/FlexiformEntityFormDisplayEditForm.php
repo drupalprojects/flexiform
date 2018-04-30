@@ -220,15 +220,17 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
     }
 
     // Collect options for extra field components.
-    foreach ($form['#extra'] as $name) {
-      if ($form_values['fields'][$name]['region'] == 'hidden') {
-        $entity->removeComponent($name);
-      }
-      else {
-        $entity->setComponent($name, [
-          'weight' => $form_values['fields'][$name]['weight'],
-          'region' => $form_values['fields'][$name]['region'],
-        ]);
+    if (!empty($form['#extra'])) {
+      foreach ($form['#extra'] as $name) {
+        if ($form_values['fields'][$name]['region'] == 'hidden') {
+          $entity->removeComponent($name);
+        }
+        else {
+          $entity->setComponent($name, [
+            'weight' => $form_values['fields'][$name]['weight'],
+            'region' => $form_values['fields'][$name]['region'],
+          ]);
+        }
       }
     }
 
