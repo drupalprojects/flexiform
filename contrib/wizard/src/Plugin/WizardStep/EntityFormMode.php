@@ -41,7 +41,7 @@ class EntityFormMode extends WizardStepBase implements ContextProvidingWizardSte
    * {@inheritdoc}
    */
   public function getProvidedContexts() {
-    $form_display = $form_display ?:$this->getFormDisplay();
+    $form_display = $this->getFormDisplay();
     $context_mapping = $this->getContextMapping();
     $provided_contexts = [];
     foreach ($form_display->getFormEntityManager()->getContexts() as $namespace => $form_entity_context) {
@@ -76,12 +76,16 @@ class EntityFormMode extends WizardStepBase implements ContextProvidingWizardSte
     $provided[''] = $provided['entity'];
     unset($provided['entity']);
 
-    if ($config->shouldSaveOnFinish()) {
-      $cached_values = $form_state->getTemporaryValue('wizard');
-      // Only saving at end of wizard.
-      // Make sure cached values are loaded.
-      if (isset($cached_values['flexiform_entities'][$step])) {
-        $provided = $provided + $cached_values['flexiform_entities'][$step];
+    // Other cached values may have been set so we provide those too.
+    $cached_values = $form_state->getTemporaryValue('wizard');
+    foreach ($cached_values['entities'] as $name => $cached_entity) {
+      if (strpos($name, '.') === FALSE) {
+        continue;
+      }
+
+      list($entity_step, $namespace) = explode('.', $name, 2);
+      if ($entity_step == $step) {
+        $provided[$namespace] = $cached_entity;
       }
     }
 
@@ -111,34 +115,10 @@ class EntityFormMode extends WizardStepBase implements ContextProvidingWizardSte
 
     $form_display->formSubmitComponents($form, $form_state);
 
-    $cached_values = $form_state->getTemporaryValue('wizard');
-    $flexiform_entities = array_map(function ($wrapper) {
-      return $wrapper->getEntity();
-    }, $form_display->getFormEntityManager()->getFormEntities());
-
     if (!$config->shouldSaveOnFinish()) {
       $entity->save();
       $form_display->saveFormEntities($form, $form_state);
     }
-    else {
-      // Only saving at the end - cache the other form entities for now.
-      $cached_values['flexiform_entities'][$step] = $flexiform_entities;
-    }
-
-    $context_mapping = $this->getContextMapping();
-    foreach ($flexiform_entities as $entity_namespace => $form_entity) {
-      if ($entity_namespace == '') {
-        $entity_namespace = 'entity';
-      }
-
-      if (!empty($context_mapping[$entity_namespace])) {
-        $cached_values['entities'][$context_mapping[$entity_namespace]] = $form_entity;
-      }
-      else {
-        $cached_values['entities']["{$step}.{$entity_namespace}"] = $form_entity;
-      }
-    }
-    $form_state->setTemporaryValue('wizard', $cached_values);
   }
 
   /**

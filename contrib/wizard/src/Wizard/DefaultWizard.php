@@ -203,16 +203,8 @@ class DefaultWizard extends FormWizardBase {
       foreach ($cached_values['entities'] as $key => $entity) {
         $entity->save();
       }
-
-      // Save additional entities for each step.
-      foreach ($cached_values['flexiform_entities'] as $step => $entities) {
-        foreach ($entities as $entity) {
-          $entity->save();
-        }
-      }
-
-      unset($cached_values['flexiform_entities']);
     }
+
     // Save entities before calling parent.
     // Parent clears the cached data.
     parent::finish($form, $form_state);

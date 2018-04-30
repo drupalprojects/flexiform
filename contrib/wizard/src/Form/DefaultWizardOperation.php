@@ -120,6 +120,16 @@ class DefaultWizardOperation extends FormBase {
       );
     }
 
+    // Add a current_user context.
+    $entity_contexts['_current_user'] = new Context(
+      new ContextDefinition(
+        'entity:user',
+        '_current_user',
+        TRUE
+      ),
+      $this->entityTypeManager->getStorage('user')->load(\Drupal::currentUser()->id())
+    );
+
     $page = $this->wizardConfig->getPages()[$this->step];
     $page['settings']['step'] = $this->step;
     $page['settings']['wizard_config'] = $this->wizardConfig;
@@ -147,6 +157,12 @@ class DefaultWizardOperation extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->plugin->submitForm($form, $form_state);
+
+    if ($this->plugin instanceof ContextProvidingWizardStepInterface) {
+      $cached_values = $form_state->getTemporaryValue('wizard');
+      $cached_values['entities'] = $this->plugin->getProvidedContexts() + $cached_values['entities'];
+      $form_state->setTemporaryValue('wizard', $cached_values);
+    }
   }
 
 }
