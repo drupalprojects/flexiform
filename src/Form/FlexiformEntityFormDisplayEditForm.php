@@ -28,6 +28,8 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
    */
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
+    $form['#entity_type'] = $this->entity->getTargetEntityTypeId();
+    $form['#bundle'] = $this->entity->getTargetBundle();
     $form['#attached']['library'][] = 'core/drupal.dialog.ajax';
     $form['#attached']['library'][] = 'core/drupal.ajax';
 
