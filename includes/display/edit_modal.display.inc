@@ -26,7 +26,7 @@ class FlexiformDisplayEditModal extends FlexiformDisplayCreateModal {
    */
   protected function getMenuArguments() {
     $args = parent::getMenuArguments();
-    $args[3] = 3;
+    array_pop($args); array_push($args, 3);
     return $args;
   }
 
