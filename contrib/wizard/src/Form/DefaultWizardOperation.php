@@ -66,7 +66,6 @@ class DefaultWizardOperation extends FormBase {
     return 'flexiform_wizard_operation_form';
   }
 
-
   /**
    * {@inheritdoc}
    */
@@ -83,6 +82,10 @@ class DefaultWizardOperation extends FormBase {
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
+   * @param \Drupal\flexiform_wizard\WizardStep\WizardStepPluginManager $wizard_step_plugin_manager
+   *   The wizard step plugin manager.
+   * @param \Drupal\Core\Plugin\Context\ContextHandlerInterface $context_handler
+   *   The context handler.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, WizardStepPluginManager $wizard_step_plugin_manager, ContextHandlerInterface $context_handler) {
     $this->wizardStepPluginManager = $wizard_step_plugin_manager;
@@ -114,7 +117,7 @@ class DefaultWizardOperation extends FormBase {
     foreach ($cached_values['entities'] as $parameter_name => $entity) {
       $entity_contexts[$parameter_name] = new Context(
         new ContextDefinition(
-          'entity:'.$entity->getEntityTypeId(),
+          'entity:' . $entity->getEntityTypeId(),
           $parameter_name,
           TRUE
         ),
@@ -152,7 +155,7 @@ class DefaultWizardOperation extends FormBase {
 
     if ($this->plugin instanceof ContextProvidingWizardStepInterface) {
       $cached_values = $form_state->getTemporaryValue('wizard');
-      $cached_values['entities'] = array_map(function($context) {
+      $cached_values['entities'] = array_map(function ($context) {
         return $context->getContextValue();
       }, $this->plugin->getProvidedContexts()) + $cached_values['entities'];
       $form_state->setTemporaryValue('wizard', $cached_values);

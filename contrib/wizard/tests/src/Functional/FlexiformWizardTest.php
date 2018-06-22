@@ -40,7 +40,8 @@ class FlexiformWizardTest extends BrowserTestBase {
     ]);
     $node->save();
 
-    $this->drupalGet('flexiform_wizard/test/'.$node->id().'/'.$account->id());
+    $this->drupalGet('flexiform_wizard/test/' . $node->id() . '/' . $account->id());
     $this->assertSession()->statusCodeEquals(200);
   }
+
 }

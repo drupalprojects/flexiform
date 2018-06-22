@@ -12,7 +12,7 @@ use Drupal\flexiform\FormEntity\FlexiformFormEntityBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Form Entity for getting profiles from a user object
+ * Form Entity for getting profiles from a user object.
  *
  * @FlexiformFormEntity(
  *   id = "user_profile",

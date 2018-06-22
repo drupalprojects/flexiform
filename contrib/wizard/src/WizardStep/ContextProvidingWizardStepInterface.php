@@ -3,8 +3,7 @@
 namespace Drupal\flexiform_wizard\WizardStep;
 
 /**
- * Interface for wizard step plugins that can provide additional contexts
- * to the wizard.
+ * Interface for wizard step plugins that provide additional contexts.
  */
 interface ContextProvidingWizardStepInterface extends WizardStepInterface {
 
@@ -14,7 +13,7 @@ interface ContextProvidingWizardStepInterface extends WizardStepInterface {
    * The keys of this array should be unique within the wizard. Keying by the
    * step name followed by a unique string is a good idea.
    *
-   * @return \Drupal\Core\Plugin\Context[]
+   * @return \Drupal\Core\Plugin\Context\Context[]
    *   Array of contexts provided by this step.
    */
   public function getProvidedContexts();

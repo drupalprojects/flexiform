@@ -31,7 +31,7 @@ class WizardEditForm extends WizardForm {
   }
 
   /**
-   * Create a new WizardEditForm class
+   * Create a new WizardEditForm class.
    *
    * @param \Drupal\flexiform_wizard\WizardStep\WizardStepPluginManager $step_plugin_manager
    *   The wizard step plugin manager.
@@ -158,7 +158,7 @@ class WizardEditForm extends WizardForm {
         '#title_display' => 'invisible',
         '#default_value' => $page['weight'] ?? 0,
         '#attributes' => [
-          'class' => [ 'wizard-page-weight' ],
+          'class' => ['wizard-page-weight'],
         ],
       ];
       $form['pages'][$name]['operations'] = [
@@ -166,21 +166,21 @@ class WizardEditForm extends WizardForm {
         'form_display' => [
           '#type' => 'submit',
           '#value' => $this->t('Manage Form Display'),
-          '#name' => 'manage_page_'.$name,
+          '#name' => 'manage_page_' . $name,
           '#page' => $name,
           '#limit_validation_errors' => [],
           '#submit' => [
-            [ $this, 'submitManagePage' ],
+            [$this, 'submitManagePage'],
           ],
         ],
         'remove' => [
           '#type' => 'submit',
           '#value' => $this->t('Remove'),
-          '#name' => 'remove_page_'.$name,
+          '#name' => 'remove_page_' . $name,
           '#page' => $name,
           '#limit_validation_errors' => [],
           '#submit' => [
-            [ $this, 'submitRemovePage' ],
+            [$this, 'submitRemovePage'],
           ],
         ],
       ];
@@ -197,7 +197,7 @@ class WizardEditForm extends WizardForm {
 
     $form['pages']['__add_new'] = [
       '#attributes' => [
-        'class' => [ 'draggable' ],
+        'class' => ['draggable'],
       ],
       '#weight' => $max_weight,
       'label' => [
@@ -222,7 +222,7 @@ class WizardEditForm extends WizardForm {
         '#title_display' => 'invisible',
         '#default_value' => $max_weight,
         '#attributes' => [
-          'class' => [ 'wizard-page-weight' ],
+          'class' => ['wizard-page-weight'],
         ],
       ],
       'operations' => [
@@ -232,13 +232,13 @@ class WizardEditForm extends WizardForm {
           '#value' => $this->t('Add Page'),
           '#name' => 'add_page',
           '#limit_validation_errors' => [
-            [ 'pages', '__add_new' ],
+            ['pages', '__add_new'],
           ],
           '#validate' => [
-            [ $this, 'validateAddPage' ],
+            [$this, 'validateAddPage'],
           ],
           '#submit' => [
-            [ $this, 'submitAddPage' ],
+            [$this, 'submitAddPage'],
           ],
         ],
       ],

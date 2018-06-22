@@ -9,7 +9,6 @@ use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
-use Drupal\flexiform\FlexiformEntityFormDisplay;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -40,8 +39,6 @@ class FormEntityProfileTypeDeriver extends DeriverBase implements ContainerDeriv
    *   The entity manager.
    * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
    *   The string translation service.
-   * @param \Drupal\Core\Entity\EntityDisplayRepositoryInterface $entity_display_repository
-   *   The entity display respository service.
    * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_bundle_info
    *   The entity bundle info service.
    */

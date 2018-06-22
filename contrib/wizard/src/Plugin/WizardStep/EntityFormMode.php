@@ -4,7 +4,6 @@ namespace Drupal\flexiform_wizard\Plugin\WizardStep;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
-use Drupal\flexiform_wizard\Entity\WizardInterface;
 use Drupal\flexiform_wizard\WizardStep\WizardStepBase;
 use Drupal\flexiform_wizard\WizardStep\ContextProvidingWizardStepInterface;
 
@@ -54,7 +53,7 @@ class EntityFormMode extends WizardStepBase implements ContextProvidingWizardSte
         $provided_contexts[$context_mapping[$namespace]] = $form_entity_context;
       }
       else {
-        $provided_contexts[$this->configuration['step'].'.'.$namespace] = $form_entity_context;
+        $provided_contexts[$this->configuration['step'] . '.' . $namespace] = $form_entity_context;
       }
     }
 
@@ -66,7 +65,7 @@ class EntityFormMode extends WizardStepBase implements ContextProvidingWizardSte
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $step = $this->configuration['step'];
-    /* @var WizardInterface $config */
+    /* @var \Drupal\flexiform_wizard\Entity\WizardInterface $config */
     $config = $this->configuration['wizard_config'];
 
     /* @var \Drupal\flexiform\FlexiformEntityFormDisplay $form_display */
@@ -106,7 +105,7 @@ class EntityFormMode extends WizardStepBase implements ContextProvidingWizardSte
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    /* @var WizardInterface $config */
+    /* @var \Drupal\flexiform_wizard\Entity\WizardInterface $config */
     $config = $this->configuration['wizard_config'];
     $entity = $this->getContextValue('entity');
     $step = $this->configuration['step'];

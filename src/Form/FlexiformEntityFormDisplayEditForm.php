@@ -135,8 +135,7 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
         }
         $form['modes']['display_modes_custom'] = [
           '#type' => 'checkboxes',
-          '#title' => $this
-            ->t('Use custom display settings for the following @display_context modes', [
+          '#title' => $this->t('Use custom display settings for the following @display_context modes', [
             '@display_context' => $this->displayContext,
           ]),
           '#options' => $display_mode_options,

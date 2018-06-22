@@ -6,7 +6,6 @@ use Drupal\Component\Plugin\Context\ContextInterface;
 use Drupal\Core\Condition\ConditionPluginCollection;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 
 /**
  * Defines a flexiform wizard entity class.

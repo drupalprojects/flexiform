@@ -3,7 +3,6 @@
 namespace Drupal\flexiform_wizard\WizardStep;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\user\PrivateTempStore;
 
 /**
  * Interface for wizard steps plugins.
@@ -11,14 +10,17 @@ use Drupal\user\PrivateTempStore;
 interface WizardStepInterface {
 
   /**
-   * Get the step informations.
+   * Get the step information.
    *
+   * @param string $name
+   *   The step name.
    * @param array $cached_values
+   *   The cached values for the wizard.
    *
    * @return array
    *   Step information including:
-   *     - title - The page title.
-   *     - form - The fully qualified class name of the form object for this page.
+   *   - title: The page title.
+   *   - form: The fully qualified class name of the form object for this page.
    */
   public function stepInfo($name = '', array $cached_values = []);
 

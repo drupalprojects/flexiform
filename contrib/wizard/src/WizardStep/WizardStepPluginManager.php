@@ -31,4 +31,5 @@ class WizardStepPluginManager extends DefaultPluginManager implements ContextAwa
     $this->alterInfo('flexiform_wizard_step_plugin');
     $this->setCacheBackend($cache_backend, 'flexiform_wizard_step_plugin');
   }
+
 }

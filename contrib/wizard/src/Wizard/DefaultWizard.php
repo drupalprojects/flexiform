@@ -3,15 +3,12 @@
 namespace Drupal\flexiform_wizard\Wizard;
 
 use Drupal\Core\DependencyInjection\ClassResolverInterface;
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\user\PrivateTempStoreFactory;
-use Drupal\ctools\Event\WizardEvent;
 use Drupal\ctools\Wizard\FormWizardBase;
-use Drupal\ctools\Wizard\FormWizardInterface;
 use Drupal\flexiform_wizard\Entity\Wizard as WizardEntity;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -34,6 +31,9 @@ class DefaultWizard extends FormWizardBase {
    */
   protected $provided = [];
 
+  /**
+   * {@inheritdoc}
+   */
   public static function getParameters() {
     $params = parent::getParameters();
     $params['tempstore'] = \Drupal::service('user.private_tempstore');
@@ -56,6 +56,7 @@ class DefaultWizard extends FormWizardBase {
 
   /**
    * Build the wizard object.
+   *
    * @param \Drupal\user\PrivateTempStoreFactory $tempstore
    *   Tempstore Factory for keeping track of values in each step of the
    *   wizard.
@@ -86,8 +87,8 @@ class DefaultWizard extends FormWizardBase {
     $this->classResolver = $class_resolver;
     $this->dispatcher = $event_dispatcher;
     $this->routeMatch = $route_match;
-    $this->tempstore_id = 'flexiform_wizard.'.$wizard->id();
-    $this->machine_name = 'flexiform_wizard__'.$wizard->id();
+    $this->tempstore_id = 'flexiform_wizard.' . $wizard->id();
+    $this->machine_name = 'flexiform_wizard__' . $wizard->id();
     $this->step = $step;
     $this->wizard = $wizard;
 
@@ -128,6 +129,9 @@ class DefaultWizard extends FormWizardBase {
     return $this->tempstore->get($this->getTempstoreId());
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getNextParameters($cached_values) {
     $parameters = parent::getNextParameters($cached_values);
 
@@ -135,7 +139,7 @@ class DefaultWizard extends FormWizardBase {
       if (!empty($cached_values['entities'][$param_name])) {
         $parameters[$param_name] = $cached_values['entities'][$param_name]->id();
       }
-      else if (!empty($this->provided[$param_name])) {
+      elseif (!empty($this->provided[$param_name])) {
         $parameters[$param_name] = $this->provided[$param_name]->id();
       }
     }
@@ -143,6 +147,9 @@ class DefaultWizard extends FormWizardBase {
     return $parameters;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getPreviousParameters($cached_values) {
     $parameters = parent::getPreviousParameters($cached_values);
 
@@ -150,7 +157,7 @@ class DefaultWizard extends FormWizardBase {
       if (!empty($cached_values['entities'][$param_name])) {
         $parameters[$param_name] = $cached_values['entities'][$param_name]->id();
       }
-      else if (!empty($this->provided[$param_name])) {
+      elseif (!empty($this->provided[$param_name])) {
         $parameters[$param_name] = $this->provided[$param_name]->id();
       }
     }
@@ -180,7 +187,7 @@ class DefaultWizard extends FormWizardBase {
    * {@inheritdoc}
    */
   public function getRouteName() {
-    return 'flexiform_wizard.'.$this->wizard->id().'.step';
+    return 'flexiform_wizard.' . $this->wizard->id() . '.step';
   }
 
   /**

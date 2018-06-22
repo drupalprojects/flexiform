@@ -2,7 +2,6 @@
 
 namespace Drupal\flexiform_wizard\Routing;
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider;
 use Drupal\flexiform_wizard\Entity\WizardInterface;
@@ -13,7 +12,6 @@ use Symfony\Component\Routing\Route;
  */
 class WizardHtmlRouteProvider extends DefaultHtmlRouteProvider {
 
-
   /**
    * {@inheritdoc}
    */
@@ -23,7 +21,7 @@ class WizardHtmlRouteProvider extends DefaultHtmlRouteProvider {
     // Get a route for configuring a step.
     if ($entity_type->hasLinkTemplate('edit-form')) {
       $entity_type_id = $entity_type->id();
-      $route = new Route($entity_type->getLinkTemplate('edit-form').'/page/{page}');
+      $route = new Route($entity_type->getLinkTemplate('edit-form') . '/page/{page}');
       $route->setDefaults([
         '_controller' => '\Drupal\flexiform_wizard\Controller\WizardPageEdit::pageContent',
         '_title_callback' => '\Drupal\flexiform_wizard\Controller\WizardPageEdit::pageTitle',
@@ -50,7 +48,6 @@ class WizardHtmlRouteProvider extends DefaultHtmlRouteProvider {
     return $collection;
   }
 
-
   /**
    * Gets the add page route.
    *
@@ -69,7 +66,7 @@ class WizardHtmlRouteProvider extends DefaultHtmlRouteProvider {
     $options = [];
     foreach ($wizard->get('parameters') as $param_name => $param_info) {
       $options['parameters'][$param_name] = [
-        'type' => 'entity:'.$param_info['entity_type'],
+        'type' => 'entity:' . $param_info['entity_type'],
       ];
     }
     $options['parameters']['wizard'] = [
