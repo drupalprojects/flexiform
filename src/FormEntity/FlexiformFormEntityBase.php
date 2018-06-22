@@ -124,11 +124,33 @@ abstract class FlexiformFormEntityBase extends ContextAwarePluginBase implements
 
   /**
    * Save the entity.
+   *
+   * If subclasses need to do more as part of saving, they should override
+   * ::doSave().
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to save.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   *   Errors during the entity save.
    */
-  public function saveEntity(EntityInterface $entity) {
+  final public function saveEntity(EntityInterface $entity) {
     if (!isset($this->configuration['save_on_submit']) || $this->configuration['save_on_submit']) {
-      $entity->save();
+      $this->doSave($entity);
     }
+  }
+
+  /**
+   * Perform the save on the entity.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to save.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   *   Errors during the entity save.
+   */
+  protected function doSave(EntityInterface $entity) {
+    $entity->save();
   }
 
   /**
