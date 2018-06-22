@@ -29,6 +29,14 @@ abstract class ConfigurableFormEnhancerBase extends FormEnhancerBase implements 
   /**
    * {@inheritdoc}
    */
+  public function setConfiguration(array $configuration) {
+    $this->configuration = $configuration;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function applies($event) {
     if ($event == 'configuration_form') {
       return TRUE;

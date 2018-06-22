@@ -50,4 +50,15 @@ interface ConfigurableFormEnhancerInterface extends FormEnhancerInterface {
    */
   public function getConfiguration();
 
+  /**
+   * Set the configuration for the enhancer.
+   *
+   * @param array $configuration
+   *   The configuration array.
+   *
+   * @return self
+   *   The form enhancer.
+   */
+  public function setConfiguration(array $configuration);
+
 }

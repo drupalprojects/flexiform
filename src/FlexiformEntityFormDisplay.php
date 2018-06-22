@@ -127,15 +127,30 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage, $update = TRUE) {
+    // Allow syncing to change the settings.
     $enhancer_settings = $this->getThirdPartySetting('flexiform', 'enhancer', []);
     foreach ($this->formEnhancers as $enhancer_name => $enhancer) {
       if ($enhancer instanceof ConfigurableFormEnhancerInterface) {
-        $config = $enhancer->getConfiguration();
-        $config['id'] = $enhancer->getPluginId();
-        $enhancer_settings[$enhancer_name] = $config;
+        // If we're syncing, update the enhancer.
+        if ($this->isSyncing()) {
+          if (isset($enhancer_settings[$enhancer_name])) {
+            $enhancer->setConfiguration($enhancer_settings[$enhancer_name]);
+          }
+        }
+        // Otherwise retrieve the values from the enhancer.
+        else {
+          $config = $enhancer->getConfiguration();
+          $config['id'] = $enhancer->getPluginId();
+          $enhancer_settings[$enhancer_name] = $config;
+        }
       }
     }
-    $this->setThirdPartySetting('flexiform', 'enhancer', $enhancer_settings);
+
+    // If not syncing, write our changes.
+    if (!$this->isSyncing()) {
+      $this->setThirdPartySetting('flexiform', 'enhancer', $enhancer_settings);
+    }
+
     parent::preSave($storage, $update);
   }
 
