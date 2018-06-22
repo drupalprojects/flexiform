@@ -79,6 +79,10 @@ class FormEntityContext extends Context implements FormEntityContextInterface {
    * @param \Drupal\flexiform\FormEntity\FlexiformFormEntityInterface $form_entity
    *   The form entity plugin.
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+   *   The form entity to create from.
+   *
+   * @return static
+   *   The generated context.
    */
   public static function createFromFlexiformFormEntity(FlexiformFormEntityInterface $form_entity, FieldableEntityInterface $entity = NULL) {
     $context_definition = new ContextDefinition('entity:' . $form_entity->getEntityType(), $form_entity->getLabel());

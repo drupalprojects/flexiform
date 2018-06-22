@@ -23,8 +23,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class FlexiformFormEntityTypedDataReferencedEntity extends FlexiformFormEntityBase implements ContainerFactoryPluginInterface {
+
   use StringTranslationTrait;
 
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
   protected $entityTypeManager;
 
   /**
@@ -95,6 +101,7 @@ class FlexiformFormEntityTypedDataReferencedEntity extends FlexiformFormEntityBa
     }
 
     $entity = $this->entityTypeManager->getStorage($this->getEntityType())->create($values);
+
     $this->moduleHandler->invokeAll('flexiform_form_entity_entity_create', [$entity, $this]);
     return $entity;
   }

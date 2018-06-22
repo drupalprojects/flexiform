@@ -26,12 +26,13 @@ class WizardParameters extends FormEnhancerBase {
   }
 
   /**
-   * Initialize form entity config.
+   * Initialise the enhancer config..
    *
    * @return array
+   *   The initial config for the enhancer.
    */
   public function initFormEntityConfig() {
-    list(,$wizard_id, $step) = explode('.', $this->getFormDisplay()->id(), 3);
+    list(, $wizard_id, $step) = explode('.', $this->getFormDisplay()->id(), 3);
     $wizard = entity_load('flexiform_wizard', $wizard_id);
 
     $form_entity_settings = [];
@@ -46,4 +47,5 @@ class WizardParameters extends FormEnhancerBase {
 
     return $form_entity_settings;
   }
+
 }

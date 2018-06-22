@@ -20,21 +20,29 @@ use Symfony\Component\Routing\RouterInterface;
 class FormComponentAddForm extends FormBase {
 
   /**
+   * The form display.
+   *
    * @var \Drupal\flexiform\FlexiformEntityFormDisplay
    */
   protected $formDisplay;
 
   /**
+   * The form component plugin manager.
+   *
    * @var \Drupal\flexiform\FormComponentTypePluginManager
    */
   protected $pluginManager;
 
   /**
+   * The entity type manager.
+   *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
   /**
+   * The router.
+   *
    * @var \Symfony\Component\Routing\RouterInterface
    */
   protected $router;
@@ -69,7 +77,8 @@ class FormComponentAddForm extends FormBase {
   /**
    * Get the form entity manager.
    *
-   * @return \Drupal\flexiform\FlexiformFormEntityManager
+   * @return \Drupal\flexiform\FormEntity\FlexiformFormEntityManager
+   *   The form entity manager.
    */
   protected function formEntityManager() {
     return $this->formDisplay->getFormEntityManager();

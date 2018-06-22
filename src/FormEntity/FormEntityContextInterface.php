@@ -24,6 +24,7 @@ interface FormEntityContextInterface extends ContextInterface {
    * Get the entity namespace.
    *
    * @return string
+   *   The entity namespace.
    */
   public function getEntityNamespace();
 

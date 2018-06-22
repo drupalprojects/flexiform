@@ -30,6 +30,8 @@ class DefaultWizard extends FormWizardBase {
   protected $provided = [];
 
   /**
+   * Build the wizard object.
+   *
    * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $tempstore
    *   Tempstore Factory for keeping track of values in each step of the
    *   wizard.
@@ -61,8 +63,8 @@ class DefaultWizard extends FormWizardBase {
       $class_resolver,
       $event_dispatcher,
       $route_match,
-      'flexiform_wizard.'.$wizard->id(),
-      'flexiform_wizard__'.$wizard->id(),
+      'flexiform_wizard.' . $wizard->id(),
+      'flexiform_wizard__' . $wizard->id(),
       $step
     );
 

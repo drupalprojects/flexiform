@@ -28,6 +28,7 @@ interface FormComponentInterface {
    * @param array $form
    *   The section of the form corresponding to this component.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
    */
   public function extractFormValues(array $form, FormStateInterface $form_state);
 
@@ -35,12 +36,17 @@ interface FormComponentInterface {
    * Get the settings form.
    *
    * @param array $form
+   *   The form array.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
    */
   public function settingsForm(array $form, FormStateInterface $form_state);
 
   /**
    * Get the settings summary.
+   *
+   * @return string
+   *   The setting summary.
    */
   public function settingsSummary();
 
@@ -48,6 +54,7 @@ interface FormComponentInterface {
    * Get the admin label for the component.
    *
    * @return string
+   *   The administrative label for the component.
    */
   public function getAdminLabel();
 

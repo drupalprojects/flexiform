@@ -102,18 +102,32 @@ class MultipleEntityForm extends ConfigurableFormEnhancerBase {
   }
 
   /**
-   * Init form entity config.
+   * Initialise the enhancer config.
    *
    * @return array
+   *   The initial config for the enhancer.
    */
   public function initFormEntityConfig() {
     return !empty($this->configuration['entities']) ? $this->configuration['entities'] : [];
   }
 
   /**
-   * Add form entity config.
+   * Get the config for an entity namespace.
    *
-   * @return array
+   * @return array|false
+   *   The entity config or FALSE if it doesn't exist.
+   */
+  public function getFormEntityConfig($namespace) {
+    return $this->configuration['entities'][$namespace] ?? FALSE;
+  }
+
+  /**
+   * Set the config for an entity namespace.
+   *
+   * @return $this
+   *   The form enhancer.
+   *
+   * @todo: Rename to setFormEntityConfig()?
    */
   public function addFormEntityConfig($namespace, $configuration) {
     $this->configuration['entities'][$namespace] = $configuration;
@@ -121,7 +135,10 @@ class MultipleEntityForm extends ConfigurableFormEnhancerBase {
   }
 
   /**
-   * {@inheritdoc}
+   * Remove an entity namespace.
+   *
+   * @return $this
+   *   The form enhancer.
    */
   public function removeFormEntityConfig($namespace) {
     unset($this->configuration['entities'][$namespace]);

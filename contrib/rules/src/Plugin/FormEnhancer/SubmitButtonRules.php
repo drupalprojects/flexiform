@@ -14,6 +14,8 @@ use Drupal\rules\Context\ContextDefinition as RulesContextDefinition;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
+ * A flexiform enhancer to trigger rules on submission.
+ *
  * @FormEnhancer(
  *   label = @Translation("Rules"),
  *   id = "submit_button_rules",
@@ -63,6 +65,7 @@ class SubmitButtonRules extends ConfigurableFormEnhancerBase implements Containe
    * Get the rules storage handler.
    *
    * @return \Drupal\Core\Entity\EntityStorageInterface
+   *   The entity storage for the rules component.
    */
   protected function rulesStorage() {
     return $this->entityTypeManager->getStorage('rules_component');

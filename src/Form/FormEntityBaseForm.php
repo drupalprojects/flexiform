@@ -86,6 +86,7 @@ abstract class FormEntityBaseForm extends FormBase {
    * Get the form entity manager.
    *
    * @return \Drupal\flexiform\FormEntity\FlexiformFormEntityManager
+   *   The form entity manager.
    */
   protected function formEntityManager() {
     return $this->formDisplay->getFormEntityManager();

@@ -43,7 +43,7 @@ class FlexiformEntityFormTest extends BrowserTestBase {
   }
 
   /**
-   * Tests that the Article 'Manage form display' page works before Flexiform is installed.
+   * Tests that the Article 'Manage form display' page works without Flexiform.
    */
   public function testArticleManageFormDisplayPageBeforeFlexiform() {
     $this->drupalGet('admin/structure/types/manage/article/form-display');
@@ -51,7 +51,7 @@ class FlexiformEntityFormTest extends BrowserTestBase {
   }
 
   /**
-   * Tests that the Article 'Manage form display' page works after Flexiform is installed.
+   * Tests that the Article 'Manage form display' page works with Flexiform.
    */
   public function testArticleManageFormDisplayPageAfterFlexiform() {
     // Install Flexiform module.
@@ -64,14 +64,14 @@ class FlexiformEntityFormTest extends BrowserTestBase {
   /**
    * Tests basic form CRUD functionality on Article nodes.
    */
-  public function testFormCRUD() {
+  public function testFormCrud() {
     $this->doFormCRUD();
   }
 
   /**
-   * Tests basic form CRUD functionality on Article nodes, with Flexiform installed.
+   * Tests basic form CRUD functionality on Article nodes, with Flexiform.
    */
-  public function testFormCRUDFlexiform() {
+  public function testFormCrudFlexiform() {
     // Install Flexiform module.
     \Drupal::service('module_installer')->install(['flexiform']);
 
@@ -81,7 +81,7 @@ class FlexiformEntityFormTest extends BrowserTestBase {
   /**
    * Executes the form CRUD tests.
    */
-  protected function doFormCRUD() {
+  protected function doFormCrud() {
     $title1 = $this->randomMachineName(8);
     $title2 = $this->randomMachineName(10);
 

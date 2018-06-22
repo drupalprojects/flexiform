@@ -36,7 +36,7 @@ class RouteSubscriber extends RouteSubscriberBase {
       $options = [];
       foreach ($wizard->get('parameters') as $param_name => $param_info) {
         $options['parameters'][$param_name] = [
-          'type' => 'entity:'.$param_info['entity_type'],
+          'type' => 'entity:' . $param_info['entity_type'],
         ];
       }
       $options['parameters']['wizard'] = [
@@ -59,7 +59,7 @@ class RouteSubscriber extends RouteSubscriberBase {
       );
       $collection->add("flexiform_wizard.{$wizard_id}", $route);
       $route = new Route(
-        $wizard->get('path').'/{step}',
+        $wizard->get('path') . '/{step}',
         $defaults,
         [
           '_access' => 'TRUE',
@@ -69,4 +69,5 @@ class RouteSubscriber extends RouteSubscriberBase {
       $collection->add("flexiform_wizard.{$wizard_id}.step", $route);
     }
   }
+
 }

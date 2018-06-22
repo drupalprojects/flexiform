@@ -416,6 +416,12 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
 
   /**
    * Get the enhancers for this form display.
+   *
+   * @param string $event
+   *   Optionally filter the enhancers by an applicable event.
+   *
+   * @return \Drupal\flexiform\FormEnhancer\FormEnhancerInterface[]
+   *   An array of form enhancers/
    */
   public function getFormEnhancers($event = NULL) {
     if (empty($this->formEnhancers)) {
@@ -452,7 +458,11 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   /**
    * Get a particular form enhancer.
    *
+   * @param string $enhancer_name
+   *   The form enhancer name.
+   *
    * @return \Drupal\flexiform\FormEnhancer\FormEnhancerInterface
+   *   The form enhancer.
    */
   public function getFormEnhancer($enhancer_name) {
     if (empty($this->formEnhancers)) {
@@ -499,6 +509,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    * Get the base entity namespace.
    *
    * @return string
+   *   The base entity namespace.
    */
   public function getBaseEntityNamespace() {
     return $this->baseEntityNamespace;

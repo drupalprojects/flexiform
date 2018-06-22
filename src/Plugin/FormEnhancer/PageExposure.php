@@ -164,9 +164,10 @@ class PageExposure extends ConfigurableFormEnhancerBase implements ContainerFact
   }
 
   /**
-   * Init form entity config.
+   * Initialise the enhancer config..
    *
    * @return array
+   *   The initial config for the enhancer.
    */
   public function initFormEntityConfig() {
     $target_entity_type_id = $this->getFormDisplay()->getTargetEntityTypeId();

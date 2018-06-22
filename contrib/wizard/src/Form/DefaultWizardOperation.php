@@ -45,6 +45,7 @@ class DefaultWizardOperation extends FormBase {
    * Construct a new DefaultWizardOperation object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager) {
     $this->entityTypeManager = $entity_type_manager;
@@ -54,6 +55,7 @@ class DefaultWizardOperation extends FormBase {
    * Get the operation form display.
    *
    * @return \Drupal\flexiform\FlexiformEntityFormDisplay
+   *   The form display.
    */
   public function getFormDisplay() {
     $id = 'flexiform_wizard.' . $this->wizardConfig->id() . '.' . $this->step;

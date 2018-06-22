@@ -96,6 +96,10 @@ class FlexiformFormEntityManager {
    * Get the form entity at a given namespace.
    *
    * @param string $namespace
+   *   The namespace for the entity to retrieve.
+   *
+   * @return \Drupal\flexiform\FormEntity\FlexiformFormEntityInterface
+   *   The form entity for the given namespace.
    */
   public function getFormEntity($namespace = '') {
     return $this->formEntities[$namespace];

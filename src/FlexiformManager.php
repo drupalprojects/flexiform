@@ -44,9 +44,13 @@ class FlexiformManager {
    * Construct a flexiform manager object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    * @param \Drupal\Core\DependencyInjection\ClassResolverInterface $class_resolver
-   * @param \Drupal\Core\StringTranslation\TranslationInterface\TranslationInterface $translation
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface\ModuleHandlerInterface $module_handler
+   *   The class resolver.
+   * @param \Drupal\Core\StringTranslation\TranslationInterface $translation
+   *   The translation service.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler.
    */
   public function __construct(
     EntityTypeManagerInterface $entity_type_manager,
@@ -64,9 +68,12 @@ class FlexiformManager {
    * Get a form object from an entity form display.
    *
    * @param \Drupal\flexiform\FlexiformEntityFormDisplayInterface $form_display
+   *   The form display.
    * @param \Drupal\Core\Entity\EntityInterface[] $provided_entities
+   *   The entities provided by for form.
    *
    * @return \Drupal\Core\Form\FormInterface
+   *   The form object.
    */
   public function getFormObject(FlexiformEntityFormDisplayInterface $form_display, array $provided_entities = []) {
     if ($entity_type_id = $form_display->getTargetEntityTypeId()) {

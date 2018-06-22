@@ -68,17 +68,26 @@ class EntityForm extends BlockBase implements ContextAwarePluginInterface, Conta
   protected $flexiformManager;
 
   /**
-   * Constructs a new EntityForm.
+   * {@inheritdoc}
    *
    * @param array $configuration
+   *   The plugin configuration.
    * @param string $plugin_id
+   *   The plugin ID.
    * @param mixed $plugin_definition
+   *   The plugin definition.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
+   *   The entity type manager.
    * @param \Drupal\Core\Form\FormBuilderInterface $form_builder
+   *   The form builder.
    * @param \Drupal\Core\DependencyInjection\ClassResolverInterface $class_resolver
+   *   The class resolver.
    * @param \Drupal\Core\StringTranslation\TranslationInterface $translation
+   *   The string translation service.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler.
    * @param \Drupal\flexiform\FlexiformManager $flexiform_manager
+   *   The flexiform manager.
    */
   public function __construct(
     array $configuration,

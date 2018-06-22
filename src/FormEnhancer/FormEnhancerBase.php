@@ -36,6 +36,7 @@ class FormEnhancerBase extends PluginBase implements FormEnhancerInterface {
    * Get the form display.
    *
    * @return \Drupal\flexiform\FlexiformEntityFormDisplayInterface
+   *   The form display.
    */
   protected function getFormDisplay() {
     return $this->formDisplay;
