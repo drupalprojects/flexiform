@@ -41,14 +41,22 @@ class FlexiformFormEntityTypedDataReferencedEntity extends FlexiformFormEntityBa
   protected $moduleHandler;
 
   /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountProxyInterface
+   */
+  protected $currentUser;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, TranslationInterface $string_translation, ModuleHandlerInterface $module_handler) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, TranslationInterface $string_translation, ModuleHandlerInterface $module_handler, AccountProxyInterface $current_user) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->entityTypeManager = $entity_type_manager;
     $this->stringTranslation = $string_translation;
     $this->moduleHandler = $module_handler;
+    $this->currentUser = $current_user;
   }
 
   /**
@@ -61,7 +69,8 @@ class FlexiformFormEntityTypedDataReferencedEntity extends FlexiformFormEntityBa
       $plugin_definition,
       $container->get('entity_type.manager'),
       $container->get('string_translation'),
-      $container->get('module_handler')
+      $container->get('module_handler'),
+      $container->get('current_user')
     );
   }
 
@@ -74,16 +83,12 @@ class FlexiformFormEntityTypedDataReferencedEntity extends FlexiformFormEntityBa
       return NULL;
     }
 
-    $property = $this->pluginDefinition['property_name'];
-
     try {
-      if ($entity = $base->{$property}->entity) {
+      if ($entity = $base->{$this->pluginDefinition['property_name']}->entity) {
         return $entity;
       }
       elseif (!empty($this->configuration['create'])) {
-        $entity = $this->createEntity();
-        $base->{$property}->entity = $entity;
-        return $entity;
+        return $this->createEntity();
       }
     }
     catch (\Exception $e) {
@@ -109,6 +114,35 @@ class FlexiformFormEntityTypedDataReferencedEntity extends FlexiformFormEntityBa
   /**
    * {@inheritdoc}
    */
+  protected function doSave(EntityInterface $entity) {
+    // Set the owner context if we can.
+    if (($this->configuration['owner_context'] ?? '_none') != 'none') {
+      if ($entity instanceof EntityOwnerInterface && !$entity->getOwnerId()) {
+        if ($this->configuration['owner_context'] == '_current_user') {
+          $entity->setOwnerId($this->currentUser->id());
+        }
+        else {
+          $context = $this->formEntityManager->getContexts()[$this->configuration['owner_context']];
+          if ($context->hasContextValue()) {
+            $entity->setOwner($context->getContextValue());
+          }
+        }
+      }
+    }
+
+    parent::doSave($entity);
+
+    // Attach to the appropriate field.
+    $base = $this->getContextValue('base');
+    if ($base) {
+      $base->{$this->pluginDefinition['property_name']}[0] = $entity;
+      $this->formEntityManager->deferredSave($base);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function configurationForm(array $form, FormStateInterface $form_state) {
     $form = parent::configurationForm($form, $form_state);
     $form['create'] = [
@@ -117,6 +151,33 @@ class FlexiformFormEntityTypedDataReferencedEntity extends FlexiformFormEntityBa
       '#description' => $this->t('If the property is empty, and new entity will be created.'),
       '#default_value' => !empty($this->configuration['create']),
     ];
+
+    // Set up ownership, if relevant.
+    if ($this->entityTypeManager->getDefinition($this->getEntityType())->entityClassImplements(EntityOwnerInterface::class)) {
+      $form['owner_context'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Set owner to'),
+        '#description' => $this->t('This will not override an existing owner.'),
+        '#default_value' => $this->configuration['owner_context'] ?? '_none',
+        '#options' => [
+          '_current_user' => $this->t('Current user'),
+        ],
+        '#empty_option' => $this->t('Do not set owner'),
+        '#empty_value' => '_none',
+        '#states' => [
+          'visible' => [
+            ':input[name="configuration[save_on_submit]"]' => ['checked' => TRUE],
+            ':input[name="configuration[create]"]' => ['checked' => TRUE],
+          ],
+        ],
+      ];
+
+      $context_definition = new ContextDefinition('entity:user', NULL, TRUE, FALSE);
+      $matching_contexts = $this->contextHandler()->getMatchingContexts($this->formEntityManager->getContexts(), $context_definition);
+      foreach ($matching_contexts as $context) {
+        $form['owner_context']['#options'][$context->getEntityNamespace()] = $context->getContextDefinition()->getLabel();
+      }
+    }
 
     return $form;
   }
