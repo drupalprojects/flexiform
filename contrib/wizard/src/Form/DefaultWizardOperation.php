@@ -82,6 +82,7 @@ class DefaultWizardOperation extends FormBase {
    * Construct a new DefaultWizardOperation object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, WizardStepPluginManager $wizard_step_plugin_manager, ContextHandlerInterface $context_handler) {
     $this->wizardStepPluginManager = $wizard_step_plugin_manager;

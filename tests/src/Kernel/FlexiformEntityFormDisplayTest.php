@@ -16,6 +16,14 @@ class FlexiformEntityFormDisplayTest extends EntityFormDisplayTest {
    *
    * @var string[]
    */
-  public static $modules = ['field_ui', 'field', 'flexiform', 'entity_test', 'field_test', 'user', 'text'];
+  public static $modules = [
+    'field_ui',
+    'field',
+    'flexiform',
+    'entity_test',
+    'field_test',
+    'user',
+    'text',
+  ];
 
 }

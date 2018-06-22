@@ -20,6 +20,7 @@ trait SubmitButtonFormEnhancerTrait {
    * Locate any submit buttons in the form.
    *
    * @return array
+   *   The buttons in the form.
    */
   protected function locateSubmitButtons() {
     if ($form_info = $this->formDisplay->getFormInformation()) {

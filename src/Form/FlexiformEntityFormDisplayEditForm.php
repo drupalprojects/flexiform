@@ -249,6 +249,7 @@ class FlexiformEntityFormDisplayEditForm extends EntityFormDisplayEditForm {
    * Get the form entity manager.
    *
    * @return \Drupal\flexiform\FormEntity\FlexiformFormEntityManager
+   *   The entity form manager.
    */
   public function getFormEntityManager() {
     if (empty($this->formEntityManager)) {

@@ -5,7 +5,6 @@ namespace Drupal\flexiform\FormEntity;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContextAwarePluginBase;
-use Drupal\Core\Plugin\Context\Context;
 
 /**
  * Provides the base form entity plugin.
@@ -74,6 +73,10 @@ abstract class FlexiformFormEntityBase extends ContextAwarePluginBase implements
    * Check whether a given entity matches bundle required.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to check the bundle on.
+   *
+   * @return bool
+   *   Whether the bundle matches the expected.
    */
   protected function checkBundle(EntityInterface $entity) {
     return !$entity->getEntityType()->hasKey('bundle') || ($entity->bundle() == $this->getBundle());
@@ -101,16 +104,14 @@ abstract class FlexiformFormEntityBase extends ContextAwarePluginBase implements
   }
 
   /**
-   * Get the context.
-   *
-   * @return \Drupal\flexiform\FormEntity\FormEntityContext
+   * {@inheritdoc}
    */
   public function getFormEntityContext() {
     return $this->formEntityContext;
   }
 
   /**
-   * Get the context definition.
+   * {@inheritdoc}
    */
   public function getFormEntityContextDefinition() {
     return $this->formEntityContext->getContextDefinition();
@@ -123,11 +124,33 @@ abstract class FlexiformFormEntityBase extends ContextAwarePluginBase implements
 
   /**
    * Save the entity.
+   *
+   * If subclasses need to do more as part of saving, they should override
+   * ::doSave().
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to save.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   *   Errors during the entity save.
    */
-  public function saveEntity(EntityInterface $entity) {
+  final public function saveEntity(EntityInterface $entity) {
     if (!isset($this->configuration['save_on_submit']) || $this->configuration['save_on_submit']) {
-      $entity->save();
+      $this->doSave($entity);
     }
+  }
+
+  /**
+   * Perform the save on the entity.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to save.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   *   Errors during the entity save.
+   */
+  protected function doSave(EntityInterface $entity) {
+    $entity->save();
   }
 
   /**

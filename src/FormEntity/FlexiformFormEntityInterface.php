@@ -14,6 +14,7 @@ interface FlexiformFormEntityInterface extends ContextAwarePluginInterface {
    * Get the context.
    *
    * @return \Drupal\Core\Plugin\Context\ContextInterface
+   *   The form entity context.
    */
   public function getFormEntityContext();
 

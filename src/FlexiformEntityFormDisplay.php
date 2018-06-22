@@ -148,15 +148,30 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    * {@inheritdoc}
    */
   public function preSave(EntityStorageInterface $storage, $update = TRUE) {
+    // Allow syncing to change the settings.
     $enhancer_settings = $this->getThirdPartySetting('flexiform', 'enhancer', []);
     foreach ($this->formEnhancers as $enhancer_name => $enhancer) {
       if ($enhancer instanceof ConfigurableFormEnhancerInterface) {
-        $config = $enhancer->getConfiguration();
-        $config['id'] = $enhancer->getPluginId();
-        $enhancer_settings[$enhancer_name] = $config;
+        // If we're syncing, update the enhancer.
+        if ($this->isSyncing()) {
+          if (isset($enhancer_settings[$enhancer_name])) {
+            $enhancer->setConfiguration($enhancer_settings[$enhancer_name]);
+          }
+        }
+        // Otherwise retrieve the values from the enhancer.
+        else {
+          $config = $enhancer->getConfiguration();
+          $config['id'] = $enhancer->getPluginId();
+          $enhancer_settings[$enhancer_name] = $config;
+        }
       }
     }
-    $this->setThirdPartySetting('flexiform', 'enhancer', $enhancer_settings);
+
+    // If not syncing, write our changes.
+    if (!$this->isSyncing()) {
+      $this->setThirdPartySetting('flexiform', 'enhancer', $enhancer_settings);
+    }
+
     parent::preSave($storage, $update);
   }
 
@@ -357,6 +372,8 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
             $new_submit[] = [$form_display, 'saveFormEntities'];
           }
         }
+
+        $element['#submit'] = $new_submit;
       }
 
       if (!empty($element['#validate'])) {
@@ -437,6 +454,12 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
 
   /**
    * Get the enhancers for this form display.
+   *
+   * @param string $event
+   *   Optionally filter the enhancers by an applicable event.
+   *
+   * @return \Drupal\flexiform\FormEnhancer\FormEnhancerInterface[]
+   *   An array of form enhancers/
    */
   public function getFormEnhancers($event = NULL) {
     if (empty($this->formEnhancers)) {
@@ -473,7 +496,11 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
   /**
    * Get a particular form enhancer.
    *
+   * @param string $enhancer_name
+   *   The form enhancer name.
+   *
    * @return \Drupal\flexiform\FormEnhancer\FormEnhancerInterface
+   *   The form enhancer.
    */
   public function getFormEnhancer($enhancer_name) {
     if (empty($this->formEnhancers)) {
@@ -525,6 +552,7 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
    * Get the base entity namespace.
    *
    * @return string
+   *   The base entity namespace.
    */
   public function getBaseEntityNamespace() {
     return $this->baseEntityNamespace;

@@ -110,6 +110,10 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
    * By default return array with 'default' as the only key.
    *
    * @param string $component_name
+   *   The component name.
+   *
+   * @return array
+   *   The options.
    */
   protected function getApplicableRendererPluginOptions($component_name) {
     return ['default' => t('Default')];
@@ -119,6 +123,10 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
    * Get the default renderer plugin.
    *
    * @param string $component_name
+   *   The component name.
+   *
+   * @return string
+   *   The default region.
    */
   protected function getDefaultRendererPlugin($component_name) {
     return 'default';
@@ -130,8 +138,11 @@ class FormComponentTypeBase extends PluginBase implements FormComponentTypeInter
    * @param \Drupal\field_ui\Form\EntityDisplayFormBase $form_object
    *   The form object building the configuration form.
    * @param string $component_name
+   *   The component name.
    * @param array $form
+   *   The form array.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
    *
    * @return array
    *   An form array representing the row for the given component.

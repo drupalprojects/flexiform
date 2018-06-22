@@ -30,6 +30,7 @@ class TempstoreAwareFlexiformFormEntityManager extends FlexiformFormEntityManage
    * Get the tempstore.
    *
    * @return \Drupal\user\PrivateTempStore|\Drupal\user\SharedTempStore
+   *   The tempstore.
    */
   protected function getTempstore() {
     return $this->tempstore;

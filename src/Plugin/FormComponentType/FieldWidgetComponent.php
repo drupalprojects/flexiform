@@ -79,6 +79,7 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
    * Get the renderer.
    *
    * @return \Drupal\Core\Field\PluginSettingsInterface
+   *   The plugin settings.
    */
   protected function getRenderer() {
     if (!empty($this->renderer)) {
@@ -106,6 +107,7 @@ class FieldWidgetComponent extends FormComponentBase implements ContainerFactory
    * Get the field definition.
    *
    * @return \Drupal\Core\Field\FieldDefinitionInterface
+   *   The field definition.
    */
   public function getFieldDefinition() {
     return $this->fieldDefinition;

@@ -21,6 +21,7 @@ interface FormComponentTypeInterface {
    * Set the form display.
    *
    * @param \Drupal\flexiform\FlexiformEntityFormDisplay $form_display
+   *   The form display.
    *
    * @return \Drupal\Flexiform\FormComponent\FormComponentTypeInterface
    *   The form component type plugin with the form display set.
@@ -39,9 +40,12 @@ interface FormComponentTypeInterface {
    * Get a component object.
    *
    * @param string $name
+   *   The name of the component.
    * @param array $options
+   *   The options for the component.
    *
    * @return \Drupal\flexiform\FormComponent\FormComponentInterface
+   *   The form component.
    */
   public function getComponent($name, array $options);
 

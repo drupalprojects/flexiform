@@ -55,6 +55,7 @@ class DefaultWizard extends FormWizardBase {
   }
 
   /**
+   * Build the wizard object.
    * @param \Drupal\user\PrivateTempStoreFactory $tempstore
    *   Tempstore Factory for keeping track of values in each step of the
    *   wizard.
