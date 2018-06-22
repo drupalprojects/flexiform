@@ -351,6 +351,8 @@ class FlexiformEntityFormDisplay extends EntityFormDisplay implements FlexiformE
             $new_submit[] = [$form_display, 'saveFormEntities'];
           }
         }
+
+        $element['#submit'] = $new_submit;
       }
 
       if (!empty($element['#validate'])) {
