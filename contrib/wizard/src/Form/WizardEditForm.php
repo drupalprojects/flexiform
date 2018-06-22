@@ -13,18 +13,19 @@ class WizardEditForm extends WizardForm {
    * {@inheritdoc}
    */
   public function form(array $form, FormStateInterface $form_state) {
+    /* @var \Drupal\flexiform_wizard\Entity\Wizard $entity */
     $entity = $this->entity;
     $form = parent::form($form, $form_state);
 
     $form['parameters'] = [
       '#type' => 'table',
-      '#title' => $this->t('Parameters'),
       '#header' => [
         $this->t('Machine-Name'),
         $this->t('Label'),
         $this->t('Entity Type'),
       ],
       '#empty' => $this->t("This wizard doesn't have an parameters defined yet. Add parameters by altering the path."),
+      '#theme_wrappers' => ['fieldset' => ['#title' => $this->t('Parameters')]],
     ];
     preg_match_all('/\{(?P<parameter>[A-Za-z0-9_\-]+)\}/', $entity->get('path'), $matches, PREG_PATTERN_ORDER);
     $parameters = $entity->get('parameters');
@@ -75,6 +76,7 @@ class WizardEditForm extends WizardForm {
           'group' => 'wizard-page-weight',
         ],
       ],
+      '#theme_wrappers' => ['fieldset' => ['#title' => $this->t('Pages')]],
     ];
     foreach ($entity->getPages() as $name => $page) {
       $form['pages'][$name]['#attributes']['class'][] = 'draggable';
