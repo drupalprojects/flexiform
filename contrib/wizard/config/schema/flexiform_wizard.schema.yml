@@ -24,34 +24,34 @@ flexiform_wizard.wizard.*:
       type: sequence
       label: 'Access Conditions'
       sequence:
-        - type: condition.plugin.[id]
-          label: 'Access Condition'
+        type: condition.plugin.[id]
+        label: 'Access Condition'
     parameters:
       type: sequence
       label: Parameter context list
       sequence:
-        - type: mapping
-          label: Parameter context
-          mapping:
-            machine_name:
-              type: string
-              label: 'Machine-readable name'
-            label:
-              type: label
-              label: 'Label of the provided entity'
-            type:
-              type: string
-              label: 'Entity type'
+        type: mapping
+        label: Parameter context
+        mapping:
+          machine_name:
+            type: string
+            label: 'Machine-readable name'
+          label:
+            type: label
+            label: 'Label of the provided entity'
+          type:
+            type: string
+            label: 'Entity type'
     operations:
       type: sequence
       label: Operations list
       sequence:
-        - type: mapping
-          label: Operation
-          mapping:
-            machine_name:
-              type: string
-              label: 'Machine-readable step name'
-            label:
-              type: label
-              label: 'Step label'
+        type: mapping
+        label: Operation
+        mapping:
+          machine_name:
+            type: string
+            label: 'Machine-readable step name'
+          label:
+            type: label
+            label: 'Step label'
