@@ -2,6 +2,7 @@
 
 namespace Drupal\flexiform\FormEntity;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\flexiform\FlexiformEntityFormDisplayInterface;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -27,6 +28,13 @@ class FlexiformFormEntityManager {
    * @var \Drupal\flexiform\FormEntity\FlexiformFormEntityInterface[]
    */
   protected $formEntities = [];
+
+  /**
+   * An array of deferred entity saves to perform.
+   *
+   * @var \Drupal\Core\Entity\EntityInterface[]
+   */
+  protected $deferredSaves = [];
 
   /**
    * Construct a new FlexiformFormEntityManager.
@@ -119,7 +127,37 @@ class FlexiformFormEntityManager {
 
       if ($entity = $this->getEntity($namespace)) {
         $form_entity->saveEntity($entity);
+        $this->clearDeferredSave($entity);
       }
+    }
+
+    // At the end loop over any deferred saves and perform them.
+    foreach ($this->deferredSaves as $entity) {
+      $entity->save();
+      $this->clearDeferredSave($entity);
+    }
+  }
+
+  /**
+   * Track that we need to do a deferred save of an entity.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to save.
+   */
+  public function deferredSave(EntityInterface $entity) {
+    $this->deferredSaves["{$entity->getEntityTypeId()}:{$entity->id()}"] = $entity;
+  }
+
+  /**
+   * Clear a deferred save requirement.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to clear.
+   */
+  public function clearDeferredSave(EntityInterface $entity) {
+    $key = "{$entity->getEntityTypeId()}:{$entity->id()}";
+    if (array_key_exists($key, $this->deferredSaves)) {
+      unset($this->deferredSaves[$key]);
     }
   }
 
