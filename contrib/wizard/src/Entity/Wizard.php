@@ -310,7 +310,9 @@ class Wizard extends ConfigEntityBase implements WizardInterface {
   public function preSave(EntityStorageInterface $storage) {
     parent::preSave($storage);
 
-    $this->filterParameters();
+    if (!$this->isSyncing()) {
+      $this->filterParameters();
+    }
   }
 
   /**
