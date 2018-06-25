@@ -97,8 +97,12 @@ class WizardEditForm extends WizardForm {
         ],
       ];
 
-      if (!empty($parameters[$param_name]['entity_type']) && !empty($parameters[$param_name]['bundle'])) {
-        $parameter_contexts[$param_name] = new Context(new ContextDefinition('entity:' . $parameters[$param_name]['entity_type'], $parameters[$param_name]['label']));
+      if (!empty($parameters[$param_name]['entity_type'])) {
+        $context_definition = new ContextDefinition('entity:' . $parameters[$param_name]['entity_type'], $parameters[$param_name]['label']);
+        if (!empty($parameters[$param_name]['bundle'])) {
+          $context_definition->addConstraint('Bundle', [$parameters[$param_name]['bundle']]);
+        }
+        $parameter_contexts[$param_name] = new Context($context_definition);
       }
     }
 

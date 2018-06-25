@@ -112,10 +112,10 @@ class EntityFormBlockDeriver extends DeriverBase implements ContainerDeriverInte
             'bundle' => $bundle,
             'form_mode' => $mode_name,
             'context' => [
-              'entity' => new ContextDefinition(
+              'entity' => (new ContextDefinition(
                 'entity:' . $entity_type_id,
                 $this->t('Base @entity_type', ['@entity_type' => $entity_type->getLabel()])
-              ),
+              ))->addConstraint('Bundle', [$bundle]),
             ],
           ] + $base_plugin_definition;
 
