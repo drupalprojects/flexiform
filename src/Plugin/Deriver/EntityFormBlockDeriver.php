@@ -117,18 +117,37 @@ class EntityFormBlockDeriver extends DeriverBase implements ContainerDeriverInte
                 $this->t('Base @entity_type', ['@entity_type' => $entity_type->getLabel()])
               ))->addConstraint('Bundle', [$bundle]),
             ],
+            'provided_context' => [
+              'entity' => (new ContextDefinition(
+                'entity:' . $entity_type_id,
+                $this->t('Base @entity_type', ['@entity_type' => $entity_type->getLabel()])
+              ))->addConstraint('Bundle', [$bundle]),
+            ],
           ] + $base_plugin_definition;
 
           foreach ($entity_form_display->getFormEntityConfig() as $namespace => $form_entity_info) {
-            if ($form_entity_info['plugin'] != 'provided' || empty($namespace)) {
+            // Skip the base entity.
+            if ($namespace == '') {
               continue;
             }
 
-            $this->derivatives[$plugin_id]['context'][$namespace] = new ContextDefinition(
+            $context = new ContextDefinition(
               'entity:' . $form_entity_info['entity_type'],
               $form_entity_info['label'],
               FALSE
             );
+            if (!empty($form_entity_info['bundle'])) {
+              $context->addConstraint('Bundle', [$form_entity_info['bundle']]);
+            }
+
+            // Declare provisions from the form.
+            $this->derivatives[$plugin_id]['provided_context'][$namespace] = $context;
+
+            if ($form_entity_info['plugin'] != 'provided') {
+              continue;
+            }
+
+            $this->derivatives[$plugin_id]['context'][$namespace] = $context;
           }
         }
       }

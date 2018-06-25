@@ -2,11 +2,14 @@
 
 namespace Drupal\flexiform\Plugin\FormEnhancer;
 
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\ctools\Form\AjaxFormTrait;
+use Drupal\flexiform\FlexiformFormEntityPluginManager;
 use Drupal\flexiform\FormEnhancer\ConfigurableFormEnhancerBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form enhancer for multiple entity forms.
@@ -16,7 +19,7 @@ use Drupal\flexiform\FormEnhancer\ConfigurableFormEnhancerBase;
  *   label = @Translation("Multiple Entities"),
  * )
  */
-class MultipleEntityForm extends ConfigurableFormEnhancerBase {
+class MultipleEntityForm extends ConfigurableFormEnhancerBase implements ContainerFactoryPluginInterface {
   use StringTranslationTrait;
   use AjaxFormTrait;
 
@@ -26,6 +29,38 @@ class MultipleEntityForm extends ConfigurableFormEnhancerBase {
   protected $supportedEvents = [
     'init_form_entity_config',
   ];
+
+  /**
+   * The form entity plugin manager.
+   *
+   * @var \Drupal\flexiform\FlexiformFormEntityPluginManager
+   */
+  protected $pluginManager;
+
+  /**
+   * {@inheritdoc}
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\flexiform\FlexiformFormEntityPluginManager $plguin_manager
+   *   The form entity plugin manager.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, FlexiformFormEntityPluginManager $plguin_manager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->pluginManager = $plguin_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static($configuration, $plugin_id, $plugin_definition,
+      $container->get('plugin.manager.flexiform_form_entity'));
+  }
 
   /**
    * {@inheritdoc}
@@ -113,7 +148,13 @@ class MultipleEntityForm extends ConfigurableFormEnhancerBase {
    *   The initial config for the enhancer.
    */
   public function initFormEntityConfig() {
-    return !empty($this->configuration['entities']) ? $this->configuration['entities'] : [];
+    $entities = $this->configuration['entities'] ?? [];
+    foreach ($entities as &$definition) {
+      $plugin = $this->pluginManager->getDefinition($definition['plugin']);
+      $definition['entity_type'] = $plugin['entity_type'] ?? NULL;
+      $definition['bundle'] = $plugin['bundle'] ?? NULL;
+    }
+    return $entities;
   }
 
   /**

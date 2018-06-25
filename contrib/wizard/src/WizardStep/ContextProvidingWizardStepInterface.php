@@ -18,4 +18,14 @@ interface ContextProvidingWizardStepInterface extends WizardStepInterface {
    */
   public function getProvidedContexts();
 
+  /**
+   * Return a list of context definintions.
+   *
+   * @return \Drupal\Core\Plugin\Context\Context[]
+   *   Array of contexts provided by this step.
+   *
+   * @see \Drupal\flexiform_wizard\WizardStep\ContextProvidingWizardStepInterface::getProvidedContexts
+   */
+  public function getProvidedContextDefinitions();
+
 }

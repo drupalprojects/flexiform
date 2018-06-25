@@ -4,6 +4,7 @@ namespace Drupal\flexiform_wizard\Plugin\WizardStep;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Plugin\Context\Context;
 use Drupal\flexiform_wizard\WizardStep\WizardStepBase;
 use Drupal\flexiform_wizard\WizardStep\ContextProvidingWizardStepInterface;
 
@@ -26,6 +27,9 @@ class EntityFormMode extends WizardStepBase implements ContextProvidingWizardSte
 
   /**
    * Get entity form display.
+   *
+   * @return \Drupal\flexiform\FlexiformEntityFormDisplayInterface
+   *   The for display.
    */
   protected function getFormDisplay() {
     if (!$this->formDisplay) {
@@ -54,6 +58,22 @@ class EntityFormMode extends WizardStepBase implements ContextProvidingWizardSte
       }
       else {
         $provided_contexts[$this->configuration['step'] . '.' . $namespace] = $form_entity_context;
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getProvidedContextDefinitions() {
+    $context_mapping = $this->getContextMapping();
+    $provided_contexts = [];
+    foreach ($this->pluginDefinition['provided_context'] as $namespace => $form_entity_context) {
+      if (!empty($context_mapping[$namespace])) {
+        $provided_contexts[$context_mapping[$namespace]] = new Context($form_entity_context);
+      }
+      else {
+        $provided_contexts[$this->configuration['step'] . '.' . $namespace] = new Context($form_entity_context);
       }
     }
 
