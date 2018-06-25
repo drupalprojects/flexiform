@@ -98,7 +98,7 @@ class WizardEditForm extends WizardForm {
       ];
 
       if (!empty($parameters[$param_name]['entity_type']) && !empty($parameters[$param_name]['bundle'])) {
-        $parameter_contexts[$param_name] = new Context(new ContextDefinition($parameters[$param_name]['entity_type'], $parameters[$param_name]['label']));
+        $parameter_contexts[$param_name] = new Context(new ContextDefinition('entity:' . $parameters[$param_name]['entity_type'], $parameters[$param_name]['label']));
       }
     }
 

@@ -126,7 +126,8 @@ class EntityFormBlockDeriver extends DeriverBase implements ContainerDeriverInte
 
             $this->derivatives[$plugin_id]['context'][$namespace] = new ContextDefinition(
               'entity:' . $form_entity_info['entity_type'],
-              $form_entity_info['label']
+              $form_entity_info['label'],
+              FALSE
             );
           }
         }
