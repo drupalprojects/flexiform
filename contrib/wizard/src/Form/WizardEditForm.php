@@ -193,7 +193,7 @@ class WizardEditForm extends WizardForm {
 
     $page_plugin_options = [];
     foreach ($this->stepPluginManager->getDefinitionsForContexts($parameter_contexts) as $plugin_id => $plugin_info) {
-      $page_plugin_options[$plugin_id] = $plugin_info['label'];
+      $page_plugin_options[$plugin_id] = $plugin_info['admin_label'];
     }
 
     $form['pages']['__add_new'] = [
