@@ -48,6 +48,7 @@ class EntityFormMode extends WizardStepBase implements ContextProvidingWizardSte
     $form_display = $this->getFormDisplay();
     $context_mapping = $this->getContextMapping();
     $provided_contexts = [];
+
     foreach ($form_display->getFormEntityManager()->getContexts() as $namespace => $form_entity_context) {
       if ($namespace == '') {
         $namespace = 'entity';
@@ -60,6 +61,8 @@ class EntityFormMode extends WizardStepBase implements ContextProvidingWizardSte
         $provided_contexts[$this->configuration['step'] . '.' . $namespace] = $form_entity_context;
       }
     }
+
+    return $provided_contexts;
   }
 
   /**
