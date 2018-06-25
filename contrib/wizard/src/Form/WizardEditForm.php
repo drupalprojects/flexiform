@@ -144,7 +144,7 @@ class WizardEditForm extends WizardForm {
         '#type' => 'textfield',
         '#title' => $this->t('Page Label'),
         '#title_display' => 'invisible',
-        '#default_value' => !empty($page['settings']['title']) ? $page['settings']['title'] : '' ,
+        '#default_value' => !empty($page['label']) ? $page['label'] : '' ,
       ];
       $form['pages'][$name]['machine_name'] = [
         '#type' => 'textfield',
@@ -200,6 +200,7 @@ class WizardEditForm extends WizardForm {
       $page_plugin_options[$plugin_id] = $plugin_info['admin_label'];
     }
 
+    $max_weight++;
     $form['pages']['__add_new'] = [
       '#attributes' => [
         'class' => ['draggable'],
@@ -301,14 +302,19 @@ class WizardEditForm extends WizardForm {
    * {@inheritdoc}
    */
   protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state) {
+    /* @var \Drupal\flexiform_wizard\Entity\WizardInterface $entity */
+    $pages = $entity->getPages();
+
     parent::copyFormValuesToEntity($entity, $form, $form_state);
 
     $page_values = $form_state->getValue(['pages']);
     unset($page_values['__add_new']);
-    foreach ($page_values as &$page) {
-      unset($page['operations']);
+    foreach ($page_values as $name => $values) {
+      $pages[$name]['label'] = $values['label'];
+      $pages[$name]['weight'] = $values['weight'];
     }
-    $entity->set('pages', $page_values);
+
+    $entity->set('pages', $pages);
   }
 
   /**
