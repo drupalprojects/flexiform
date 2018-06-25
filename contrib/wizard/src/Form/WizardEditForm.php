@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Plugin\Context\ContextDefinition;
+use Drupal\flexiform_wizard\WizardStep\ContextProvidingWizardStepInterface;
 use Drupal\flexiform_wizard\WizardStep\WizardStepPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
