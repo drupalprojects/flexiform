@@ -1,4 +1,4 @@
-flexiform_wizard.wizard.*:
+flexiform_wizard.flexiform_wizard.*:
   type: config_entity
   label: 'Wizard'
   mapping:
@@ -64,3 +64,9 @@ flexiform_wizard.wizard.*:
           settings:
             type: mapping
             label: 'Settings'
+            mapping:
+              context_mapping:
+                type: sequence
+                label: 'Context assignments'
+                sequence:
+                  type: string
