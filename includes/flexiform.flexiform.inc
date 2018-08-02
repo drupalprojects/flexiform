@@ -159,7 +159,7 @@ function flexiform($form, &$form_state, $flexiform, $base_entity) {
   );
 
   if (!empty($flexiform->settings['ajax']['submit'])) {
-    $wrapper_id = drupal_html_id($form_state['build_info']['form_id'].'-ajax-wrapper');
+    $wrapper_id = $form_state['build_info']['form_id'].'-ajax-wrapper';
     $form['#prefix'] = '<div id="'.$wrapper_id.'">';
     $form['#suffix'] = '</div>';
     $form['actions']['submit']['#ajax'] = array(
@@ -218,13 +218,13 @@ function flexiform_submit_ajax($form, $form_state) {
       unset($original_post);
 
       $commands = array(
-        ajax_command_prepend(
-          '#'.$wrapper,
-          theme('status_messages')
-        ),
         ajax_command_replace(
           '#'.$wrapper,
           drupal_render($new_form)
+        ),
+        ajax_command_prepend(
+          '#'.$wrapper,
+          theme('status_messages')
         ),
       );
       break;
